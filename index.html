@@ -1,0 +1,1320 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>
+<title>منصة المحاكاة</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    --tarmac:#0C1322; --panel:#151E33; --panel-2:#1B2642; --line:#2A3757;
+    --amber:#F6B93B; --amber-ink:#1A1300; --mint:#3ED18B; --coral:#F2634E; --sky:#6FB7FF;
+    --text:#F4F1E9; --muted:#9BA6C3; --dim:#5F6C8C;
+    --hall:#DCE7F2; --hall-2:#C4D3E4; --floor:#B9C6D6; --floor-2:#A9B7C9;
+    color-scheme:dark;
+  }
+  html,body{height:100%}
+  body{margin:0;background:var(--tarmac);color:var(--text);font-family:"IBM Plex Sans Arabic",system-ui,sans-serif;font-size:15px;line-height:1.6;padding-inline:16px;padding-block:14px 32px;
+    background-image:radial-gradient(1000px 500px at 50% -150px,#1A2A4C,transparent 60%)}
+  *{box-sizing:border-box}
+  button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+  button:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+  h1,h2,h3{font-family:"Cairo",sans-serif;margin:0;line-height:1.3;text-wrap:balance}
+  p{margin:0}
+  .mono{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+  .phone{max-width:430px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:4px 2px}
+  .brand{display:flex;align-items:center;gap:8px;font-family:"Cairo",sans-serif;font-weight:900}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 4px rgba(246,185,59,.18)}
+  .hud{display:flex;gap:6px}
+  .chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-size:.78rem;font-weight:600;color:var(--muted)}
+  .chip b{color:var(--amber);font-variant-numeric:tabular-nums}
+  .chip.pop{animation:pop .4s ease}
+  @keyframes pop{40%{transform:scale(1.18)}}
+
+  .rail{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+  .rail span{height:4px;border-radius:99px;background:var(--line)}
+  .rail span.done{background:var(--mint)}.rail span.now{background:var(--amber)}
+
+  /* ===== STAGE ===== */
+  .stage{position:relative;width:100%;aspect-ratio:4/3.4;max-width:100%;border-radius:22px;overflow:hidden;background:var(--hall);border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.45);direction:ltr;isolation:isolate}
+  .stage > *{position:absolute}
+  .wall{inset:0 0 28% 0;background:linear-gradient(var(--hall),var(--hall-2))}
+  .floor{inset:72% 0 0 0;background:repeating-linear-gradient(90deg,var(--floor) 0 40px,var(--floor-2) 40px 42px),var(--floor);background-blend-mode:multiply}
+  .floor::after{content:"";position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.08),transparent 30%)}
+  .window{top:8%;left:6%;width:88%;height:38%;border-radius:14px;background:linear-gradient(#8EC5FF,#CFE6FF 70%,#E9F3FF);border:6px solid #F6F8FB;box-shadow:inset 0 0 0 2px #C9D5E4}
+  .window::before,.window::after{content:"";position:absolute;background:#F6F8FB}
+  .window::before{left:50%;top:0;bottom:0;width:6px;margin-left:-3px}
+  .window::after{top:50%;left:0;right:0;height:6px;margin-top:-3px}
+  .plane{top:18%;left:-20%;width:26%;animation:fly 14s linear infinite}
+  @keyframes fly{to{transform:translateX(560%)}}
+  .cloud{top:14%;width:16%;height:8%;background:#fff;border-radius:99px;opacity:.9;animation:drift 22s linear infinite}
+  .cloud.c2{top:30%;width:11%;animation-duration:30s;animation-delay:-9s}
+  @keyframes drift{from{left:-20%}to{left:110%}}
+  .sign{top:52%;padding:5px 12px;border-radius:8px;background:#151B2B;color:var(--amber);font-family:"IBM Plex Mono",monospace;font-size:.62rem;letter-spacing:.06em;box-shadow:0 4px 10px rgba(0,0,0,.2)}
+  .sign::before{content:"";position:absolute;bottom:100%;left:50%;width:2px;height:14px;background:#5B6474;margin-left:-1px}
+
+  /* scene visibility */
+  .stage [data-scene]{display:none}
+  .stage[data-now="store"] [data-scene~="store"],
+  .stage[data-now="lawlobby"] [data-scene~="lawlobby"],
+  .stage[data-now="office"] [data-scene~="office"],
+  .stage[data-now="docs"] [data-scene~="docs"],
+  .stage[data-now="efile"] [data-scene~="efile"],
+  .stage[data-now="court"] [data-scene~="court"],
+  .stage[data-now="verdict"] [data-scene~="verdict"],
+  .stage[data-now="surprise"] [data-scene~="surprise"],
+  .stage[data-now="dual"] [data-scene~="dual"],
+  .stage[data-now="lawdone"] [data-scene~="lawdone"],
+  .stage[data-now="lobby"] [data-scene~="lobby"],
+  .stage[data-now="library"] [data-scene~="library"],
+  .stage[data-now="hall"] [data-scene~="hall"],
+  .stage[data-now="counter"] [data-scene~="counter"],
+  .stage[data-now="scale"] [data-scene~="scale"],
+  .stage[data-now="security"] [data-scene~="security"],
+  .stage[data-now="security2"] [data-scene~="security2"],
+  .stage[data-now="gate"] [data-scene~="gate"],
+  .stage[data-now="pass"] [data-scene~="pass"],
+  .stage[data-now="done"] [data-scene~="done"]{display:block}
+
+  /* hero character */
+  .hero{bottom:6%;left:40%;width:22%;transform-origin:50% 100%;transition:left .9s cubic-bezier(.4,0,.2,1);z-index:5}
+  .hero svg{width:100%;height:auto;display:block;overflow:visible}
+  .hero.idle .body{animation:bob 2.4s ease-in-out infinite}
+  .hero.walk .body{animation:step .35s ease-in-out infinite alternate}
+  .hero.happy .body{animation:jump .55s ease 2}
+  .hero.sad .body{animation:shake .5s ease 1}
+  .hero.think .body{animation:tilt 1.6s ease-in-out infinite}
+  @keyframes bob{50%{transform:translateY(-3px)}}
+  @keyframes step{from{transform:translateY(0) rotate(-2deg)}to{transform:translateY(-5px) rotate(2deg)}}
+  @keyframes jump{30%{transform:translateY(-22px) scaleY(1.05)}60%{transform:translateY(0) scaleY(.96)}}
+  @keyframes shake{20%{transform:translateX(-5px) rotate(-3deg)}60%{transform:translateX(5px) rotate(3deg)}}
+  @keyframes tilt{50%{transform:rotate(-4deg)}}
+  .hero .mouth-happy,.hero .mouth-sad,.hero .brow-up{display:none}
+  .hero.happy .mouth-flat,.hero.sad .mouth-flat{display:none}
+  .hero.happy .mouth-happy{display:block}
+  .hero.sad .mouth-sad{display:block}
+  .hero.think .brow-up{display:block}
+  .hero .emote{position:absolute;top:-22%;right:-18%;font-family:"Cairo",sans-serif;font-weight:900;font-size:1.6rem;color:#151B2B;background:#fff;width:1.6em;height:1.6em;border-radius:50%;display:none;place-items:center;box-shadow:0 4px 10px rgba(0,0,0,.2);animation:pop .4s ease}
+  .hero.think .emote.q,.hero.happy .emote.ex,.hero.sad .emote.dr{display:grid}
+  .hero .emote.ex{color:var(--mint)}.hero .emote.dr{color:var(--coral)}
+  .hero .eye{animation:blink 4.5s infinite}
+  @keyframes blink{0%,96%,100%{transform:scaleY(1)}98%{transform:scaleY(.1)}}
+
+  /* NPC */
+  .npc{bottom:24%;width:16%;z-index:3}
+  .npc svg{width:100%;height:auto;display:block;overflow:visible}
+  .npc .arm{transform-origin:20% 10%;animation:wave 2.2s ease-in-out infinite}
+  @keyframes wave{0%,100%{transform:rotate(0)}30%{transform:rotate(-30deg)}60%{transform:rotate(-10deg)}}
+
+  /* counter */
+  .desk{bottom:12%;left:52%;width:40%;height:22%;background:linear-gradient(#EFF3F8,#D7DFEA);border-radius:10px 10px 4px 4px;box-shadow:0 8px 20px rgba(0,0,0,.15);z-index:2}
+  .desk::before{content:"SM  CHECK-IN";position:absolute;top:-40%;left:10%;right:10%;padding:5px;border-radius:6px;background:#151B2B;color:var(--amber);font-family:"IBM Plex Mono",monospace;font-size:.55rem;text-align:center;letter-spacing:.1em}
+  .desk .screen{position:absolute;right:10%;top:12%;width:26%;height:50%;background:#151B2B;border-radius:4px;border:2px solid #8E99AB}
+  .desk .screen::after{content:"";position:absolute;inset:20%;background:var(--sky);opacity:.5;animation:blink2 2s infinite}
+  @keyframes blink2{50%{opacity:.15}}
+
+  /* scale */
+  .bigscale{bottom:8%;left:62%;width:28%;height:12%;background:#6B7787;border-radius:8px;z-index:2}
+  .bigscale .disp{position:absolute;top:-70%;left:15%;right:15%;background:#151B2B;color:var(--amber);border-radius:6px;padding:3px;text-align:center;font-family:"IBM Plex Mono",monospace;font-size:.72rem;font-weight:600}
+  .bigscale .disp.over{color:var(--coral);animation:blink 1s steps(2) infinite}
+  .bag{position:absolute;bottom:100%;left:22%;width:56%;height:120%;background:linear-gradient(#5B7BD9,#3E5DB3);border-radius:8px 8px 4px 4px;border:3px solid #2C4488;animation:drop .6s cubic-bezier(.2,.8,.3,1.2) both}
+  .bag::before{content:"";position:absolute;top:-22%;left:32%;width:36%;height:22%;border:3px solid #2C4488;border-bottom:0;border-radius:6px 6px 0 0}
+  .bag::after{content:"";position:absolute;inset:30% 20% auto 20%;height:12%;background:rgba(255,255,255,.35);border-radius:3px}
+  @keyframes drop{from{transform:translateY(-140px)}}
+
+  /* security */
+  .belt{bottom:14%;left:0;width:100%;height:16%;background:#3B4657;z-index:2;overflow:hidden;border-top:6px solid #2A323F}
+  .belt::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 30px,rgba(255,255,255,.12) 30px 34px);animation:belt 1.6s linear infinite}
+  @keyframes belt{to{background-position:34px 0}}
+  .xray{bottom:14%;right:8%;width:22%;height:36%;background:#6B7787;border-radius:12px 12px 0 0;z-index:3;box-shadow:inset 0 0 0 6px #556172}
+  .xray::before{content:"X-RAY";position:absolute;top:8%;left:0;right:0;text-align:center;color:#fff;font-family:"IBM Plex Mono",monospace;font-size:.55rem;letter-spacing:.15em}
+  .xray::after{content:"";position:absolute;inset:auto 18% 18% 18%;height:30%;background:#1E2A3B;border-radius:4px}
+  .zonesdrop{bottom:32%;left:4%;width:60%;display:grid!important;grid-template-columns:repeat(3,1fr);gap:6px;z-index:6}
+  .stage[data-now]:not([data-now="security"]) .zonesdrop{display:none!important}
+  .dz{aspect-ratio:1/.8;border-radius:12px;display:grid;place-items:center;text-align:center;font-size:.62rem;font-weight:700;color:#fff;padding:4px;line-height:1.2;border:2px dashed rgba(255,255,255,.6);transition:transform .15s,background .15s;direction:rtl;font-family:"IBM Plex Sans Arabic",sans-serif}
+  .dz.tray{background:#6B7A94}.dz.bin{background:#8C5A5A}.dz.pocket{background:#5B8A6A}
+  .dz.armed{transform:scale(1.06);border-style:solid;box-shadow:0 0 0 4px rgba(255,255,255,.35)}
+  .dz span{font-size:1.3rem;display:block}
+  .flyer{position:absolute;font-size:1.8rem;z-index:20;transition:all .55s cubic-bezier(.3,.7,.3,1.2);pointer-events:none}
+
+  /* gate */
+  .bridge{bottom:14%;right:0;width:46%;height:44%;background:linear-gradient(90deg,#8E99AB,#6B7787);clip-path:polygon(0 25%,100% 0,100% 100%,0 100%);z-index:1}
+  .bridge::after{content:"";position:absolute;left:18%;top:45%;width:36%;height:45%;background:#151B2B;border-radius:8px 8px 0 0}
+  .queue{bottom:14%;left:2%;width:45%;height:20%;z-index:2}
+  .queue i{position:absolute;bottom:0;width:11%;aspect-ratio:1/2.2;border-radius:40% 40% 8px 8px;background:var(--c,#7D8DA6);animation:shuffle 3.2s ease-in-out infinite}
+  .queue i::before{content:"";position:absolute;top:-38%;left:15%;width:70%;aspect-ratio:1;border-radius:50%;background:#F1C9A5}
+  @keyframes shuffle{0%,60%,100%{transform:translateX(0)}70%{transform:translateX(8px)}}
+  .gatesign{top:50%;right:14%;padding:5px 10px;border-radius:8px;background:#151B2B;color:#fff;font-family:"IBM Plex Mono",monospace;font-size:.6rem;letter-spacing:.06em;z-index:3}
+  .gatesign b{color:var(--amber);display:block;font-size:.85rem}
+  .gatesign.calling b{animation:blink 1.2s steps(2) infinite}
+
+  /* pass scene */
+  .scanner{bottom:14%;left:14%;width:20%;height:36%;background:#6B7787;border-radius:10px;z-index:2;box-shadow:inset 0 0 0 5px #556172}
+  .scanner .lamp{position:absolute;top:8%;left:35%;width:30%;aspect-ratio:1;border-radius:50%;background:#B03A2E;box-shadow:0 0 8px #B03A2E}
+  .scanner.ok .lamp{background:var(--mint);box-shadow:0 0 14px var(--mint)}
+  .scanner .glass{position:absolute;top:40%;left:20%;width:60%;height:22%;background:#1E2A3B;border-radius:4px;overflow:hidden}
+  .scanner.scan .glass::after{content:"";position:absolute;left:0;right:0;height:3px;background:var(--mint);box-shadow:0 0 10px var(--mint);animation:scan 1s ease-in-out 2}
+  @keyframes scan{0%{top:0}50%{top:calc(100% - 3px)}100%{top:0}}
+  .stage[data-now="done"] .hero,.stage[data-now="lawdone"] .hero{left:120%}
+  .stage[data-now="dual"] .hero,.stage[data-now="dual"] .bubble,.stage[data-now="efile"] .hero{display:none!important}
+  .stage[data-now="done"] .plane{animation-duration:6s}
+  .banner{inset:32% 8% auto 8%;z-index:8;text-align:center;direction:rtl;font-family:"Cairo",sans-serif;font-weight:900;font-size:1.6rem;color:#151B2B;animation:pop .6s ease}
+  .banner small{display:block;font-family:"IBM Plex Sans Arabic",sans-serif;font-weight:500;font-size:.85rem;color:#4B5163}
+  .confetti{inset:0;pointer-events:none;z-index:7}
+  .confetti i{position:absolute;top:-10px;width:8px;height:12px;background:var(--c);animation:fall 2.6s linear infinite;opacity:.9}
+  @keyframes fall{to{transform:translateY(420px) rotate(540deg)}}
+
+  /* speech bubble on stage */
+  .bubble{z-index:9;max-width:62%;background:#fff;color:#151B2B;border-radius:16px;padding:10px 12px;font-size:.82rem;line-height:1.5;direction:rtl;box-shadow:0 8px 24px rgba(0,0,0,.18);animation:pop .35s ease;font-weight:500}
+  .bubble::after{content:"";position:absolute;bottom:-9px;width:16px;height:16px;background:#fff;transform:rotate(45deg);border-radius:2px}
+  .bubble.hero-b{bottom:58%;left:34%}
+  .stage[data-now="verdict"] .bubble.hero-b{bottom:auto;top:44%}
+  .bubble.hero-b::after{left:22px}
+  .bubble.npc-b{bottom:60%;right:6%;left:auto}
+  .bubble.npc-b::after{right:24px}
+  .bubble .en{display:block;direction:ltr;text-align:left;font-weight:600;margin-bottom:3px}
+  .bubble .ar{display:block;font-size:.72rem;color:#4B5163}
+  .bubble .who{display:block;font-size:.65rem;color:var(--dim);letter-spacing:.05em;margin-bottom:2px}
+
+  /* ===== DOCK: choices ===== */
+  .dock{display:flex;flex-direction:column;gap:10px;min-height:120px}
+  .prompt{font-family:"Cairo",sans-serif;font-weight:800;font-size:1.05rem;padding:0 4px}
+  .choices{display:flex;flex-direction:column;gap:8px}
+  .ch{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:var(--panel);border:1px solid var(--line);text-align:start;width:100%;animation:slideIn .4s ease both;transition:border-color .15s,transform .1s}
+  .ch:nth-child(2){animation-delay:.08s}.ch:nth-child(3){animation-delay:.16s}.ch:nth-child(4){animation-delay:.24s}
+  @keyframes slideIn{from{opacity:0;transform:translateY(10px) scale(.98)}}
+  .ch:hover{border-color:var(--sky)}
+  .ch:active{transform:scale(.985)}
+  .ch .em{font-size:1.4rem;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--panel-2);flex:none}
+  .ch.right{border-color:var(--mint);background:rgba(62,209,139,.1)}
+  .ch.wrong{border-color:var(--coral);background:rgba(242,99,78,.1)}
+  .ch[disabled]{cursor:default}
+  .fb{border-radius:14px;padding:11px 14px;display:flex;gap:10px;align-items:flex-start;border:1px solid;animation:slideIn .3s ease}
+  .fb.good{border-color:rgba(62,209,139,.5);background:rgba(62,209,139,.08)}
+  .fb.bad{border-color:rgba(242,99,78,.5);background:rgba(242,99,78,.08)}
+  .fb.info{border-color:rgba(111,183,255,.5);background:rgba(111,183,255,.08)}
+  .fb .pts{margin-inline-start:auto;font-family:"IBM Plex Mono",monospace;font-weight:600;white-space:nowrap}
+  .good .pts{color:var(--mint)}.bad .pts{color:var(--coral)}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 18px;border-radius:14px;font-weight:700;min-height:48px;transition:transform .08s}
+  .btn:active{transform:scale(.98)}
+  .btn.primary{background:var(--amber);color:var(--amber-ink)}
+  .btn.ghost{background:var(--panel-2);border:1px solid var(--line)}
+  .btn.block{width:100%}
+  .btn[disabled]{opacity:.45;cursor:not-allowed}
+  .btn.pulse{animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{50%{box-shadow:0 0 0 10px rgba(246,185,59,0)}0%{box-shadow:0 0 0 0 rgba(246,185,59,.5)}}
+
+  /* seat map */
+  .cabin{background:#0A1020;border:1px solid var(--line);border-radius:22px 22px 12px 12px;padding:14px 10px 10px;direction:ltr}
+  .cabin .nose{width:60%;margin:0 auto 10px;height:6px;border-radius:99px;background:var(--line)}
+  .seatrow{display:grid;grid-template-columns:22px repeat(3,1fr) 18px repeat(3,1fr);gap:6px;align-items:center;margin-bottom:6px}
+  .seatrow .rn{font-family:"IBM Plex Mono",monospace;font-size:.7rem;color:var(--dim);text-align:center}
+  .seat{aspect-ratio:1/1;border-radius:7px 7px 4px 4px;background:var(--panel-2);border:1px solid var(--line);font-family:"IBM Plex Mono",monospace;font-size:.68rem;color:var(--muted);display:grid;place-items:center}
+  .seat.taken{background:#0E1424;color:#3B465F;cursor:not-allowed}
+  .seat.sel{background:var(--amber);color:var(--amber-ink);border-color:transparent;box-shadow:0 0 0 3px rgba(246,185,59,.25)}
+  .items{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  .it{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 10px;border-radius:14px;background:var(--panel);border:1px solid var(--line);font-size:.7rem;min-width:64px;transition:transform .15s,opacity .3s}
+  .it .e{font-size:1.5rem}
+  .it.armed{border-color:var(--amber);transform:translateY(-4px);box-shadow:0 0 0 3px rgba(246,185,59,.25)}
+  .it.gone{opacity:0;transform:scale(.6);pointer-events:none}
+
+  /* boarding pass */
+  .pass{background:#FBF8F0;color:#151B2B;border-radius:18px;overflow:hidden;position:relative;box-shadow:0 18px 50px rgba(0,0,0,.45)}
+  .pass .hdr{background:#151B2B;color:#FBF8F0;padding:10px 16px;display:flex;justify-content:space-between;align-items:center}
+  .pass .hdr .al{font-family:"Cairo",sans-serif;font-weight:800}
+  .pass .hdr .fl{font-family:"IBM Plex Mono",monospace;color:var(--amber);font-weight:600}
+  .pass .route{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 4px;direction:ltr}
+  .pass .code{font-family:"IBM Plex Mono",monospace;font-size:2rem;font-weight:600;line-height:1}
+  .pass .city{font-size:.7rem;color:#6B7285;text-align:center}
+  .pass .mid{flex:1;text-align:center;color:#B9BECB;font-size:.7rem;position:relative}
+  .pass .mid::before{content:"";position:absolute;left:10%;right:10%;top:50%;border-top:1px dashed #C9CDD8}
+  .pass .mid span{background:#FBF8F0;position:relative;padding:0 6px}
+  .pass .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:6px 16px 12px}
+  .pass .grid div{font-size:.6rem;color:#6B7285}
+  .pass .grid b{display:block;font-family:"IBM Plex Mono",monospace;font-size:.95rem;color:#151B2B;font-weight:600}
+  .pass .tear{border-top:2px dashed #D6D2C6;position:relative}
+  .pass .tear::before,.pass .tear::after{content:"";position:absolute;top:-11px;width:22px;height:22px;border-radius:50%;background:var(--tarmac)}
+  .pass .tear::before{left:-11px}.pass .tear::after{right:-11px}
+  .pass .qrwrap{display:flex;align-items:center;gap:14px;padding:12px 16px 14px}
+  .pass .qr{width:104px;height:104px;flex:none;background:#fff;padding:5px;border-radius:8px;display:grid;place-items:center}
+  .pass .qr img,.pass .qr canvas{width:94px!important;height:94px!important;display:block}
+  .pass .qrtxt{font-size:.78rem;color:#4B5163}
+  .pass .qrtxt b{display:block;font-family:"IBM Plex Mono",monospace;color:#151B2B}
+
+  .stars{display:flex;gap:6px;font-size:2rem;justify-content:center}
+  .stars span{opacity:.2;transition:opacity .4s}
+  .stars span.on{opacity:1;color:var(--amber);text-shadow:0 4px 14px rgba(246,185,59,.5)}
+  .score{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .score div{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
+  .score b{display:block;font-family:"IBM Plex Mono",monospace;font-size:1.3rem;color:var(--amber)}
+  .score small{color:var(--muted);font-size:.7rem}
+  .note{font-size:.76rem;color:var(--dim);text-align:center}
+  .scale4{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .scale4 .ch{animation-delay:0s}
+  .levels{display:flex;flex-direction:column;gap:8px}
+  .lvl{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;background:var(--panel);border:1px solid var(--line);width:100%;text-align:start;animation:slideIn .4s ease both}
+  .lvl .n{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-family:"Cairo",sans-serif;font-weight:900;font-size:1.05rem;flex:none;background:var(--panel-2);border:1px solid var(--line)}
+  .lvl.open .n{background:var(--amber);color:var(--amber-ink);border-color:transparent}
+  .lvl.done .n{background:rgba(62,209,139,.15);color:var(--mint);border-color:rgba(62,209,139,.4)}
+  .lvl.locked{opacity:.45;filter:saturate(.2);cursor:not-allowed}
+  .lvl .t{flex:1;min-width:0}
+  .lvl .t h3{font-size:.98rem}
+  .lvl .t small{display:block;color:var(--muted);font-size:.76rem}
+  .lvl .tag{font-size:.7rem;padding:3px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+  .lvl.open .tag{border-color:var(--amber);color:var(--amber)}
+  .lvl.done .tag{border-color:rgba(62,209,139,.5);color:var(--mint)}
+  .libhead{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .update{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(90deg,#F6B93B,#FFD97A);color:var(--amber-ink);font-weight:700;font-size:.72rem;padding:4px 10px;border-radius:99px}
+  .prog{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+  .prog i{display:block;height:100%;background:var(--mint);width:0;transition:width .6s ease}
+  .taxi{bottom:30%;left:-30%;width:20%;animation:taxi 9s linear infinite}
+  @keyframes taxi{to{transform:translateX(650%)}}
+  .entrance{top:44%;left:35%;width:30%;padding:6px;border-radius:8px;background:#151B2B;color:#fff;font-family:"IBM Plex Mono",monospace;font-size:.58rem;text-align:center;letter-spacing:.12em;z-index:2}
+  .entrance b{display:block;color:var(--amber);font-size:.8rem}
+
+  /* ===== STORE ===== */
+  .cats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .cat{position:relative;padding:14px;border-radius:18px;border:1px solid var(--line);background:var(--panel);text-align:start;animation:slideIn .4s ease both;overflow:hidden;min-height:120px}
+  .cat .ico{font-size:2rem;display:block;margin-bottom:4px}
+  .cat h3{font-size:1rem}
+  .cat small{display:block;color:var(--muted);font-size:.72rem;margin-top:2px}
+  .cat .meta{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap}
+  .cat .meta span{font-size:.66rem;padding:2px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+  .cat.travel{border-color:rgba(111,183,255,.45)} .cat.law{border-color:rgba(246,185,59,.5)}
+  .cat::before{content:"";position:absolute;inset:auto -30% -40% auto;width:60%;aspect-ratio:1;border-radius:50%;opacity:.12;background:var(--dim)}
+  .cat.travel::before{background:var(--sky)} .cat.law::before{background:var(--amber)}
+  .cat.soon{opacity:.5;cursor:not-allowed}
+  .cat .new{position:absolute;top:10px;left:10px;font-size:.62rem;background:var(--mint);color:#06301B;font-weight:700;padding:2px 7px;border-radius:99px}
+  .cat .soonTag{position:absolute;top:10px;left:10px;font-size:.62rem;background:var(--line);color:var(--muted);font-weight:700;padding:2px 7px;border-radius:99px}
+  .back{font-size:.76rem;color:var(--muted);padding:4px 10px;border-radius:99px;border:1px solid var(--line)}
+
+  /* ===== LAW WORLD ===== */
+  .stage[data-world="law"]{background:#EFE6D6}
+  .stage[data-world="law"] .wall{background:linear-gradient(#F4EDDF,#E4D8C3)}
+  .stage[data-world="law"] .floor{background:repeating-linear-gradient(90deg,#C9B899 0 40px,#BCA987 40px 42px),#C9B899}
+  .stage[data-world="law"] .window,.stage[data-world="law"] .plane,.stage[data-world="law"] .cloud{display:none}
+  .hero .outfit.law{display:none}
+  .stage[data-world="law"] .hero .outfit.law{display:block}
+  .stage[data-world="law"] .hero .outfit.travel{display:none}
+  .facade{top:5%;left:8%;width:84%;height:56%;z-index:1}
+  .facade .roof{position:absolute;top:0;left:-2%;right:-2%;height:24%;background:#D9CBB0;clip-path:polygon(50% 0,100% 100%,0 100%)}
+  .facade .cols{position:absolute;top:24%;left:4%;right:4%;bottom:0;display:flex;justify-content:space-between;background:#E8DCC6;padding:0 2%}
+  .facade .cols i{width:8%;height:100%;background:linear-gradient(90deg,#FBF6EA,#CDBFA5);border-radius:3px 3px 0 0}
+  .facade .plate{position:absolute;top:34%;left:50%;transform:translateX(-50%);background:#151B2B;color:var(--amber);padding:4px 12px;border-radius:6px;font-family:"Cairo",sans-serif;font-weight:900;font-size:.66rem;white-space:nowrap;direction:rtl;z-index:2}
+  .facade .plate small{display:block;font-family:"IBM Plex Mono",monospace;font-size:.5rem;color:#fff;letter-spacing:.12em;font-weight:500;text-align:center}
+  .lawdesk{bottom:12%;left:44%;width:44%;height:22%;background:linear-gradient(#8B5E3C,#6B4527);border-radius:8px 8px 4px 4px;box-shadow:0 8px 20px rgba(0,0,0,.2);z-index:2}
+  .lawdesk::before{content:"";position:absolute;top:-30%;left:8%;width:22%;height:30%;background:#F4EFE4;border:2px solid #C9B899;border-radius:2px;transform:rotate(-4deg)}
+  .lawdesk::after{content:"";position:absolute;top:-40%;right:8%;width:22%;height:40%;background:#151B2B;border-radius:4px;border:2px solid #8E99AB}
+  .shelf{top:10%;right:5%;width:30%;height:42%;background:#7A5230;border-radius:6px;z-index:1;display:grid;grid-template-rows:1fr 1fr 1fr;gap:5px;padding:6px}
+  .shelf i{background:repeating-linear-gradient(90deg,#B03A2E 0 8px,#2C4488 8px 16px,#3B7A57 16px 22px,#F6B93B 22px 30px);border-radius:2px;opacity:.85}
+  .certif{top:14%;left:10%;width:22%;height:20%;background:#FBF6EA;border:4px solid #8B5E3C;z-index:1;display:grid;place-items:center;font-size:1.2rem}
+  .lzones{bottom:32%;left:4%;width:56%;display:grid!important;grid-template-columns:1fr 1fr;gap:6px;z-index:6}
+  .stage[data-now]:not([data-now="docs"]) .lzones{display:none!important}
+  .dz.file{background:#3B6A9A}.dz.no{background:#8C5A5A}
+  .ephone{top:5%;left:30%;width:40%;height:82%;background:#0E1424;border-radius:22px;border:5px solid #2A3757;z-index:6;padding:7%;direction:rtl;color:#fff;font-size:.58rem;flex-direction:column;gap:5px;box-shadow:0 20px 40px rgba(0,0,0,.35)}
+  .stage[data-now="efile"] .ephone{display:flex!important}
+  .ephone .eh{font-family:"Cairo",sans-serif;font-weight:900;color:var(--amber);font-size:.66rem;text-align:center;line-height:1.3}
+  .ephone .eh small{display:block;color:var(--muted);font-weight:500;font-size:.5rem}
+  .ephone .row{background:#1B2642;border-radius:6px;padding:4px 6px;border:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:4px;line-height:1.3}
+  .ephone .row.ok{border-color:var(--mint)} .ephone .row.bad{border-color:var(--coral)} .ephone .row.dim{opacity:.4}
+  .ephone .bar{height:5px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:auto}
+  .ephone .bar i{display:block;height:100%;background:var(--mint);width:0;transition:width .6s ease}
+  .ephone .stampd{color:var(--mint);font-weight:700;text-align:center;font-size:.6rem}
+  .bench{bottom:30%;left:22%;width:56%;height:16%;background:linear-gradient(#8B5E3C,#5E3C20);border-radius:10px 10px 2px 2px;z-index:2;box-shadow:0 10px 24px rgba(0,0,0,.25)}
+  .bench::after{content:"⚖";position:absolute;left:50%;top:14%;transform:translateX(-50%);color:var(--amber);font-size:1.1rem}
+  .benchsign{top:10%;left:50%;transform:translateX(-50%);padding:5px 12px;border-radius:8px;background:#151B2B;color:var(--amber);font-family:"Cairo",sans-serif;font-weight:900;font-size:.62rem;z-index:2;direction:rtl;white-space:nowrap}
+  .podium{bottom:14%;left:10%;width:15%;height:15%;background:#6B4527;border-radius:6px 6px 2px 2px;z-index:2}
+  .podium.p2{left:auto;right:10%}
+  .judge{bottom:40%;left:50%;transform:translateX(-50%);width:22%;z-index:4}
+  .judge svg{width:100%;height:auto;display:block;overflow:visible}
+  .judge .gavel{position:absolute;right:-28%;top:42%;font-size:1.3rem;transform-origin:20% 80%;display:none}
+  .judge.hit .gavel{display:block;animation:knock .45s ease 3}
+  @keyframes knock{50%{transform:rotate(-45deg)}}
+  .defendant{bottom:26%;right:9%;width:15%;z-index:3}
+  .defendant svg{width:100%;height:auto;display:block}
+  .defendant.talk{animation:bob 1s ease-in-out infinite}
+  .stamp{inset:10% 14% auto 14%;z-index:8;text-align:center;direction:rtl;font-family:"Cairo",sans-serif;font-weight:900;font-size:1.35rem;color:#8B1E1E;border:5px solid #8B1E1E;border-radius:12px;padding:8px;opacity:0;animation:stamp .6s cubic-bezier(.2,.8,.3,1.2) .5s forwards;background:rgba(255,255,255,.75)}
+  .stamp small{display:block;font-family:"IBM Plex Sans Arabic",sans-serif;font-weight:600;font-size:.72rem;color:#5A1414}
+  @keyframes stamp{from{transform:rotate(-8deg) scale(2.4);opacity:0}to{transform:rotate(-8deg) scale(1);opacity:1}}
+  .lawbanner{inset:30% 8% auto 8%;z-index:8;text-align:center;direction:rtl;font-family:"Cairo",sans-serif;font-weight:900;font-size:1.5rem;color:#151B2B;animation:pop .6s ease}
+  .lawbanner small{display:block;font-family:"IBM Plex Sans Arabic",sans-serif;font-weight:500;font-size:.85rem;color:#4B5163}
+  .deed{background:#FBF8F1;color:#1A1A1A;border-radius:14px;padding:14px;direction:rtl;font-size:.8rem;line-height:1.7;border:1px solid #D9CBB0;box-shadow:0 18px 50px rgba(0,0,0,.45)}
+  .deed .dh{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #1A1A1A;padding-bottom:6px;margin-bottom:8px;font-family:"Cairo",sans-serif;font-weight:900}
+  .deed .dh small{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:.68rem;color:#555}
+  .deed .kv{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:.74rem;margin:6px 0}
+  .deed .kv div{background:#F4EEE1;border-radius:6px;padding:4px 8px}
+  .deed .kv span{display:block;color:#7A6E5A;font-size:.62rem}
+  .deed .kv b{font-weight:600}
+  .deed .txt{background:#F1EBDD;border-radius:8px;padding:8px 10px;font-size:.76rem;border-right:3px solid #8B5E3C}
+  .deed .qrrow{display:flex;gap:12px;align-items:center;margin-top:10px;border-top:1px dashed #C9B899;padding-top:10px}
+  .deed .qr{width:96px;height:96px;flex:none;background:#fff;padding:4px;border-radius:6px;display:grid;place-items:center}
+  .deed .qr img,.deed .qr canvas{width:88px!important;height:88px!important;display:block}
+  .deed .qrrow p{font-size:.7rem;color:#555}
+  .deed .qrrow p b{display:block;color:#1A1A1A;font-family:"IBM Plex Mono",monospace}
+  .chk{display:flex;flex-direction:column;gap:6px}
+  .chk .ch{padding:10px 12px}
+  .chk .ch.on{border-color:var(--sky);background:rgba(111,183,255,.1)}
+  .chk .ch .box{width:22px;height:22px;border-radius:6px;border:2px solid var(--line);display:grid;place-items:center;flex:none;font-size:.8rem}
+  .chk .ch.on .box{background:var(--sky);border-color:var(--sky);color:#06213A}
+
+
+  /* ===== SURPRISE LEVEL ===== */
+  .trust{top:4%;left:3%;width:30%;z-index:8;background:rgba(21,27,43,.9);border-radius:10px;padding:5px 8px;direction:rtl;color:#fff;font-size:.6rem}
+  .trust b{display:flex;justify-content:space-between;font-family:"Cairo",sans-serif;font-weight:900;font-size:.62rem}
+  .trust .tm{height:6px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:3px}
+  .trust .tm i{display:block;height:100%;width:60%;background:var(--amber);transition:width .5s ease,background .3s}
+  .trust.hi .tm i{background:var(--mint)} .trust.lo .tm i{background:var(--coral)}
+  .alertcard{top:26%;right:6%;width:44%;z-index:9;background:#fff;color:#151B2B;border-radius:14px;padding:8px 10px;direction:rtl;font-size:.7rem;line-height:1.4;box-shadow:0 12px 30px rgba(0,0,0,.3);animation:pop .4s ease;border:2px solid var(--coral)}
+  .alertcard .ic{font-size:1.4rem;display:block;animation:ring .6s ease infinite}
+  @keyframes ring{25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
+  .alertcard b{font-family:"Cairo",sans-serif;font-weight:900;display:block}
+  .flydoc{top:40%;right:22%;z-index:9;font-size:1.8rem;animation:flydoc 1s cubic-bezier(.3,.7,.3,1.1) forwards}
+  @keyframes flydoc{to{right:62%;top:52%;transform:rotate(-20deg)}}
+  .countdown{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--muted)}
+  .countdown .cb{flex:1;height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+  .countdown .cb i{display:block;height:100%;background:var(--sky);width:100%;transition:width .25s linear}
+  .countdown.low .cb i{background:var(--coral)} .countdown.low b{color:var(--coral)}
+  .pick3{display:flex;flex-direction:column;gap:6px}
+
+  /* ===== VOICE ===== */
+  .rec{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:10px}
+  .rec .head{display:flex;align-items:center;gap:10px}
+  .rec .dot{width:12px;height:12px;border-radius:50%;background:var(--line);flex:none}
+  .rec.on .dot{background:var(--coral);animation:pulse2 1s infinite}
+  @keyframes pulse2{50%{box-shadow:0 0 0 8px rgba(242,99,78,0)}0%{box-shadow:0 0 0 0 rgba(242,99,78,.6)}}
+  .rec .tm{font-family:"IBM Plex Mono",monospace;color:var(--muted)}
+  .rec .wave{display:flex;gap:3px;align-items:center;height:28px;flex:1;justify-content:center}
+  .rec .wave i{width:4px;height:6px;border-radius:2px;background:var(--sky);transition:height .1s}
+  .rec .tr{background:var(--panel-2);border-radius:10px;padding:8px 10px;font-size:.85rem;min-height:40px;color:var(--text)}
+  .rec .tr small{display:block;color:var(--dim);font-size:.68rem}
+  .rec audio{width:100%;height:36px}
+  .kw{display:flex;flex-wrap:wrap;gap:6px}
+  .kw span{font-size:.72rem;padding:3px 9px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
+  .kw span.hit{border-color:var(--mint);color:var(--mint);background:rgba(62,209,139,.1)}
+  .kw span.miss{border-color:var(--coral);color:var(--coral)}
+  /* ===== DUAL HEARING ===== */
+  .stage[data-now="dual"] .laptop{display:flex!important}
+  .laptop{inset:5% 5% 9% 5%;background:#1B2130;border-radius:14px;border:5px solid #2F3A4F;z-index:6;padding:8px;flex-direction:column;gap:8px;direction:rtl}
+  .tile.live{flex:1}
+  .tile:not(.live){flex:0 0 34%;flex-direction:row}
+  .tile:not(.live) .vid{flex:0 0 32%;min-height:0}
+  .tile:not(.live) .vid svg{width:70%}
+  .tile:not(.live) .nm{flex:1;display:flex;flex-direction:column;justify-content:center}
+  .tile:not(.live) .pat{display:none}
+  .tile .note2{font-size:.56rem;color:var(--amber);line-height:1.3;margin-top:2px;animation:pop .4s ease}
+  .tile .note2.bad{color:var(--coral)}
+  .laptop::after{content:"";position:absolute;left:50%;bottom:-16px;width:60%;height:10px;background:#2F3A4F;transform:translateX(-50%);border-radius:0 0 8px 8px}
+  .tile{position:relative;border-radius:10px;background:#0E1424;border:2px solid var(--line);overflow:hidden;display:flex;flex-direction:column;transition:border-color .2s,box-shadow .2s}
+  .tile.live{border-color:var(--mint);box-shadow:0 0 0 3px rgba(62,209,139,.25)}
+  .tile.lost{border-color:var(--coral);filter:grayscale(.8)}
+  .tile.won{border-color:var(--amber)}
+  .tile .vid{flex:1;background:linear-gradient(#2A3757,#151E33);position:relative;display:grid;place-items:end center;min-height:60px}
+  .tile .vid svg{width:52%;height:auto;display:block}
+  .tile .vid .face{position:absolute;top:6px;left:6px;font-size:1.1rem;transition:transform .3s}
+  .tile .vid .mic{position:absolute;top:4px;right:6px;font-size:.62rem;padding:1px 6px;border-radius:99px;background:rgba(0,0,0,.5);color:#fff;font-family:"IBM Plex Mono",monospace}
+  .tile.live .vid .mic{background:var(--mint);color:#06301B;font-weight:600}
+  .tile .vid .frz{position:absolute;inset:0;display:none;place-items:center;background:rgba(14,20,36,.75);color:#fff;font-size:.62rem;text-align:center;padding:6px;direction:rtl}
+  .tile.frz .vid .frz{display:grid}
+  .tile .nm{font-size:.58rem;padding:4px 6px 2px;color:#fff;font-weight:600;line-height:1.25}
+  .tile .nm small{display:block;color:var(--muted);font-weight:400}
+  .tile .pat{height:6px;margin:3px 6px 6px;border-radius:99px;background:var(--line);overflow:hidden}
+  .tile .pat i{display:block;height:100%;background:var(--mint);width:100%;transition:width .4s linear,background .3s}
+  .tile .pat.mid i{background:var(--amber)} .tile .pat.low i{background:var(--coral)}
+  .tile .q{position:absolute;inset:auto 4px 30% 4px;background:#fff;color:#151B2B;border-radius:8px;padding:4px 6px;font-size:.56rem;line-height:1.35;direction:rtl;display:none;animation:pop .3s ease;z-index:2}
+  .tile.ask .q{display:block}
+  .timerbar{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--muted)}
+  .timerbar .tb{flex:1;height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+  .timerbar .tb i{display:block;height:100%;background:var(--sky);width:100%;transition:width 1s linear}
+  .speaking{border-color:var(--sky)!important}
+  .speaking .pts{color:var(--sky)}
+  .hearhead{display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:8px 12px}
+  .hearhead b{font-family:"Cairo",sans-serif}
+  .hearhead small{display:block;color:var(--muted);font-size:.72rem}
+  .hearhead .sw{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:.78rem;font-weight:700;white-space:nowrap}
+  .hearhead .sw.urgent{border-color:var(--coral);animation:pulse 1.2s infinite}
+
+</style>
+
+<div class="phone" id="app" dir="rtl" lang="ar">
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span> <span id="brandTxt">منصة المحاكاة</span></div>
+    <div class="hud"><span class="chip" id="ptsChip">⭐ <b id="hudPts">0</b></span><span class="chip" id="stepChip">المرحلة <b id="hudStep">1</b>/5</span></div>
+  </div>
+  <div class="rail" id="rail"><span class="now"></span><span></span><span></span><span></span><span></span></div>
+
+  <!-- ===== STAGE ===== -->
+  <div class="stage" id="stage" data-now="hall" aria-label="مشهد المطار">
+    <div class="wall"></div>
+    <div class="window">
+      <div class="cloud" style="position:absolute"></div><div class="cloud c2" style="position:absolute"></div>
+      <svg class="plane" style="position:absolute" viewBox="0 0 120 40"><path d="M2 22 L70 14 L100 4 L112 6 L88 20 L108 26 L104 30 L80 26 L40 34 L30 30 L52 24 Z" fill="#fff" stroke="#8FA6C6" stroke-width="2" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="floor"></div>
+
+    <!-- lobby / library -->
+    <div class="entrance" data-scene="lobby library store">KING ABDULAZIZ INTL<b>DEPARTURES</b></div>
+    <svg class="taxi" data-scene="lobby library store" viewBox="0 0 120 50" style="position:absolute"><rect x="10" y="18" width="100" height="22" rx="8" fill="#F6B93B"/><path d="M30 18 L42 6 L84 6 L96 18Z" fill="#F6B93B"/><rect x="46" y="8" width="34" height="10" rx="2" fill="#CFE6FF"/><circle cx="32" cy="42" r="7" fill="#222"/><circle cx="90" cy="42" r="7" fill="#222"/><rect x="54" y="0" width="16" height="6" rx="2" fill="#151B2B"/></svg>
+
+    <!-- hall -->
+    <div class="sign" data-scene="hall" style="left:8%">GATES →</div>
+    <div class="sign" data-scene="hall" style="left:42%">CHECK-IN</div>
+    <div class="sign" data-scene="hall" style="left:74%">SECURITY</div>
+
+    <!-- counter / scale -->
+    <div class="desk" data-scene="counter scale"><div class="screen"></div></div>
+    <div class="bigscale" data-scene="scale"><div class="bag"></div><div class="disp over" id="scaleDisp">26.4 kg</div></div>
+    <div class="npc" data-scene="counter scale security2" style="right:14%">
+      <svg viewBox="0 0 80 120">
+        <rect x="22" y="52" width="36" height="52" rx="10" fill="#2C4488"/>
+        <rect x="34" y="52" width="12" height="52" fill="#F6B93B"/>
+        <g class="arm"><rect x="52" y="54" width="10" height="34" rx="5" fill="#2C4488"/><circle cx="57" cy="90" r="6" fill="#E9B58E"/></g>
+        <circle cx="40" cy="32" r="20" fill="#E9B58E"/>
+        <path d="M20 30 Q40 0 60 30 L60 24 Q40 6 20 24Z" fill="#3B2A22"/>
+        <path d="M18 34 Q20 14 40 12 Q60 14 62 34 L64 60 Q40 54 16 60Z" fill="#3B2A22"/>
+        <circle cx="33" cy="34" r="2.4" fill="#222"/><circle cx="47" cy="34" r="2.4" fill="#222"/>
+        <path d="M33 42 Q40 48 47 42" stroke="#8B3A3A" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <!-- security -->
+    <div class="belt" data-scene="security security2"></div>
+    <div class="xray" data-scene="security security2"></div>
+    <div class="zonesdrop" id="zones" data-scene="security">
+      <button class="dz tray" data-z="tray"><span>🧺</span>الصينية</button>
+      <button class="dz bin" data-z="bin"><span>🗑️</span>أفرغه / ارمِه</button>
+      <button class="dz pocket" data-z="pocket"><span>✋</span>ابقه معك</button>
+    </div>
+
+    <!-- gate -->
+    <div class="bridge" data-scene="gate pass"></div>
+    <div class="gatesign" data-scene="gate pass" id="gateSign">GATE B12<b id="gateNow">ZONE 1</b></div>
+    <div class="queue" data-scene="gate">
+      <i style="left:2%;--c:#7D8DA6"></i><i style="left:16%;--c:#A67D7D;animation-delay:.3s"></i><i style="left:30%;--c:#7DA68E;animation-delay:.6s"></i><i style="left:44%;--c:#8E7DA6;animation-delay:.9s"></i><i style="left:58%;--c:#A6997D;animation-delay:1.2s"></i>
+    </div>
+    <div class="npc" data-scene="gate pass" style="right:30%;bottom:16%;width:14%">
+      <svg viewBox="0 0 80 120">
+        <rect x="22" y="52" width="36" height="52" rx="10" fill="#151B2B"/>
+        <rect x="36" y="52" width="8" height="30" fill="#F6B93B"/>
+        <circle cx="40" cy="32" r="20" fill="#C98E6A"/>
+        <path d="M18 30 Q40 2 62 30 L62 22 Q40 4 18 22Z" fill="#1B1B1B"/>
+        <circle cx="33" cy="34" r="2.4" fill="#222"/><circle cx="47" cy="34" r="2.4" fill="#222"/>
+        <path d="M34 43 Q40 46 46 43" stroke="#6B3A3A" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <!-- pass -->
+    <div class="scanner" data-scene="pass" id="scanner"><div class="lamp"></div><div class="glass"></div></div>
+
+
+    <!-- ===== LAW WORLD ===== -->
+    <div class="facade" data-scene="lawlobby"><div class="roof"></div><div class="cols"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="plate">المحكمة التجارية<small>COMMERCIAL COURT</small></div></div>
+
+    <div class="shelf" data-scene="office docs efile"><i></i><i></i><i></i></div>
+    <div class="certif" data-scene="office docs efile">⚖️</div>
+    <div class="lawdesk" data-scene="office docs efile"></div>
+    <div class="npc" data-scene="office docs efile" style="right:8%;bottom:26%">
+      <svg viewBox="0 0 80 120">
+        <rect x="20" y="52" width="40" height="52" rx="10" fill="#1F2A44"/>
+        <path d="M32 52 L40 70 L48 52 Z" fill="#fff"/><rect x="38" y="56" width="5" height="26" rx="2" fill="#F6B93B"/>
+        <g class="arm"><rect x="54" y="54" width="10" height="34" rx="5" fill="#1F2A44"/><circle cx="59" cy="90" r="6" fill="#D9A47E"/></g>
+        <circle cx="40" cy="32" r="20" fill="#D9A47E"/>
+        <path d="M20 30 Q40 4 60 30 L60 22 Q40 6 20 22Z" fill="#2B1D16"/>
+        <circle cx="33" cy="35" r="5" fill="none" stroke="#333" stroke-width="1.5"/><circle cx="47" cy="35" r="5" fill="none" stroke="#333" stroke-width="1.5"/><path d="M38 35 L42 35" stroke="#333" stroke-width="1.5"/>
+        <circle cx="33" cy="35" r="2" fill="#222"/><circle cx="47" cy="35" r="2" fill="#222"/>
+        <path d="M34 44 Q40 48 46 44" stroke="#8B3A3A" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="lzones" id="lzones" data-scene="docs">
+      <button class="dz file" data-z="file"><span>📁</span>ملف الدعوى</button>
+      <button class="dz no" data-z="no"><span>🚫</span>لا يفيد كدليل</button>
+    </div>
+    <div class="ephone" data-scene="efile" id="ephone"></div>
+
+    <div class="benchsign" data-scene="court verdict surprise">المحكمة التجارية · الدائرة الثالثة</div>
+    <div class="bench" data-scene="court verdict surprise"></div>
+    <div class="podium" data-scene="court verdict surprise"></div><div class="podium p2" data-scene="court verdict surprise"></div>
+    <div class="judge" data-scene="court verdict surprise" id="judge"><span class="gavel">🔨</span>
+      <svg viewBox="0 0 80 110">
+        <rect x="14" y="50" width="52" height="56" rx="12" fill="#3B2A22"/><rect x="30" y="50" width="20" height="56" fill="#F7F5EE"/>
+        <path d="M14 56 Q40 50 66 56 L66 62 Q40 56 14 62Z" fill="#B8860B" opacity=".8"/>
+        <circle cx="40" cy="32" r="18" fill="#D9A47E"/>
+        <path d="M16 30 Q40 2 64 30 L66 46 Q40 40 14 46Z" fill="#F7F5EE"/>
+        <rect x="18" y="19" width="44" height="6" rx="3" fill="#111"/>
+        <circle cx="33" cy="34" r="2.2" fill="#222"/><circle cx="47" cy="34" r="2.2" fill="#222"/>
+        <path d="M33 44 Q40 42 47 44" stroke="#6B3A3A" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M30 48 Q40 60 50 48" fill="#5A4636"/>
+      </svg>
+    </div>
+    <div class="defendant" data-scene="court verdict surprise" id="defendant">
+      <svg viewBox="0 0 80 120">
+        <rect x="20" y="50" width="40" height="60" rx="10" fill="#F7F5EE"/>
+        <circle cx="40" cy="32" r="19" fill="#C98E6A"/>
+        <path d="M18 30 Q40 2 62 30 L64 50 Q40 44 16 50Z" fill="#B03A2E"/>
+        <path d="M18 30 Q40 2 62 30 L64 50 Q40 44 16 50Z" fill="url(#none)" opacity="0"/>
+        <rect x="19" y="19" width="42" height="6" rx="3" fill="#111"/>
+        <circle cx="33" cy="35" r="2.2" fill="#222"/><circle cx="47" cy="35" r="2.2" fill="#222"/>
+        <path d="M33 46 Q40 42 47 46" stroke="#6B3A3A" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="stamp" data-scene="verdict">حُكم لصالح المدعي<small>85,000 ريال · قابل للاستئناف خلال 30 يوماً</small></div>
+
+    <div class="trust" data-scene="surprise" id="trust"><b><span>ثقة القاضي</span><span id="trustV">60</span></b><div class="tm"><i id="trustBar"></i></div></div>
+    <div class="alertcard" data-scene="surprise" id="alertCard" hidden></div>
+    <div class="laptop" data-scene="dual" id="laptop"></div>
+    <div class="lawbanner" data-scene="lawdone" id="lawBanner">اكتمل المستوى ⚖️<small>مرافعة موفّقة</small></div>
+
+    <!-- done -->
+    <div class="confetti" data-scene="done lawdone" id="confetti"></div>
+    <div class="banner" data-scene="done">على متن الطائرة ✈<small>رحلة سعيدة يا مسافر</small></div>
+
+    <!-- hero -->
+    <div class="hero idle" id="hero">
+      <div class="emote q">؟</div><div class="emote ex">!</div><div class="emote dr">…</div>
+      <svg viewBox="0 0 120 160">
+        <g class="body">
+          <!-- ===== TRAVELER OUTFIT ===== -->
+          <g class="outfit travel">
+            <g class="suitcase" transform="translate(84,96)"><rect x="0" y="0" width="30" height="44" rx="6" fill="#5B7BD9" stroke="#2C4488" stroke-width="3"/><rect x="10" y="-12" width="10" height="14" rx="3" fill="none" stroke="#2C4488" stroke-width="3"/><rect x="5" y="14" width="20" height="4" rx="2" fill="#fff" opacity=".5"/><circle cx="7" cy="46" r="3" fill="#222"/><circle cx="23" cy="46" r="3" fill="#222"/></g>
+            <rect x="40" y="108" width="14" height="36" rx="6" fill="#2F3A4F"/><rect x="58" y="108" width="14" height="36" rx="6" fill="#2F3A4F"/>
+            <rect x="36" y="140" width="20" height="10" rx="5" fill="#F6B93B"/><rect x="56" y="140" width="20" height="10" rx="5" fill="#F6B93B"/>
+            <path d="M34 66 Q56 56 78 66 L82 112 L30 112 Z" fill="#F2634E"/>
+            <rect x="46" y="84" width="20" height="14" rx="4" fill="#D4503D"/>
+            <path d="M42 68 L38 110" stroke="#2F3A4F" stroke-width="6" stroke-linecap="round"/>
+            <path d="M76 72 Q92 80 96 92" stroke="#F2634E" stroke-width="10" stroke-linecap="round" fill="none"/><circle cx="97" cy="92" r="6" fill="#E9B58E"/>
+            <path d="M38 72 Q28 84 32 98" stroke="#F2634E" stroke-width="10" stroke-linecap="round" fill="none"/><circle cx="32" cy="100" r="6" fill="#E9B58E"/>
+          </g>
+          <!-- ===== LAWYER OUTFIT (ثوب + غترة + بشت + حقيبة) ===== -->
+          <g class="outfit law">
+            <path d="M30 70 Q56 58 82 70 L92 150 L20 150 Z" fill="#2B2118"/>
+            <path d="M36 68 Q56 58 76 68 L80 150 L32 150 Z" fill="#F7F5EE"/>
+            <path d="M36 68 Q56 60 76 68 L76 78 Q56 70 36 78 Z" fill="#B8860B" opacity=".85"/>
+            <path d="M50 66 L56 80 L62 66" stroke="#D9D3C4" stroke-width="2" fill="none"/>
+            <rect x="34" y="146" width="20" height="8" rx="4" fill="#3A2A1E"/><rect x="58" y="146" width="20" height="8" rx="4" fill="#3A2A1E"/>
+            <path d="M76 74 Q92 82 96 96" stroke="#2B2118" stroke-width="10" stroke-linecap="round" fill="none"/><circle cx="97" cy="96" r="6" fill="#E9B58E"/>
+            <g transform="translate(84,100)"><rect x="0" y="0" width="30" height="22" rx="3" fill="#5A3A1F" stroke="#3A2412" stroke-width="2"/><rect x="10" y="-6" width="10" height="7" rx="3" fill="none" stroke="#3A2412" stroke-width="2.5"/><rect x="0" y="8" width="30" height="3" fill="#3A2412"/><rect x="12" y="7" width="6" height="5" rx="1" fill="#F6B93B"/></g>
+            <path d="M38 74 Q28 86 32 100" stroke="#2B2118" stroke-width="10" stroke-linecap="round" fill="none"/><circle cx="32" cy="102" r="6" fill="#E9B58E"/>
+          </g>
+          <!-- head -->
+          <circle cx="56" cy="40" r="26" fill="#E9B58E"/>
+          <g class="outfit travel"><path d="M30 38 Q34 8 60 12 Q84 14 82 40 Q78 26 66 26 Q52 22 40 30 Q32 34 30 38Z" fill="#2B1D16"/></g>
+          <g class="outfit law">
+            <path d="M30 40 Q30 8 56 8 Q82 8 82 40 L88 78 Q76 68 70 66 L68 34 Q62 26 56 26 Q50 26 44 34 L42 66 Q36 68 24 78 Z" fill="#F7F5EE"/>
+            <path d="M44 34 Q56 24 68 34 L66 30 Q56 20 46 30Z" fill="#E4DFD2"/>
+            <rect x="30" y="20" width="52" height="7" rx="3.5" fill="#111"/><rect x="31" y="28" width="50" height="4" rx="2" fill="#111" opacity=".85"/>
+          </g>
+          <g class="brows"><path class="brow-up" d="M42 30 L52 27 M62 27 L72 31" stroke="#2B1D16" stroke-width="3" stroke-linecap="round"/></g>
+          <g class="eye" style="transform-origin:48px 42px"><circle cx="48" cy="42" r="3.2" fill="#1B1B1B"/></g>
+          <g class="eye" style="transform-origin:66px 42px"><circle cx="66" cy="42" r="3.2" fill="#1B1B1B"/></g>
+          <path class="mouth-flat" d="M50 54 Q57 57 64 54" stroke="#8B3A3A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path class="mouth-happy" d="M48 52 Q57 64 66 52 Z" fill="#8B3A3A"/>
+          <path class="mouth-sad" d="M50 58 Q57 51 64 58" stroke="#8B3A3A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <ellipse cx="42" cy="50" rx="4" ry="2.4" fill="#F0A38A" opacity=".6"/><ellipse cx="72" cy="50" rx="4" ry="2.4" fill="#F0A38A" opacity=".6"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="bubble hero-b" id="bHero" hidden></div>
+    <div class="bubble npc-b" id="bNpc" hidden></div>
+  </div>
+
+  <!-- ===== DOCK ===== -->
+  <div class="dock" id="dock"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+(function(){
+  document.documentElement.dir='rtl'; document.documentElement.lang='ar';
+  const $=s=>document.querySelector(s);
+  const stage=$('#stage'), hero=$('#hero'), dock=$('#dock'), bH=$('#bHero'), bN=$('#bNpc');
+  const S={pts:0,right:0,total:0,seat:null,start:Date.now(),zone:1,zt:null,armed:null,secLeft:0};
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+  function mood(m,ms){ hero.className='hero '+m; if(ms) setTimeout(()=>{hero.className='hero idle'},ms); }
+  function moveTo(pct){ hero.style.left=pct+'%'; }
+  function say(who,txt,label){ const b=who==='hero'?bH:bN; const o=who==='hero'?bN:bH; o.hidden=true; if(!txt){b.hidden=true;return;} b.innerHTML=`<span class="who">${who==='hero'?'أنت':(label||S.npcLabel||'الموظف')}</span>${txt}`; b.hidden=false; }
+  function addPts(n){ S.pts=Math.max(0,S.pts+n); $('#hudPts').textContent=S.pts; const c=$('#ptsChip'); c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop'); }
+  function mark(ok){ S.total++; if(ok) S.right++; }
+  function step(i){ document.querySelectorAll('#rail span').forEach((s,k)=>s.className=k<i?'done':k===i?'now':''); $('#hudStep').textContent=i+1; }
+  function fb(kind,text,pts){ const ic=kind==='good'?'✓':kind==='bad'?'✕':'ⓘ'; const d=document.createElement('div'); d.className='fb '+kind; d.innerHTML=`<span>${ic}</span><span>${text}</span>${pts!==undefined?`<span class="pts">${pts>0?'+':''}${pts}</span>`:''}`; dock.appendChild(d); return d; }
+  function choices(list,onPick){
+    const w=document.createElement('div'); w.className='choices';
+    list.forEach((c,i)=>{ const b=document.createElement('button'); b.className='ch'; b.innerHTML=`<span class="em">${c.em}</span><span>${c.t}</span>`; b.addEventListener('click',()=>{ w.querySelectorAll('.ch').forEach((x,k)=>{x.disabled=true; if(list[k].ok) x.classList.add('right');}); if(!c.ok) b.classList.add('wrong'); onPick(c,i); }); w.appendChild(b); });
+    dock.appendChild(w); return w;
+  }
+  function nextBtn(label,fn){ const b=document.createElement('button'); b.className='btn primary block pulse'; b.textContent=label; b.addEventListener('click',fn); dock.appendChild(b); return b; }
+  function clearDock(title){ dock.innerHTML=title?`<div class="prompt">${title}</div>`:''; }
+  function beep(freq,ms){ try{ const a=new (window.AudioContext||window.webkitAudioContext)(); const o=a.createOscillator(), g=a.createGain(); o.frequency.value=freq; o.connect(g); g.connect(a.destination); g.gain.value=.08; o.start(); setTimeout(()=>{o.stop();a.close();},ms);}catch(e){} }
+
+  const CATS={
+    travel:{name:'السفر',ico:'✈️',brand:'محاكي المطار',lib:'مكتبتي · السفر',world:'travel',lobby:'lobby',npc:'الموظف',
+      q:'كم مرة سافرت بالطائرة؟',opts:[['🐣','ولا مرة',1],['🙂','مرة أو مرتين',2],['😎','عدة مرات',3],['✈️','أسافر كثيراً',4]],
+      react:{1:'أول رحلة لي! نمشي خطوة خطوة.',4:'تمام، مسافر متمرّس.',x:'طيب، عندي شوية خبرة.'},
+      levels:[
+        ['المطار: من الكاونتر إلى الطائرة','الكاونتر، الحقائب، التفتيش، الصعود','١٥ دقيقة',()=>hall()],
+        ['تكلّم في المطار بالإنجليزية 🎙','5 مواقف يكلّمك فيها الموظف، وتردّ بصوتك','٨ دقائق',()=>talk()],
+        ['الترانزيت','تغيير الطائرة في مطار وسيط دون فقدان الرحلة','١٢ دقيقة'],
+        ['البوابات الذكية والجوازات','الدخول الإلكتروني والختم والجمارك','١٠ دقائق'],
+        ['الوصول: الحقائب والمواصلات','سير الحقائب، الحقيبة المفقودة، التاكسي','١٠ دقائق'],
+        ['الفندق: من الحجز إلى المغادرة','الإيداع، الكفالة، الفاتورة','٨ دقائق'],
+      ]},
+    law:{name:'المحاماة',ico:'⚖️',brand:'محاكي المحاكم',lib:'مكتبتي · المحاماة',world:'law',lobby:'lawlobby',npc:'المحامي',
+      q:'هل سبق أن رفعت دعوى أو حضرت جلسة؟',opts:[['🐣','ولا مرة',1],['🙂','حضرت جلسة مرة',2],['📁','رفعت دعوى بنفسي',3],['⚖️','أتعامل مع المحاكم باستمرار',4]],
+      react:{1:'أول مرة أدخل محكمة… خطوة خطوة.',4:'تمام، خبرة في القاعات.',x:'طيب، عندي فكرة عامة.'},
+      levels:[
+        ['مطالبة مالية: من الفاتورة إلى الحكم','الإنذار، المستندات، رفع الدعوى، الجلسة، الصك','١٢ دقيقة',()=>lawIntro()],
+        ['المرافعة تحت الضغط: جلستان في وقت واحد','قاضيان عن بُعد، صبر ينفد، وأنت وحدك','٥ دقائق',()=>dual()],
+        ['جلسة مليئة بالمفاجآت','دليل مفاجئ، اتصال العميل، مستند ناقص، عرض صلح… وقرارات موقوتة','٧ دقائق',()=>surprise()],
+        ['توقيع عقد تجاري: بنود لا تفوتك','الشرط الجزائي، الاختصاص، التحكيم','١٠ دقائق'],
+        ['التنفيذ: من الحكم إلى التحصيل','محكمة التنفيذ، الإيقاف، الحجز','٨ دقائق'],
+        ['جلسة صلح وتسوية','التفاوض أمام المصلح دون خسارة موقفك','٨ دقائق'],
+      ]},
+  };
+  S.cat='travel'; S.prog={travel:{unlocked:2,done:0,tested:false},law:{unlocked:3,done:0,tested:false}};
+  const cat=()=>CATS[S.cat];
+  function setWorld(k){ stage.dataset.world=CATS[k].world; S.npcLabel=CATS[k].npc; $('#brandTxt').textContent=CATS[k].brand; }
+  function resetHero(pct){ hero.style.transition='none'; moveTo(pct); setTimeout(()=>hero.style.transition='',60); }
+  function begin(fn){ S.pts=0;S.right=0;S.total=0;S.seat=null;S.start=Date.now(); $('#hudPts').textContent='0'; $('#scanner').classList.remove('ok'); $('#stepChip').hidden=false; document.querySelectorAll('#rail span').forEach(x=>x.className=''); fn(); }
+
+  /* ===== STORE ===== */
+  async function store(){
+    stage.dataset.now='store'; stage.dataset.world='travel'; $('#brandTxt').textContent='منصة المحاكاة'; say(); clearDock(); document.querySelectorAll('#rail span').forEach(x=>x.className=''); $('#stepChip').hidden=true;
+    resetHero(-30); await sleep(60); mood('walk'); moveTo(40); await sleep(1000); mood('think');
+    say('hero','وش نتدرّب عليه اليوم؟');
+    clearDock('المتجر · اختر تصنيفاً');
+    const w=document.createElement('div'); w.className='cats';
+    const cards=[
+      ['travel','✈️','السفر','المطار، الترانزيت، الجوازات، الفندق',['٥ مستويات','مجاني'],''],
+      ['law','⚖️','المحاماة','الدعاوى، المرافعة، الجلسات، التنفيذ',['٥ مستويات','جديد'],'<span class="new">جديد ✨</span>'],
+      [null,'💼','الوظائف','المقابلة الأولى، الموارد البشرية، أول يوم عمل',['قريباً'],'<span class="soonTag">قريباً</span>'],
+      [null,'🎓','التعليم','التسجيل الجامعي، اختيار التخصص',['قريباً'],'<span class="soonTag">قريباً</span>'],
+    ];
+    cards.forEach(([k,ico,t,d,meta,badge],i)=>{
+      const b=document.createElement('button'); b.className='cat '+(k||'soon'); b.style.animationDelay=(i*.07)+'s'; b.disabled=!k;
+      b.innerHTML=`${badge}<span class="ico">${ico}</span><h3>${t}</h3><small>${d}</small><div class="meta">${meta.map(m=>`<span>${m}</span>`).join('')}</div>`;
+      if(k) b.addEventListener('click',()=>{ S.cat=k; setWorld(k); mood('happy',900); S.prog[k].tested?library():placement(); });
+      w.appendChild(b); });
+    dock.appendChild(w);
+    dock.insertAdjacentHTML('beforeend','<p class="note">كل تصنيف يبدأ باختبار قصير يحدد المستويات المفتوحة لك.</p>');
+  }
+
+  /* ===== PLACEMENT ===== */
+  async function placement(){
+    const c=cat(); stage.dataset.now=c.lobby; say(); clearDock(); $('#stepChip').hidden=true;
+    resetHero(-30); await sleep(60); mood('walk'); moveTo(40); await sleep(1000); mood('think');
+    say('hero','قبل ما ندخل… سؤال سريع يحدد من وين نبدأ.');
+    clearDock(c.q);
+    const w=document.createElement('div'); w.className='scale4';
+    c.opts.forEach(([em,t,u])=>{
+      const b=document.createElement('button'); b.className='ch'; b.innerHTML=`<span class="em">${em}</span><span>${t}</span>`;
+      b.addEventListener('click',()=>{ const P=S.prog[S.cat]; P.unlocked=Math.max(P.unlocked,u); P.tested=true; mood('happy',1100); say('hero',c.react[u]||c.react.x); setTimeout(library,1200); });
+      w.appendChild(b); });
+    dock.appendChild(w);
+  }
+
+  /* ===== LIBRARY ===== */
+  function library(){
+    const c=cat(), P=S.prog[S.cat]; stage.dataset.now=c.lobby; mood('idle'); $('#stepChip').hidden=true; resetHero(40);
+    const msgs={1:'فتحنا لك المستوى الأول، والباقي يُفتح بالإنجاز.',2:'فتحنا لك مستويين. ابدأ بأيهما شئت.',3:'فتحنا لك ثلاثة مستويات. ابدأ بأيها شئت.',4:'معظم المستويات مفتوحة، والأخير بالإنجاز.'};
+    say('hero',msgs[Math.min(P.unlocked,4)]);
+    clearDock();
+    dock.insertAdjacentHTML('beforeend',`<div class="libhead"><div class="prompt">${c.lib}</div><button class="back" id="toStore">← المتجر</button></div><div class="prog"><i style="width:${P.done*20}%"></i></div>`);
+    $('#toStore').addEventListener('click',store);
+    const w=document.createElement('div'); w.className='levels';
+    c.levels.forEach((l,i)=>{
+      const st=i<P.done?'done':i<P.unlocked?'open':'locked';
+      const b=document.createElement('button'); b.className='lvl '+st; b.style.animationDelay=(i*.07)+'s'; b.disabled=st==='locked';
+      b.innerHTML=`<span class="n">${st==='locked'?'🔒':st==='done'?'✓':i+1}</span><span class="t"><h3>${l[0]}</h3><small>${l[1]}</small></span><span class="tag">${st==='locked'?'مقفل':st==='done'?'مكتمل':'ابدأ · '+l[2]}</span>`;
+      if(st!=='locked') b.addEventListener('click',()=>{ S.level=i; if(l[3]) begin(l[3]); else { say('hero','هذا المستوى قيد البناء في النموذج التجريبي.'); } });
+      w.appendChild(b); });
+    dock.appendChild(w);
+    dock.insertAdjacentHTML('beforeend','<p class="note">المستويات الرمادية 🔒 تُفتح تلقائياً بعد اجتياز ما قبلها.</p>');
+  }
+
+  /* ===== 1. HALL ===== */
+  async function hall(){
+    step(0); stage.dataset.now='hall'; say(); clearDock();
+    hero.style.transition='none'; moveTo(-30); await sleep(50); hero.style.transition=''; mood('walk'); moveTo(38);
+    await sleep(1000); mood('think');
+    say('hero','وصلت المطار ومعي حقيبة كبيرة… وين أروح أول؟');
+    clearDock('إلى أين تذهب أولاً؟');
+    choices([
+      {em:'🚪',t:'إلى بوابة الصعود مباشرة',ok:false},
+      {em:'🧳',t:'إلى كاونتر شركة الطيران لتسليم الحقيبة',ok:true},
+      {em:'🛂',t:'إلى التفتيش الأمني',ok:false},
+    ],(c)=>{
+      mark(c.ok);
+      if(c.ok){ addPts(100); mood('happy',1300); say('hero','أكيد، الحقيبة لازم تتسلّم أول.'); fb('good','حتى مع التذكرة الإلكترونية، الحقيبة المشحونة تُسلَّم في الكاونتر أو جهاز الإيداع الذاتي.',100); }
+      else { addPts(-20); mood('sad',900); say('hero','أوبس… ما يسمحون لي أعدّي بحقيبة كبيرة.'); fb('bad','لا التفتيش ولا البوابة يقبلان حقيبة كبيرة. ابدأ من كاونتر شركة الطيران.',-20); }
+      nextBtn('امشِ إلى الكاونتر ←',counter);
+    });
+  }
+
+  /* ===== 2. COUNTER: seat ===== */
+  async function counter(){
+    step(1); stage.dataset.now='counter'; say(); clearDock();
+    mood('walk'); moveTo(20); await sleep(950); mood('idle');
+    say('npc','أهلاً بك، رحلتك إلى دبي. أي مقعد تفضّل؟');
+    clearDock('اختر مقعدك من خريطة الطائرة');
+    const cab=document.createElement('div'); cab.className='cabin'; cab.innerHTML='<div class="nose"></div>';
+    const taken=new Set(['14B','14C','14D','15A','15E','15F','16C','16D','17B','17D','17E','18A','18C','18F']);
+    for(let r=14;r<=18;r++){ const row=document.createElement('div'); row.className='seatrow'; row.innerHTML=`<span class="rn">${r}</span>`;
+      ['A','B','C','|','D','E','F'].forEach(l=>{ if(l==='|'){row.insertAdjacentHTML('beforeend','<span></span>');return;} const id=r+l, t=taken.has(id); row.insertAdjacentHTML('beforeend',`<button class="seat ${t?'taken':''}" data-id="${id}" ${t?'disabled':''} aria-label="مقعد ${id}">${l}</button>`); });
+      cab.appendChild(row); }
+    dock.appendChild(cab);
+    const info=document.createElement('div'); dock.appendChild(info);
+    const go=nextBtn('تأكيد المقعد',()=>{ mark(true); addPts(60); mood('happy',1200); say('npc',`تم. مقعدك ${S.seat}. الآن ضع الحقيبة على الميزان.`); go.disabled=true; setTimeout(scale,1500); });
+    go.disabled=true; go.classList.remove('pulse');
+    cab.addEventListener('click',e=>{ const s=e.target.closest('.seat'); if(!s||s.disabled) return; cab.querySelectorAll('.sel').forEach(x=>x.classList.remove('sel')); s.classList.add('sel'); S.seat=s.dataset.id; const l=S.seat.slice(-1);
+      const k=(l==='A'||l==='F')?'نافذة: منظر جميل، لكن تستأذن جارَيك للخروج':(l==='C'||l==='D')?'ممر: حرية حركة، وعربة الطعام تمرّ بجانبك':'وسط: الأقل تفضيلاً وغالباً الأسرع توفراً';
+      say('hero',`أبغى ${S.seat} لو سمحتِ.`); info.innerHTML=''; info.appendChild(Object.assign(document.createElement('div'),{className:'fb info',innerHTML:`<span>ⓘ</span><span>${S.seat}، مقعد ${k}.</span>`})); go.disabled=false; go.classList.add('pulse'); });
+  }
+
+  /* ===== 3. SCALE ===== */
+  async function scale(){
+    step(2); stage.dataset.now='scale'; say(); clearDock();
+    const disp=$('#scaleDisp'); disp.textContent='0.0 kg'; disp.classList.remove('over');
+    let w=0; const iv=setInterval(()=>{ w=Math.min(26.4,w+1.7); disp.textContent=w.toFixed(1)+' kg'; if(w>23) disp.classList.add('over'); if(w>=26.4){clearInterval(iv); beep(220,300);} },70);
+    await sleep(1500); mood('think');
+    say('npc','الحقيبة 26.4 كجم، والحد 23. زائدة 3.4 كجم. كيف تحب نتصرف؟');
+    clearDock('حقيبة اليد معك 4 كجم من أصل 7. قرارك؟');
+    choices([
+      {em:'🎒',t:'أنقل الملابس الثقيلة إلى حقيبة اليد (تصبح 7 كجم)',ok:true,pts:100},
+      {em:'💳',t:'أدفع رسوم الوزن الزائد 150 ر.س وأمضي',ok:true,pts:40},
+      {em:'🙏',t:'«يا أختي 3 كيلو بس، سامحينا هالمرة»',ok:false,pts:-30},
+    ],(c,i)=>{
+      mark(c.ok); addPts(c.pts);
+      if(i===0){ disp.textContent='23.0 kg'; disp.classList.remove('over'); mood('happy',1300); say('hero','خلاص، نقلت الجاكيت والأحذية لحقيبة اليد.'); fb('good','الحل الأفضل: صفر تكلفة وبقيت داخل حدّي الحقيبتين. لا تتجاوز 7 كجم لحقيبة اليد.',100); }
+      else if(i===1){ mood('idle'); say('hero','طيب، أدفع الزيادة.'); fb('good','مقبول، لكن 150 ر.س كان يمكن توفيرها بإعادة التوزيع. الرسوم تُدفع قبل طباعة بطاقة الحقيبة.',40); }
+      else { mood('sad',900); say('npc','والله ما بيدي، النظام ما يطبع البطاقة فوق الحد.'); fb('bad','الموظفة لا تملك الصلاحية. ضيّعت وقتاً والصف خلفك يطول.',-30); }
+      nextBtn('إلى التفتيش الأمني ←',security);
+    });
+  }
+
+  /* ===== 4. SECURITY ===== */
+  const ITEMS=[
+    {e:'💻',n:'لابتوب',z:'tray',why:'الأجهزة الكبيرة تُخرج في صينية وحدها لتظهر بوضوح في الأشعة.'},
+    {e:'🧴',n:'شامبو 250 مل',z:'bin',why:'حد السوائل 100 مل للعبوة. 250 مل تُصادَر.'},
+    {e:'🍶',n:'زجاجة ماء',z:'bin',why:'الماء سائل أيضاً. أفرغها وعبّئها بعد التفتيش.'},
+    {e:'⌚',n:'ساعة وحزام ومفاتيح',z:'tray',why:'كل المعادن في الصينية، وإلا أطلقت البوابة الإنذار.'},
+    {e:'🛂',n:'الجواز وتذكرة الصعود',z:'pocket',why:'قد يطلبها الموظف في أي لحظة؛ لا تتركها في صينية تسبقك.'},
+  ];
+  async function security(){
+    step(3); stage.dataset.now='security'; say(); clearDock();
+    mood('walk'); moveTo(66); await sleep(1000); mood('think');
+    say('npc','أفرغ جيوبك وحقيبة اليد. اختر الغرض ثم اضغط مكانه الصحيح فوق.');
+    clearDock('اضغط الغرض، ثم اضغط وجهته في المشهد');
+    const w=document.createElement('div'); w.className='items';
+    ITEMS.forEach((it,i)=>{ const b=document.createElement('button'); b.className='it'; b.dataset.i=i; b.innerHTML=`<span class="e">${it.e}</span>${it.n}`; b.addEventListener('click',()=>{ w.querySelectorAll('.it').forEach(x=>x.classList.remove('armed')); b.classList.add('armed'); S.armed=i; say('hero',`${it.e} ${it.n}… وين أحطه؟`); document.querySelectorAll('.dz').forEach(z=>z.classList.add('armed')); }); w.appendChild(b); });
+    dock.appendChild(w);
+    const log=document.createElement('div'); log.className='choices'; dock.appendChild(log);
+    S.secLeft=ITEMS.length;
+    document.querySelectorAll('.dz').forEach(z=>{ z.onclick=()=>{ if(S.armed===null) return; const it=ITEMS[S.armed], ok=it.z===z.dataset.z; const chip=w.querySelector(`.it[data-i="${S.armed}"]`);
+      const f=document.createElement('div'); f.className='flyer'; f.textContent=it.e; const sr=stage.getBoundingClientRect(), zr=z.getBoundingClientRect(), hr=hero.getBoundingClientRect(); f.style.left=(hr.left-sr.left+hr.width*.3)+'px'; f.style.top=(hr.top-sr.top)+'px'; stage.appendChild(f); requestAnimationFrame(()=>{ f.style.left=(zr.left-sr.left+zr.width*.35)+'px'; f.style.top=(zr.top-sr.top+zr.height*.2)+'px'; f.style.opacity=ok?1:.2; }); setTimeout(()=>f.remove(),700);
+      chip.classList.add('gone'); chip.classList.remove('armed'); document.querySelectorAll('.dz').forEach(x=>x.classList.remove('armed')); S.armed=null;
+      mark(ok); addPts(ok?40:-15); mood(ok?'happy':'sad',800); const d=document.createElement('div'); d.className='fb '+(ok?'good':'bad'); d.innerHTML=`<span>${ok?'✓':'✕'}</span><span><b>${it.n}</b>: ${it.why}</span><span class="pts">${ok?'+40':'-15'}</span>`; log.prepend(d);
+      if(--S.secLeft===0){ say('npc','تمام، اجمع أغراضك. ولا تنسَ اللابتوب في الصينية!'); nextBtn('إلى البوابة B12 ←',gate); } }; });
+  }
+
+  /* ===== 5. GATE ===== */
+  async function gate(){
+    step(4); stage.dataset.now='gate'; say(); clearDock();
+    mood('walk'); moveTo(46); await sleep(1000); mood('idle');
+    S.zone=1; const gs=$('#gateSign'), gn=$('#gateNow'); gs.classList.add('calling'); gn.textContent='ZONE 1';
+    say('npc','بدأ الصعود. نرحّب أولاً بالمجموعة 1.');
+    clearDock('تذكرتك في <b>المجموعة 3</b>. متى تصعد؟');
+    const info=fb('info','المضيف ينادي المجموعات بالترتيب. اصعد عند نداء مجموعتك.');
+    clearInterval(S.zt);
+    S.zt=setInterval(()=>{ if(S.zone<4){ S.zone++; gn.textContent='ZONE '+S.zone; beep(660,120); say('npc',`الآن المجموعة ${S.zone}${S.zone===3?'، تفضّلوا.':'.'}`); if(S.zone===3) mood('think'); } else clearInterval(S.zt); },3400);
+    const b=nextBtn('اصعد الآن',()=>{
+      if(S.zone<3){ mark(false); addPts(-25); mood('sad',900); say('npc',`ما زلنا في المجموعة ${S.zone}، تفضّل بالانتظار.`); const d=fb('bad','تقدّمك قبل دورك يعطّل الصف ولا يكسبك شيئاً؛ مقعدك محجوز باسمك.',-25); setTimeout(()=>d.remove(),2600); }
+      else { clearInterval(S.zt); gs.classList.remove('calling'); const p=S.zone===3?100:60; mark(true); addPts(p); mood('happy',1300); say('npc','تفضّل، جهّز تذكرتك للمسح.'); b.disabled=true; fb('good',S.zone===3?'توقيت ممتاز.':'صعدت في وقت مقبول، وكان يمكنك منذ نداء المجموعة 3.',p); setTimeout(pass,1400); }
+    });
+  }
+
+  /* ===== 6. PASS ===== */
+  async function pass(){
+    stage.dataset.now='pass'; say(); clearDock('تذكرتك جاهزة. قرّبها من القارئ');
+    mood('walk'); moveTo(30); await sleep(900); mood('idle');
+    const pnr='SM'+Math.random().toString(36).slice(2,6).toUpperCase();
+    const p=document.createElement('div'); p.className='pass'; p.innerHTML=`<div class="hdr"><span class="al">طيران المحاكاة</span><span class="fl">SM 214</span></div>
+      <div class="route"><div><div class="code">JED</div><div class="city">جدة</div></div><div class="mid"><span>✈ 2h 45m</span></div><div><div class="code">DXB</div><div class="city">دبي</div></div></div>
+      <div class="grid"><div>المسافر<b>H. SALAMA</b></div><div>المقعد<b>${S.seat||'17A'}</b></div><div>المجموعة<b>3</b></div><div>البوابة<b>B12</b></div><div>التاريخ<b>27 SEP</b></div><div>الصعود<b>14:05</b></div><div>الإقلاع<b>14:35</b></div><div>PNR<b>${pnr}</b></div></div>
+      <div class="tear"></div><div class="qrwrap"><div class="qr" id="qr"></div><div class="qrtxt">رمز حقيقي قابل للمسح بأي كاميرا.<b>${pnr} · ${S.seat||'17A'}</b>كل رحلة تولّد رمزاً فريداً.</div></div>`;
+    dock.appendChild(p);
+    try{ new QRCode(p.querySelector('#qr'),{text:`M1SALAMA/H ${pnr} JEDDXBSM 0214 270Y${(S.seat||'17A').padStart(4,'0')} Z3`,width:94,height:94,correctLevel:QRCode.CorrectLevel.M}); }catch(e){}
+    const sc=$('#scanner');
+    const b=nextBtn('امسح التذكرة',async()=>{ b.disabled=true; b.textContent='جارٍ المسح…'; sc.classList.add('scan'); moveTo(22); await sleep(2100); sc.classList.remove('scan'); sc.classList.add('ok'); beep(880,180); mood('happy',1400); say('npc','مرحباً بك على متن الطائرة.'); b.textContent='تم القبول ✓'; await sleep(1300); done(); });
+  }
+
+  /* =====================================================================
+     LAW · LEVEL 1 : مطالبة مالية من الفاتورة إلى الحكم
+     ===================================================================== */
+  async function lawIntro(){
+    step(0); stage.dataset.now='office'; say(); clearDock(); S.npcLabel='المحامي';
+    resetHero(-30); await sleep(60); mood('walk'); moveTo(16); await sleep(1000); mood('think');
+    say('hero','عميلي ما سدّد فاتورة 85,000 ريال من 90 يوم… وش أسوي؟');
+    clearDock('ما خطوتك الأولى؟');
+    choices([
+      {em:'📞',t:'أتصل عليه وأهدده بالشرطة',ok:false,pts:-20},
+      {em:'📨',t:'أرسل إنذاراً كتابياً بالسداد خلال مدة محددة وأجمع مستنداتي',ok:true,pts:100},
+      {em:'⚖️',t:'أرفع دعوى فوراً بدون أي تواصل',ok:true,pts:40},
+    ],(c,i)=>{
+      mark(c.ok); addPts(c.pts);
+      if(i===0){ mood('sad',900); say('npc','التأخر في السداد نزاع تجاري لا جنائي.'); fb('bad','الشرطة لا تدخل في نزاع مالي بين تاجرين، والتهديد قد يُستخدم ضدك لاحقاً.',-20); }
+      else if(i===1){ mood('happy',1300); say('npc','ممتاز. الإنذار يوثّق المطالبة ويثبت المماطلة.'); fb('good','الإنذار الكتابي يثبت أنك طالبت وأنه ماطل، وكثير من النزاعات تنتهي عنده دون محكمة.',100); }
+      else { mood('idle'); say('npc','حقك، لكن القاضي بيسألك: حاولت الحل ودياً؟'); fb('good','مقبول، لكن الإنذار أولاً يقوّي موقفك ويختصر التقاضي.',40); }
+      nextBtn('رتّب ملف الدعوى ←',lawDocs);
+    });
+  }
+
+  const DOCS=[
+    {e:'📄',n:'العقد الموقّع',z:'file',why:'أساس المطالبة: يثبت الاتفاق والقيمة وشروط السداد.'},
+    {e:'🧾',n:'الفواتير الضريبية',z:'file',why:'تثبت قيمة المطالبة وتاريخ الاستحقاق.'},
+    {e:'📦',n:'محضر استلام موقّع',z:'file',why:'يثبت أنك نفّذت التزامك؛ بدونه سيدّعي أنه لم يستلم.'},
+    {e:'💬',n:'واتساب يقرّ بالدين ويطلب مهلة',z:'file',why:'الإقرار الكتابي دليل قوي، والمراسلات الإلكترونية مقبولة.'},
+    {e:'🗣️',n:'صديقك «سمع» إنه ما بيسدد',z:'no',why:'كلام سماعي عن نيّة لا عن واقعة؛ لا يضيف شيئاً وقد يُضعف الملف.'},
+    {e:'📱',n:'مكالمة ما سجّلتها',z:'no',why:'ما لا يمكن إثباته كأنه لم يحدث. وثّق دائماً كتابياً.'},
+  ];
+  async function lawDocs(){
+    step(1); stage.dataset.now='docs'; say(); clearDock();
+    mood('walk'); moveTo(20); await sleep(800); mood('think');
+    say('npc','وش عندك من مستندات؟ اضغط المستند ثم مكانه.');
+    clearDock('اضغط المستند، ثم اضغط وجهته في المشهد');
+    const w=document.createElement('div'); w.className='items';
+    DOCS.forEach((it,i)=>{ const b=document.createElement('button'); b.className='it'; b.dataset.i=i; b.innerHTML=`<span class="e">${it.e}</span>${it.n}`; b.addEventListener('click',()=>{ w.querySelectorAll('.it').forEach(x=>x.classList.remove('armed')); b.classList.add('armed'); S.armed=i; say('hero',`${it.e} ${it.n}… ينفع؟`); document.querySelectorAll('#lzones .dz').forEach(z=>z.classList.add('armed')); }); w.appendChild(b); });
+    dock.appendChild(w);
+    const log=document.createElement('div'); log.className='choices'; dock.appendChild(log);
+    let left=DOCS.length; S.armed=null;
+    document.querySelectorAll('#lzones .dz').forEach(z=>{ z.onclick=()=>{ if(S.armed===null) return; const it=DOCS[S.armed], ok=it.z===z.dataset.z; const chip=w.querySelector(`.it[data-i="${S.armed}"]`);
+      const f=document.createElement('div'); f.className='flyer'; f.textContent=it.e; const sr=stage.getBoundingClientRect(), zr=z.getBoundingClientRect(), hr=hero.getBoundingClientRect(); f.style.left=(hr.left-sr.left+hr.width*.3)+'px'; f.style.top=(hr.top-sr.top)+'px'; stage.appendChild(f); requestAnimationFrame(()=>{ f.style.left=(zr.left-sr.left+zr.width*.35)+'px'; f.style.top=(zr.top-sr.top+zr.height*.2)+'px'; f.style.opacity=ok?1:.2; }); setTimeout(()=>f.remove(),700);
+      chip.classList.add('gone'); chip.classList.remove('armed'); document.querySelectorAll('#lzones .dz').forEach(x=>x.classList.remove('armed')); S.armed=null;
+      mark(ok); addPts(ok?40:-15); mood(ok?'happy':'sad',800); const d=document.createElement('div'); d.className='fb '+(ok?'good':'bad'); d.innerHTML=`<span>${ok?'✓':'✕'}</span><span><b>${it.n}</b>: ${it.why}</span><span class="pts">${ok?'+40':'-15'}</span>`; log.prepend(d);
+      if(--left===0){ say('npc','ملفك قوي. لو كان معك سند لأمر لرحنا للتنفيذ مباشرة، لكن هذا يكفي لدعوى.'); nextBtn('ارفع الدعوى إلكترونياً ←',lawFile); } }; });
+  }
+
+  const PLEAD=[
+    {t:'بيانات المدعى عليه: السجل التجاري والعنوان',ok:true},
+    {t:'الوقائع مرتبة زمنياً: العقد، التسليم، الإنذار',ok:true},
+    {t:'الطلبات: إلزامه بسداد 85,000 ريال والمصاريف',ok:true},
+    {t:'المرفقات: العقد، الفواتير، المحضر، الإقرار',ok:true},
+    {t:'وصف أخلاقه وسمعته في السوق',ok:false},
+    {t:'طلب سجنه حتى يسدد',ok:false},
+  ];
+  async function lawFile(){
+    step(2); stage.dataset.now='efile'; say(); clearDock();
+    resetHero(-30); await sleep(60); mood('walk'); moveTo(4); await sleep(900); mood('think');
+    const ph=$('#ephone'); ph.innerHTML=`<div class="eh">بوابة القضاء الإلكترونية<small>صحيفة دعوى جديدة</small></div><div class="row dim">١ · المحكمة المختصة</div><div class="row dim">٢ · محتويات الصحيفة</div><div class="row dim">٣ · القيد والإحالة</div><div class="bar"><i id="ebar"></i></div>`;
+    say('npc','الدعوى تُرفع إلكترونياً. أول خطوة: المحكمة المختصة.');
+    clearDock('نزاع بين شركتين على فاتورة بضاعة. أي محكمة؟');
+    choices([
+      {em:'🏛️',t:'المحكمة العامة',ok:false},
+      {em:'⚖️',t:'المحكمة التجارية',ok:true},
+      {em:'🔨',t:'محكمة التنفيذ مباشرة',ok:false},
+    ],(c,i)=>{
+      mark(c.ok); addPts(c.ok?100:-20);
+      if(i===1){ mood('happy',1200); say('npc','صحيح. نزاع بين تاجرين بسبب أعمالهما التجارية.'); fb('good','المنازعات بين التجار بسبب أعمالهم التجارية اختصاص المحكمة التجارية.',100); }
+      else if(i===0){ mood('sad',900); say('npc','العامة تنظر ما لا يدخل في اختصاص غيرها.'); fb('bad','النزاع بين تاجرين بسبب تجارتهما يذهب للمحكمة التجارية.',-20); }
+      else { mood('sad',900); say('npc','التنفيذ يحتاج سنداً تنفيذياً.'); fb('bad','محكمة التنفيذ تنفّذ حكماً نهائياً أو سنداً لأمر أو شيكاً؛ عقد وفاتورة لا يكفيان.',-20); }
+      ph.querySelectorAll('.row')[0].className='row ok'; ph.querySelectorAll('.row')[0].innerHTML='١ · المحكمة التجارية <span>✓</span>'; $('#ebar').style.width='33%';
+      nextBtn('املأ صحيفة الدعوى ←',lawPlead);
+    });
+  }
+  function lawPlead(){
+    clearDock('اختر ما يجب أن تحتويه صحيفة الدعوى'); say('npc','اختر العناصر ثم أرسل.');
+    const ph=$('#ephone'); const rows=ph.querySelectorAll('.row'); rows[1].className='row'; rows[1].innerHTML='٢ · محتويات الصحيفة <span id="ecount">0/4</span>';
+    const w=document.createElement('div'); w.className='chk'; const on=new Set();
+    PLEAD.forEach((it,i)=>{ const b=document.createElement('button'); b.className='ch'; b.innerHTML=`<span class="box"></span><span>${it.t}</span>`; b.addEventListener('click',()=>{ b.classList.toggle('on'); on.has(i)?on.delete(i):on.add(i); b.querySelector('.box').textContent=on.has(i)?'✓':''; $('#ecount').textContent=on.size+'/4'; }); w.appendChild(b); });
+    dock.appendChild(w);
+    nextBtn('إرسال الصحيفة',function(){
+      this.disabled=true; w.querySelectorAll('.ch').forEach((b,i)=>{ b.disabled=true; if(PLEAD[i].ok) b.classList.add('right'); if(!PLEAD[i].ok&&on.has(i)) b.classList.add('wrong'); });
+      let good=0,bad=0; PLEAD.forEach((it,i)=>{ if(it.ok&&on.has(i)) good++; if(!it.ok&&on.has(i)) bad++; });
+      const pts=good*20-bad*20; mark(good===4&&bad===0); addPts(pts);
+      if(good===4&&bad===0){ mood('happy',1300); say('npc','صحيفة نموذجية. قُيّدت الدعوى.'); fb('good','بيانات، وقائع، طلبات، مرفقات. لا عواطف ولا طلبات خارج اختصاص المحكمة.',pts); }
+      else { mood(bad?'sad':'think',900); say('npc',bad?'المحكمة تحكم بالمستندات لا بالسمعة، ولا تسجن أحداً على دين.':'ناقصة، وسيُطلب منك استكمالها.'); fb(bad?'bad':'info',`أصبت ${good} من 4 عناصر${bad?`، وأضفت ${bad} مما لا مكان له في الصحيفة`:''}. المطلوب: بيانات، وقائع، طلبات، مرفقات.`,pts); }
+      rows[1].className='row ok'; rows[1].innerHTML='٢ · محتويات الصحيفة <span>✓</span>'; $('#ebar').style.width='66%';
+      setTimeout(()=>{ rows[2].className='row ok'; rows[2].innerHTML='٣ · قُيّدت برقم 4521/1448 <span>✓</span>'; $('#ebar').style.width='100%'; ph.insertAdjacentHTML('beforeend','<div class="stampd">موعد الجلسة: بعد 21 يوماً · عن بُعد</div>'); beep(660,150); nextBtn('إلى الجلسة ←',lawCourt); },900);
+    });
+  }
+
+  async function lawCourt(){
+    step(3); stage.dataset.now='court'; say(); clearDock(); S.npcLabel='القاضي'; $('#defendant').classList.remove('talk'); $('#judge').classList.remove('hit');
+    resetHero(-30); await sleep(60); mood('walk'); moveTo(8); await sleep(1000); mood('idle');
+    say('npc','بسم الله. الجلسة الثالثة، الدعوى 4521.');
+    clearDock('دخل القاضي القاعة. ماذا تفعل؟');
+    choices([
+      {em:'🧍',t:'أقف احتراماً وأنتظر الإذن بالجلوس',ok:true},
+      {em:'🪑',t:'أبقى جالساً وأكمل على جوالي',ok:false},
+      {em:'🤝',t:'أتقدّم لأسلّم عليه وأشرح قضيتي',ok:false},
+    ],(c,i)=>{
+      mark(c.ok); addPts(c.ok?60:-30);
+      if(i===0){ mood('happy',1000); fb('good','الانطباع الأول يُحسب. الجوال مغلق، والوقوف عند دخول القاضي.',60); }
+      else if(i===1){ mood('sad',900); say('npc','يا أستاذ، الجوال!'); fb('bad','القاضي يلاحظ كل شيء، وتنبيهه لك يبدأ الجلسة ضدك.',-30); }
+      else { mood('sad',900); say('npc','تفضّل مكانك، الكلام بالدور.'); fb('bad','لا حديث مع القاضي خارج الإجراء؛ هو يسأل وأنت تجيب.',-30); }
+      nextBtn('تبدأ المرافعة ←',lawCourt2);
+    });
+  }
+  async function lawCourt2(){
+    say(); clearDock(); $('#defendant').classList.add('talk');
+    say('npc','البضاعة كانت معيبة، ولهذا ما سددت!','المدعى عليه');
+    await sleep(400);
+    clearDock('المدعى عليه يتكلم… ماذا تفعل؟');
+    choices([
+      {em:'✋',t:'أقاطعه: «كذب! هذا غير صحيح»',ok:false,pts:-30},
+      {em:'📝',t:'أدوّن ما قاله وأنتظر إذن القاضي للرد',ok:true,pts:100},
+      {em:'😶',t:'أسكت حتى لو سألني القاضي',ok:false,pts:-10},
+    ],(c,i)=>{
+      mark(c.ok); addPts(c.pts); $('#defendant').classList.remove('talk');
+      if(i===1){ mood('happy',1000); fb('good','القاضي يمنح كل طرف دوره. ما تدوّنه الآن هو ردّك بعد قليل.',100); }
+      else if(i===0){ mood('sad',900); say('npc','يا أستاذ! الكلام بالدور.','القاضي'); fb('bad','المقاطعة تُخصم من هيبتك ولا تضيف للدليل.',-30); }
+      else { mood('think'); fb('bad','الصمت عند سؤال القاضي يُفهم كعدم اعتراض.',-10); }
+      nextBtn('القاضي يسألك ←',lawCourt3);
+    });
+  }
+  async function lawCourt3(){
+    say(); clearDock();
+    say('npc','المدعي، ما ردّك على دفع العيب؟ وهل لديك ما يثبت الاستلام؟','القاضي');
+    mood('think');
+    clearDock('ردّك على القاضي؟');
+    choices([
+      {em:'📦',t:'محضر الاستلام موقّع دون تحفظ، وهذه رسالته يقرّ بالدين ويطلب مهلة',ok:true,pts:100},
+      {em:'🧾',t:'«الفاتورة موجودة يا فضيلة الشيخ وهذا يكفي»',ok:true,pts:30},
+      {em:'🗣️',t:'«اسأل أي أحد في السوق عن سمعته»',ok:false,pts:-30},
+      {em:'🎙️',t:'أجيب بصوتي (تسجيل حتى دقيقة)',ok:true,pts:0,voice:true},
+    ],(c,i)=>{
+      if(c.voice){ say('npc','تفضّل بالردّ.','القاضي'); voiceAnswer([
+          {t:'محضر الاستلام',alts:['محضر','الاستلام','استلام']},{t:'دون تحفظ / لم يعترض',alts:['تحفظ','يعترض','اعتراض','ما اعترض']},{t:'إقراره الكتابي بالدين',alts:['إقرار','أقر','اقر','واتساب','رسالة']},{t:'طلبه مهلة للسداد',alts:['مهلة','السداد','سداد']}
+        ],(ok)=>{ if(ok) say('npc','أُثبت في المحضر. رُفعت الجلسة للنطق بالحكم.','القاضي'); $('#judge').classList.add('hit'); beep(330,120); nextBtn('النطق بالحكم ←',lawVerdict); }); return; }
+      mark(c.ok); addPts(c.pts);
+      if(i===0){ mood('happy',1300); say('npc','أُثبت في المحضر. رُفعت الجلسة للنطق بالحكم.','القاضي'); fb('good','ردّ بالدليل لا بالعاطفة: استلام دون تحفظ + إقرار كتابي يهدمان دفع العيب.',100); }
+      else if(i===1){ mood('idle'); say('npc','الفاتورة تثبت المبلغ لا سلامة البضاعة.','القاضي'); fb('good','مقبول جزئياً. الردّ على دفع العيب يحتاج محضر الاستلام.',30); }
+      else { mood('sad',900); say('npc','المحكمة تحكم بالبيّنة يا أستاذ.','القاضي'); fb('bad','السمعة ليست دليلاً. لديك مستندات، استخدمها.',-30); }
+      $('#judge').classList.add('hit'); beep(330,120); setTimeout(()=>beep(330,120),450);
+      nextBtn('النطق بالحكم ←',lawVerdict);
+    });
+  }
+
+  /* ===== VOICE ANSWER ===== */
+  const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  function voiceAnswer(keywords,onDone,opts){
+    opts=opts||{}; const lang=opts.lang||'ar-SA', maxSec=opts.max||60, isEn=lang.startsWith('en');
+    const box=document.createElement('div'); box.className='rec'; dock.appendChild(box);
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    const canRec=!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia);
+    box.innerHTML=`<div class="head"><span class="dot"></span><span class="tm" id="rtm">00:00</span><div class="wave" id="rwave">${'<i></i>'.repeat(18)}</div></div>
+      <div class="tr" id="rtr" ${isEn?'dir="ltr" style="text-align:left"':''}><small>${SR?(isEn?'Your words will appear here as you speak':'سيظهر نصّ كلامك هنا أثناء التسجيل'):'متصفحك لا يدعم التحويل إلى نص؛ سنسجّل صوتك وتقيّم نفسك'}</small></div>`;
+    if(!canRec){ fb('bad','هذا المتصفح لا يتيح الميكروفون للصفحة.'); openOutside(); return onDone(false,true); }
+    const b=nextBtn('🎙 ابدأ التسجيل',start);
+    let rec,chunks=[],t0,iv,rs,transcript='',finalTxt='',ctx,an,raf,recording=false,stopped=false;
+    function openOutside(){ const o=document.createElement('button'); o.className='btn ghost block'; o.textContent='↗ افتح الصفحة في تبويب مستقل (خارج الإطار)'; o.addEventListener('click',()=>window.open(location.href,'_blank')); dock.appendChild(o); }
+    function startSR(){ if(!SR) return; try{ rs=new SR(); rs.lang=lang; rs.continuous=!IOS; rs.interimResults=true; rs.maxAlternatives=1;
+        rs.onresult=e=>{ let fin='',tmp=''; for(let i=e.resultIndex;i<e.results.length;i++){ const r=e.results[i]; if(r.isFinal) fin+=r[0].transcript+' '; else tmp+=r[0].transcript; } if(fin) finalTxt+=fin; transcript=(finalTxt+tmp).trim(); $('#rtr').textContent=transcript||'…'; };
+        rs.onerror=e=>{ if(e.error==='not-allowed'||e.error==='service-not-allowed') $('#rtr').innerHTML='<small>التحويل إلى نص غير متاح هنا؛ سنعتمد على تسجيلك وتقييمك.</small>'; };
+        rs.onend=()=>{ if(recording&&!stopped){ try{ rs.start(); }catch(e){} } };
+        rs.start(); }catch(e){} }
+    async function start(){
+      let st=null;
+      try{ st=await navigator.mediaDevices.getUserMedia({audio:true}); }
+      catch(e){ const why=e&&e.name; const framed=window.top!==window; let pol=null; try{ pol=document.permissionsPolicy?document.permissionsPolicy.allowsFeature('microphone'):(document.featurePolicy?document.featurePolicy.allowsFeature('microphone'):null); }catch(_){}
+        const msg=(why==='NotAllowedError'||why==='SecurityError')?(framed&&pol===false?'الميكروفون محجوب لأن الصفحة تعمل داخل إطار تطبيق Claude (سياسة المضيف)، وليس بسبب إعدادات جوالك.':framed?'الصفحة داخل إطار، والإطار لم يمنح إذن الميكروفون.':'رفض المتصفح إذن الميكروفون. اسمح به من إعدادات الموقع ثم أعد المحاولة.'):'تعذّر تشغيل الميكروفون ('+why+').';
+        if(!box.dataset.failed){ box.dataset.failed='1'; fb('bad',msg); openOutside(); } b.disabled=true; b.textContent='الميكروفون غير متاح هنا'; return; }
+      recording=true; t0=Date.now(); box.classList.add('on');
+      try{ rec=new MediaRecorder(st); chunks=[]; rec.ondataavailable=e=>chunks.push(e.data); rec.start(); }catch(e){ rec=null; }
+      iv=setInterval(()=>{ const s=Math.floor((Date.now()-t0)/1000); $('#rtm').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); if(s>=maxSec) stop(); },250);
+      try{ ctx=new (window.AudioContext||window.webkitAudioContext)(); const src=ctx.createMediaStreamSource(st); an=ctx.createAnalyser(); an.fftSize=64; src.connect(an); const data=new Uint8Array(an.frequencyBinCount); const bars=[...$('#rwave').children]; (function loop(){ an.getByteFrequencyData(data); bars.forEach((el,i)=>el.style.height=(6+data[i]/255*22)+'px'); raf=requestAnimationFrame(loop); })(); }catch(e){}
+      startSR();
+      b.textContent='⏹ إيقاف التسجيل'; b.removeEventListener('click',start); b.addEventListener('click',stop);
+      if(opts.onStart) opts.onStart();
+      function stop(){ if(stopped) return; stopped=true; recording=false; clearInterval(iv); cancelAnimationFrame(raf); box.classList.remove('on'); try{ rs&&rs.stop(); }catch(e){}
+        const finish=()=>{ st.getTracks().forEach(t=>t.stop()); try{ctx&&ctx.close();}catch(e){} if(chunks.length){ const url=URL.createObjectURL(new Blob(chunks,{type:(rec&&rec.mimeType)||'audio/webm'})); const au=document.createElement('audio'); au.controls=true; au.src=url; box.appendChild(au); } b.remove(); setTimeout(evaluate,600); };
+        if(rec&&rec.state!=='inactive'){ rec.onstop=finish; rec.stop(); } else finish(); }
+      start.stop=stop;
+    }
+    function evaluate(){
+      const txt=transcript.trim(), low=txt.toLowerCase();
+      const kw=document.createElement('div'); kw.className='kw'; let hits=0;
+      if(txt){ keywords.forEach(k=>{ const h=k.alts.some(a=>low.includes(a.toLowerCase())); if(h) hits++; kw.insertAdjacentHTML('beforeend',`<span class="${h?'hit':'miss'}">${h?'✓':'✕'} ${k.t}</span>`); }); box.appendChild(kw);
+        const need=opts.need||2, words=txt.split(/\s+/).length, long=words>(opts.maxWords||45);
+        const pts=hits*35-(long?15:0); mark(hits>=need); addPts(pts); mood(hits>=need?'happy':'sad',1000);
+        fb(hits>=need?'good':'bad',`ذكرت ${hits} من ${keywords.length} عناصر الردّ`+`${long?'، وأطلت أكثر من اللازم':''}. ${hits>=need?(opts.okMsg||'ممتاز.'):(opts.badMsg||'ناقص.')}`,pts); onDone(hits>=need); }
+      else { box.insertAdjacentHTML('beforeend','<div class="prompt" style="font-size:.95rem">اسمع تسجيلك، ثم قيّم نفسك بصدق: هل ذكرت…</div>'); const on=new Set(); const w=document.createElement('div'); w.className='chk';
+        keywords.forEach((k,i)=>{ const c=document.createElement('button'); c.className='ch'; c.innerHTML=`<span class="box"></span><span>${k.t}</span>`; c.addEventListener('click',()=>{ c.classList.toggle('on'); on.has(i)?on.delete(i):on.add(i); c.querySelector('.box').textContent=on.has(i)?'✓':''; }); w.appendChild(c); }); box.appendChild(w);
+        const ok=nextBtn('اعتمد التقييم',()=>{ ok.disabled=true; const need=opts.need||2, pts=on.size*35; mark(on.size>=need); addPts(pts); mood(on.size>=need?'happy':'sad',1000); fb(on.size>=need?'good':'info',`ذكرت ${on.size} من ${keywords.length}. في التطبيق الحقيقي سيقيّم الذكاء الاصطناعي ردّك تلقائياً.`,pts); onDone(on.size>=need); }); }
+    }
+  }
+  async function lawVerdict(){
+    step(4); stage.dataset.now='verdict'; say(); clearDock('صدر الحكم. هذا صكّك'); $('#judge').classList.remove('hit');
+    mood('happy',1500); beep(880,200);
+    const no='4521/1448', ref='MOJ-SIM-'+Math.random().toString(36).slice(2,8).toUpperCase();
+    const d=document.createElement('div'); d.className='deed'; d.innerHTML=`<div class="dh"><span>صك حكم · المحكمة التجارية</span><small>${no}</small></div>
+      <div class="kv"><div><span>المدعي</span><b>شركة المحاكاة للتجارة</b></div><div><span>المدعى عليه</span><b>مؤسسة الأفق التجارية</b></div><div><span>الدائرة</span><b>التجارية الثالثة</b></div><div><span>التاريخ</span><b>27 SEP 2026</b></div></div>
+      <div class="txt">حكمت المحكمة بإلزام المدعى عليها بأن تدفع للمدعية مبلغ <b>85,000 ريال</b> قيمة الفاتورة رقم 1042، ورفض ما عدا ذلك. حكم ابتدائي قابل للاستئناف خلال <b>30 يوماً</b> من تاريخ استلامه.</div>
+      <div class="qrrow"><div class="qr" id="dqr"></div><p>رمز تحقق حقيقي قابل للمسح.<b>${ref}</b>كل صك يولّد رمزاً فريداً.</p></div>`;
+    dock.appendChild(d);
+    try{ new QRCode(d.querySelector('#dqr'),{text:`${ref}|CASE ${no}|85000 SAR|PLAINTIFF WINS|APPEAL 30D`,width:88,height:88,correctLevel:QRCode.CorrectLevel.M}); }catch(e){}
+    await sleep(1200);
+    say('hero','كسبت! أروح آخذ فلوسي؟');
+    dock.insertAdjacentHTML('beforeend','<div class="prompt">صدر الحكم لصالحك. الخطوة التالية؟</div>');
+    choices([
+      {em:'⏳',t:'أنتظر انقضاء مهلة الاستئناف ثم أطلب التنفيذ إن لم يسدد',ok:true,pts:100},
+      {em:'🏢',t:'أروح مكتبه وآخذ المبلغ بنفسي بالحكم',ok:false,pts:-30},
+      {em:'✅',t:'خلاص، انتهت القضية',ok:false,pts:-20},
+    ],(c,i)=>{
+      mark(c.ok); addPts(c.pts);
+      if(i===0){ mood('happy',1200); fb('good','الحكم الابتدائي يصير نهائياً بانقضاء مهلة الاستئناف، وبعدها يُقدَّم لمحكمة التنفيذ.',100); }
+      else if(i===1){ mood('sad',900); fb('bad','الحكم يُنفَّذ عبر محكمة التنفيذ لا بيدك؛ التصرف الذاتي قد يضعك أنت في موقف المخالف.',-30); }
+      else { mood('sad',900); fb('bad','الحكم ورقة ما لم يُنفَّذ؛ قد يستأنف وقد يماطل. تابع.',-20); }
+      nextBtn('اختم المستوى ←',()=>{ $('#lawBanner').innerHTML='حُكم لصالحك ⚖️<small>85,000 ريال · والتنفيذ بعد 30 يوماً</small>'; done({now:'lawdone',title:'اكتمل المستوى: مطالبة مالية',tips:['أداء محامٍ متمرّس: إنذار، مستندات، اختصاص صحيح، ردّ بالدليل.','جيد. أكثر ما يُضعف الدعاوى: مستندات ناقصة والانفعال في القاعة.','لا بأس. أعد المستوى وركّز على: الدليل قبل الكلام.']}); });
+    });
+  }
+
+  /* =====================================================================
+     LAW · LEVEL 2 : جلستان في وقت واحد (نسخة مبسّطة: 4 مواقف)
+     ===================================================================== */
+  const H={
+    a:{name:'القاضي أ · المحكمة التجارية',short:'التجارية',cs:'دعوى توريد 85,000 ر.س'},
+    b:{name:'القاضي ب · المحكمة العمالية',short:'العمالية',cs:'دعوى فصل تعسفي'},
+  };
+  const JUDGE_SVG='<svg viewBox="0 0 80 70"><rect x="14" y="48" width="52" height="30" rx="10" fill="#3B2A22"/><rect x="30" y="48" width="20" height="30" fill="#F7F5EE"/><circle cx="40" cy="30" r="17" fill="#D9A47E"/><path d="M17 28 Q40 2 63 28 L65 44 Q40 38 15 44Z" fill="#F7F5EE"/><rect x="19" y="17" width="42" height="6" rx="3" fill="#111"/><circle cx="34" cy="32" r="2" fill="#222"/><circle cx="46" cy="32" r="2" fill="#222"/><path d="M34 41 Q40 39 46 41" stroke="#6B3A3A" stroke-width="2" fill="none"/></svg>';
+  let D=null;
+  function tile(k){ return $('#tile-'+k); }
+  function dualUI(active, note){
+    D.active=active;
+    ['a','b'].forEach(k=>{ const T=tile(k), h=D[k]; T.classList.toggle('live',k===active&&h.st==='live'); T.classList.toggle('lost',h.st==='lost'); T.classList.toggle('won',h.st==='won');
+      T.querySelector('.mic').textContent=k===active&&h.st==='live'?'● LIVE':h.st==='lost'?'ENDED':h.st==='won'?'DONE':'MUTED';
+      const P=T.querySelector('.pat'); P.querySelector('i').style.width=h.pat+'%'; P.className='pat'+(h.pat<35?' low':h.pat<65?' mid':'');
+      T.querySelector('.face').textContent=h.st==='lost'?'🚪':h.st==='won'?'✅':h.pat>70?'🙂':h.pat>40?'😐':'😠';
+      const n=T.querySelector('.note2'); n.textContent=(note&&note[k])||''; n.classList.toggle('bad',!!(note&&note.bad===k)); });
+  }
+  function pat(k,d){ D[k].pat=Math.max(0,Math.min(100,D[k].pat+d)); if(D[k].pat<=0){ D[k].st='lost'; beep(160,400); } }
+  function dual(){
+    stage.dataset.now='dual'; say(); clearDock(); $('#stepChip').hidden=false; S.npcLabel='القاضي';
+    D={active:'a',caught:0,honest:0,memo:false,a:{pat:70,st:'live'},b:{pat:70,st:'live'}};
+    const lp=$('#laptop'); lp.innerHTML=['a','b'].map(k=>`<div class="tile" id="tile-${k}"><div class="vid">${JUDGE_SVG}<span class="face">😐</span><span class="mic">MUTED</span></div><div class="nm">${H[k].name}<small>${H[k].cs}</small><div class="note2"></div></div><div class="pat"><i></i></div></div>`).join('');
+    dualUI('a',{b:'⏳ تبدأ بعد لحظات'}); step(0);
+    clearDock('الساعة 10:00 · جلستان عن بُعد في وقت واحد');
+    fb('info','النافذة الكبيرة = القاضي الذي يسمعك الآن. الصغيرة = الآخر ينتظر… وصبره محدود. 4 مواقف، و15 ثانية لكل قرار.');
+    nextBtn('ابدأ · الميكروفون مع القاضي أ',()=>dualM1());
+  }
+  function dualM1(){
+    step(0); dualUI('a',{b:'🔔 بدأت جلسة العمالية الآن',bad:'b'}); beep(520,120);
+    clearDock('القاضي أ: «ما ردّكم على دفع العيب؟» — والقاضي ب بدأ جلسته الآن');
+    timedChoices(15,[
+      {em:'🗣️',t:'أردّ باختصار: «محضر الاستلام دون تحفظ، مرفق 3» ثم أنتقل',ok:true,pts:100,fb:'ردّ من جملة واحدة يغلق النقطة ويحرّرك للجلسة الأخرى.'},
+      {em:'📜',t:'أشرح تسلسل التسليم كاملاً (5 دقائق)',ok:false,pts:-20,fb:'خمس دقائق هنا = القاضي ب يفتح الجلسة ولا يجد وكيل المدعى عليه.'},
+      {em:'⏩',t:'أنتقل فوراً إلى ب وأترك القاضي أ بلا ردّ',ok:false,pts:-40,fb:'تركت قاضياً في منتصف سؤاله. سيسأل: «الأستاذ؟ نسمعك؟» ويغضب.'},
+    ],(c,i,to)=>{
+      if(to){ timeoutFb(); pat('a',-30); pat('b',-15); }
+      else { mark(c.ok); addPts(c.pts); mood(c.ok?'happy':'sad',900); fb(c.ok?'good':'bad',c.fb,c.pts); if(i===0){ pat('a',+15); pat('b',-10); } if(i===1){ pat('a',+10); pat('b',-45); } if(i===2){ pat('a',-40); } }
+      dualUI('a'); nextBtn('انتقل إلى القاضي ب ⇄',dualM2);
+    });
+  }
+  function dualM2(){
+    step(1); dualUI('b',{a:'📣 «الأستاذ؟ هل ما زلت معنا؟»',bad:'a'}); beep(520,120);
+    clearDock('أنت مع القاضي ب: «ما ردّكم على مطالبة العامل؟» — والقاضي أ ينادي عليك');
+    timedChoices(15,[
+      {em:'📄',t:'أردّ على ب: «أستأذنكم بمذكرة مكتوبة خلال 24 ساعة» ثم أعود لـ أ',ok:true,pts:100,fb:'أغلقت الجلسة ب بشكل نظامي دون ارتجال، وحرّرت نفسك للعودة.'},
+      {em:'🎤',t:'أعود لـ أ وأقول: «عذراً، الصوت كان يتقطع عندي»',ok:false,pts:0,fb:''},
+      {em:'😶',t:'أكمل مع ب وأتجاهل نداء أ',ok:false,pts:-40,fb:'تجاهل قاضٍ ينادي عليك مرتين = يرفع الجلسة ويسجّل غيابك.'},
+    ],(c,i,to)=>{
+      if(to){ timeoutFb(); pat('a',-30); pat('b',-20); }
+      else if(i===0){ mark(true); addPts(100); D.memo=true; D.b.st='won'; pat('a',-10); mood('happy',900); fb('good',c.fb,100); }
+      else if(i===1){ const caught=Math.random()<.4; D.caught+=caught?1:0; mark(false); if(caught){ addPts(-40); pat('a',-30); pat('b',-20); mood('sad',900); fb('bad','القاضي أ: «الصوت كان واضحاً جداً يا أستاذ، وأرى ميكروفونك مفتوحاً». انكشفت.',-40); } else { addPts(0); pat('a',+5); pat('b',-25); mood('think'); fb('info','مرّت هذه المرة… لكن القاضي ب ما زال ينتظر ردّك، والكذبة صارت في المحضر.',0); } }
+      else { mark(false); addPts(-40); pat('a',-45); mood('sad',900); fb('bad',c.fb,-40); }
+      dualUI(D.b.st==='won'?'a':'b'); nextBtn(D.a.st==='lost'?'…':'عُد إلى القاضي أ ⇄',dualM3);
+    });
+  }
+  function dualM3(){
+    step(2);
+    if(D.a.st==='lost'){ dualUI('b',{a:'🚪 رُفعت الجلسة وسُجّل غيابك',bad:'a'}); clearDock('القاضي أ رفع الجلسة.'); fb('bad','خسرت جلسة التجارية بالغياب. ما زال بإمكانك إنقاذ العمالية.'); return nextBtn('أكمل مع القاضي ب ←',dualM4); }
+    dualUI('a',D.b.st==='won'?{b:'✅ في انتظار مذكرتك خلال 24 ساعة'}:{b:'⏳ «ننتظر ردّك النهائي خلال دقيقة»',bad:'b'});
+    clearDock('القاضي أ: «لديكم بيّنة على التسليم؟»' + (D.b.st==='won'?'':' — والقاضي ب يمهلك دقيقة'));
+    timedChoices(15,[
+      {em:'🗣️',t:'«نعم، محضر الاستلام مرفق 3، ونكتفي به. أستأذنكم برفع الجلسة»',ok:true,pts:100,fb:'جملة واحدة + طلب واضح. القاضي يحب من يعرف متى يتوقف.'},
+      {em:'🙏',t:'«فضيلتكم، لديّ جلسة متزامنة أُبلغت بها متأخراً. أستأذن دقيقتين ثم أختم»',ok:true,pts:80,fb:'الصدق أمام القاضي يكلّفك قليلاً من صبره ويكسبك ثقته.'},
+      {em:'📜',t:'أشرح كل الوقائع من 2015 حتى اليوم',ok:false,pts:-30,fb:'لا أحد طلب القصة. ضيّعت دقيقة القاضي ب.'},
+    ],(c,i,to)=>{
+      if(to){ timeoutFb(); pat('a',-30); if(D.b.st==='live') pat('b',-30); }
+      else { mark(c.ok); addPts(c.pts); mood(c.ok?'happy':'sad',900); fb(c.ok?'good':'bad',c.fb,c.pts); if(i===0){ pat('a',+20); D.a.st='won'; } if(i===1){ D.honest++; pat('a',-5); D.a.st='won'; } if(i===2){ pat('a',0); if(D.b.st==='live') pat('b',-50); } }
+      dualUI(D.b.st==='live'?'b':'a'); nextBtn('الموقف الأخير ←',dualM4);
+    });
+  }
+  function dualM4(){
+    step(3);
+    if(D.caught){ dualUI('a',{b:D.b.st==='won'?'✅ انتهت':D.b.st==='lost'?'🚪 انتهت بالغياب':'⏳ تنتظر'}); clearDock('القاضي أ ينظر إليك: «هل كنت في جلسة أخرى يا أستاذ؟»');
+      return timedChoices(15,[
+        {em:'🙏',t:'«نعم فضيلتكم، وأعتذر. كان ينبغي أن أطلب التأجيل مسبقاً»',ok:true,pts:60,fb:'الاعتراف أنقذ رخصتك. الخصم من الهيبة أهون من مخالفة مهنية.'},
+        {em:'🤥',t:'«أبداً، كان عطلاً في الإنترنت»',ok:false,pts:-80,fb:'كذبة فوق كذبة، في محضر رسمي. هذا ما يصل إلى لجنة التأديب.'},
+      ],(c,i,to)=>{ if(to){ timeoutFb(); } else { mark(c.ok); addPts(c.pts); fb(c.ok?'good':'bad',c.fb,c.pts); if(i===1) D.caught++; else D.honest++; } nextBtn('النتيجة ←',endDual); });
+    }
+    if(D.b.st==='live'){ dualUI('b',{a:D.a.st==='won'?'✅ انتهت':'🚪 انتهت بالغياب'}); clearDock('القاضي ب: «هل من إضافة قبل رفع الجلسة؟»');
+      return timedChoices(15,[
+        {em:'📄',t:'«لا، ونكتفي بمذكرة مكتوبة خلال 24 ساعة»',ok:true,pts:80,fb:'أنهيتها نظامياً.'},
+        {em:'📜',t:'«نعم، لديّ 6 نقاط…»',ok:false,pts:-20,fb:'القاضي عرض عليك الخروج بسلام ورفضت.'},
+      ],(c,i,to)=>{ if(to){ timeoutFb(); pat('b',-40); } else { mark(c.ok); addPts(c.pts); fb(c.ok?'good':'bad',c.fb,c.pts); if(i===0){ D.b.st='won'; } else pat('b',-15); } dualUI('b'); nextBtn('النتيجة ←',endDual); });
+    }
+    endDual();
+  }
+  function endDual(){
+    ['a','b'].forEach(k=>{ if(D[k].st==='live') D[k].st=D[k].pat>0?'won':'lost'; }); dualUI(D.active);
+    const won=['a','b'].filter(k=>D[k].st==='won').length;
+    const stars=won===2&&!D.caught?3:won===2||(won===1&&!D.caught)?2:won===1?1:0;
+    const extra=[];
+    if(D.caught) extra.push(['bad',`انكشفت ${D.caught} مرة. في الواقع: ادّعاء عطل غير موجود أمام القضاء مخالفة مهنية قد تصل للتأديب.`]);
+    if(D.honest) extra.push(['good','استخدمت الاستئذان الصريح. هذا ما يفعله المحترفون.']);
+    extra.push(['info','الدرس الحقيقي: لا تقبل جلستين متزامنتين أصلاً؛ اطلب التأجيل مسبقاً عبر المنصة أو أنِب زميلاً.']);
+    $('#lawBanner').innerHTML=(won===2?'أنقذت الجلستين ⚖️':won===1?'أنقذت جلسة واحدة':'خسرت الجلستين')+`<small>${D.caught?'مع انكشاف':'دون انكشاف'} · ${D.honest?'واستئذان صريح':'وبلا استئذان'}</small>`;
+    done({now:'lawdone',title:'انتهى الضغط',stars,extra,tips:['تنقّل مثالي: ردود قصيرة، مذكرة مكتوبة، وصدق مع القاضي.','نجوت، لكن على حساب جلسة أو بمخاطرة.','خسرت جلسة على الأقل. القاعدة: جملة واحدة ثم انتقل، ومذكرة مكتوبة تغلق ما لا وقت له.']});
+  }
+
+  /* =====================================================================
+     LAW · LEVEL 3 : جلسة مليئة بالمفاجآت (قرارات موقوتة + ثقة القاضي)
+     ===================================================================== */
+  let T={trust:60,timer:null,timeouts:0};
+  function setTrust(d){ T.trust=Math.max(0,Math.min(100,T.trust+d)); $('#trustV').textContent=T.trust; $('#trustBar').style.width=T.trust+'%'; const t=$('#trust'); t.className='trust'+(T.trust>=75?' hi':T.trust<35?' lo':''); }
+  function alertCard(ic,title,txt,ms){ const a=$('#alertCard'); a.hidden=false; a.innerHTML=`<span class="ic">${ic}</span><b>${title}</b>${txt||''}`; if(ms) setTimeout(()=>a.hidden=true,ms); }
+  function timedChoices(secs,list,onPick){
+    const cd=document.createElement('div'); cd.className='countdown'; cd.innerHTML=`<span>⏱ <b id="cdv">${secs}</b> ث</span><div class="cb"><i id="cdb"></i></div>`; dock.appendChild(cd);
+    let left=secs; const w=choices(list,(c,i)=>{ clearInterval(T.timer); cd.remove(); onPick(c,i,false); });
+    clearInterval(T.timer);
+    T.timer=setInterval(()=>{ left-=.25; $('#cdv').textContent=Math.ceil(left); $('#cdb').style.width=(left/secs*100)+'%'; if(left<=4) cd.classList.add('low'); if(left<=3.1&&left>2.9) beep(440,80);
+      if(left<=0){ clearInterval(T.timer); cd.remove(); w.querySelectorAll('.ch').forEach((x,k)=>{x.disabled=true; if(list[k].ok) x.classList.add('right');}); T.timeouts++; onPick(null,-1,true); } },250);
+  }
+  function timeoutFb(){ mark(false); addPts(-30); setTrust(-15); mood('sad',900); say('npc','لا وقت للتردد في القاعة. ننتقل.','القاضي'); fb('bad','انتهى الوقت ولم تقرر. الصمت في القاعة قرار… وغالباً الأسوأ.',-30); }
+  const SURPRISES=[
+    {ic:'📄',title:'دليل مفاجئ',setup:()=>{ const f=document.createElement('div'); f.className='flydoc'; f.textContent='📄'; f.style.position='absolute'; stage.appendChild(f); setTimeout(()=>f.remove(),1500); $('#defendant').classList.add('talk'); say('npc','هذه رسالة من المدعي نفسه يقرّ فيها أن البضاعة معيبة!','المدعى عليه'); },
+     q:'الخصم قدّم مستنداً لم تره من قبل. خلال 12 ثانية:',
+     opts:[{em:'⏸️',t:'«أستأذن المحكمة بمهلة للاطلاع عليه والرد كتابياً»',ok:true,pts:100,tr:+10,fb:'لا تردّ على ورقة لم تقرأها. المهلة حقك، والرد المكتوب أدقّ.'},
+           {em:'🗣️',t:'أردّ فوراً: «مزوّر! موكلي ما كتب هذا»',ok:false,pts:-40,tr:-15,fb:'اتهام بالتزوير بلا دليل قد ينقلب دعوى ضدك. اقرأ أولاً.'},
+           {em:'🙅',t:'«أعترض على تقديمه الآن، وأطلب إثبات تاريخ تقديمه في المحضر»',ok:true,pts:60,tr:+5,fb:'مقبول: تثبيت التوقيت مهم، لكن الأقوى الجمع بينه وبين طلب المهلة.'}]},
+    {ic:'📱',title:'جوالك يرن',setup:()=>{ beep(700,120); setTimeout(()=>beep(700,120),300); setTimeout(()=>beep(700,120),600); alertCard('📱','مكالمة واردة','الموكل · محاولة 3',6000); say('npc','ما هذا الصوت يا أستاذ؟','القاضي'); },
+     q:'الموكل يتصل للمرة الثالثة والقاضي يحدّق فيك:',
+     opts:[{em:'🔇',t:'أرفض المكالمة وأكتم الجوال وأعتذر بكلمة واحدة',ok:true,pts:80,tr:+5,fb:'اعتذار قصير وإسكات فوري. القاضي يقدّر من لا يبرّر كثيراً.'},
+           {em:'🤫',t:'أردّ بهمس: «أنا في الجلسة، أكلمك بعدين»',ok:false,pts:-40,tr:-20,fb:'أي حديث هاتفي داخل القاعة إهانة للمحكمة، حتى همساً.'},
+           {em:'🚪',t:'«أستأذن دقيقة، اتصال طارئ من موكلي»',ok:false,pts:-25,tr:-10,fb:'موكلك ليس أهم من القاضي في هذه اللحظة. المكالمة تنتظر، الجلسة لا.'}]},
+    {ic:'🗂️',title:'مستند ناقص',setup:()=>{ say('npc','أين أصل العقد؟ في الملف صورة فقط.','القاضي'); mood('think'); },
+     q:'الأصل في مكتبك ولم تُرفقه. ردّك؟',
+     opts:[{em:'📎',t:'«الأصل لدى موكلي، أطلب إثبات ذلك وتقديمه عبر المنصة خلال يومين»',ok:true,pts:100,tr:+10,fb:'صدق + حل + موعد. هذا ما يريده القاضي.'},
+           {em:'🤥',t:'«موجود في الملف يا فضيلة الشيخ، لعلّه لم يظهر عندكم»',ok:false,pts:-60,tr:-30,fb:'كذبة صغيرة يكشفها القاضي بضغطة زر. ثقته لا تعود.'},
+           {em:'📅',t:'«أطلب تأجيل الجلسة كاملة لإحضاره»',ok:false,pts:10,tr:-5,fb:'تأجيل جلسة كاملة بسبب ورقة يمكن رفعها إلكترونياً يُحسب تقصيراً منك.'}]},
+    {ic:'🧑‍💼',title:'شاهدك يتناقض',setup:()=>{ $('#defendant').classList.remove('talk'); say('npc','قال الشاهد قبل قليل إن التسليم كان في مارس، والآن يقول أبريل.','القاضي'); },
+     q:'شاهدك أرباك التاريخ. خلال 12 ثانية:',
+     opts:[{em:'🔁',t:'أنتقل فوراً إلى محضر الاستلام المؤرّخ وأترك الشاهد',ok:true,pts:100,tr:+10,fb:'المستند المؤرّخ يحسم ما يعجز عنه الشاهد. لا تغرق مع شاهد غارق.'},
+           {em:'😤',t:'أضغط عليه: «قلت مارس! اثبت على كلامك»',ok:false,pts:-40,tr:-15,fb:'الضغط على شاهدك أمام القاضي يوحي أنك لقّنته. تزيد الشك.'},
+           {em:'🤷',t:'«الشهر ليس مهماً يا فضيلة الشيخ»',ok:false,pts:-20,tr:-10,fb:'أنت لا تقرر ما المهم. تجاهل التناقض يثبّته.'}]},
+    {ic:'🤝',title:'عرض صلح مفاجئ',setup:()=>{ $('#defendant').classList.add('talk'); say('npc','أدفع 60,000 اليوم بدل 85,000 بعد سنة استئناف. قرارك الآن.','المدعى عليه'); },
+     q:'القاضي ينتظر ردّك على عرض الصلح:',
+     opts:[{em:'📞',t:'«أستأذن بمهلة قصيرة لأخذ موافقة موكلي كتابياً»',ok:true,pts:100,tr:+10,fb:'الصلح قرار الموكل لا المحامي، ما لم يكن التوكيل يخوّلك صراحة.'},
+           {em:'✅',t:'أقبل فوراً: 60 ألفاً في اليد خير من 85 بعد سنة',ok:false,pts:-50,tr:-10,fb:'قبلت بلا تفويض. لو رفض موكلك فأنت المسؤول عن 25,000 فرق.'},
+           {em:'❌',t:'أرفض فوراً: «حقنا كامل ولن نتنازل»',ok:false,pts:-30,tr:-10,fb:'الرفض أيضاً ليس لك. ربما موكلك يفضّل السيولة الآن.'}]},
+  ];
+  async function surprise(){
+    step(0); stage.dataset.now='surprise'; say(); clearDock(); S.npcLabel='القاضي'; T={trust:60,timer:null,timeouts:0}; setTrust(0); $('#alertCard').hidden=true; $('#defendant').classList.remove('talk'); $('#judge').classList.remove('hit');
+    resetHero(-30); await sleep(60); mood('walk'); moveTo(8); await sleep(1000); mood('idle');
+    say('npc','الجلسة الثانية في الدعوى 4521. تفضّل يا أستاذ.','القاضي');
+    clearDock('جلسة واحدة، ست مفاجآت، و12 ثانية لكل قرار');
+    fb('info','راقب مقياس «ثقة القاضي» فوق القاعة. الصدق والدليل يرفعانه، والارتجال والكذب يهبطانه بسرعة.');
+    nextBtn('ابدأ الجلسة',()=>surpriseStep(0));
+  }
+  async function surpriseStep(i){
+    if(i>=SURPRISES.length) return surpriseFinale();
+    const ev=SURPRISES[i]; step(Math.min(i,4)); clearDock(); say(); $('#alertCard').hidden=true; mood('idle');
+    ev.setup(); await sleep(900);
+    clearDock(`${ev.ic} ${ev.title} · ${ev.q}`);
+    timedChoices(12,ev.opts,(c,k,to)=>{
+      $('#defendant').classList.remove('talk');
+      if(to){ timeoutFb(); }
+      else { mark(c.ok); addPts(c.pts); setTrust(c.tr); mood(c.ok?'happy':'sad',1000); fb(c.ok?'good':'bad',c.fb,c.pts); if(c.tr<=-20) say('npc','…','القاضي'); }
+      nextBtn(i<SURPRISES.length-1?'المفاجأة التالية ←':'خلاصة المرافعة ←',()=>surpriseStep(i+1));
+    });
+  }
+  const FINAL=[
+    {t:'طلباتنا: إلزامه بـ85,000 ريال والمصاريف',ok:true},
+    {t:'الدليل الأقوى: محضر الاستلام دون تحفظ + إقراره الكتابي',ok:true},
+    {t:'الرد على دفع العيب: لم يعترض خلال مدة الفحص المتفق عليها',ok:true},
+    {t:'تاريخ علاقتنا التجارية معه منذ 2015 وكيف بدأت',ok:false},
+    {t:'مشاعر موكلي وما مرّ به من ضيق مالي',ok:false},
+    {t:'سمعة الخصم في السوق ومماطلته مع الآخرين',ok:false},
+  ];
+  function surpriseFinale(){
+    step(4); clearDock('«لديك دقيقة واحدة لخلاصة مرافعتك». اختر 3 نقاط فقط'); say('npc','دقيقة واحدة يا أستاذ، ثم أرفع الجلسة.','القاضي'); mood('think');
+    const w=document.createElement('div'); w.className='chk'; const on=new Set();
+    FINAL.forEach((it,i)=>{ const b=document.createElement('button'); b.className='ch'; b.innerHTML=`<span class="box"></span><span>${it.t}</span>`; b.addEventListener('click',()=>{ if(!on.has(i)&&on.size>=3) return; b.classList.toggle('on'); on.has(i)?on.delete(i):on.add(i); b.querySelector('.box').textContent=on.has(i)?'✓':''; }); w.appendChild(b); });
+    dock.appendChild(w);
+    const cd=document.createElement('div'); cd.className='countdown'; cd.innerHTML=`<span>⏱ <b id="cdv">20</b> ث</span><div class="cb"><i id="cdb"></i></div>`; dock.appendChild(cd);
+    let left=20; const finish=()=>{ clearInterval(T.timer); cd.remove(); w.querySelectorAll('.ch').forEach((b,i)=>{ b.disabled=true; if(FINAL[i].ok) b.classList.add('right'); if(!FINAL[i].ok&&on.has(i)) b.classList.add('wrong'); });
+      let g=0,bd=0; FINAL.forEach((it,i)=>{ if(it.ok&&on.has(i)) g++; if(!it.ok&&on.has(i)) bd++; }); const pts=g*40-bd*30; mark(g===3); addPts(pts); setTrust(g*6-bd*8);
+      $('#judge').classList.add('hit'); beep(330,120); setTimeout(()=>beep(330,120),450);
+      if(g===3){ mood('happy',1300); say('npc','خلاصة محكمة. رُفعت الجلسة.','القاضي'); fb('good','طلبات، دليل، ردّ على الدفع. لا قصص ولا مشاعر ولا هجوم على الخصم.',pts); }
+      else { mood(bd?'sad':'think',900); fb(bd?'bad':'info',`${g} من 3 نقاط في محلها${bd?`، و${bd} أضاعت وقتك الثمين`:''}. القاضي يريد: ماذا تطلب، وما دليلك، وردّك على دفع الخصم.`,pts); }
+      nextBtn('اختم المستوى ←',()=>{ const tr=T.trust; $('#lawBanner').innerHTML=(tr>=75?'القاضي يثق بك ⚖️':tr>=40?'نجوت من المفاجآت':'فقدت ثقة القاضي')+`<small>ثقة القاضي ${tr}/100 · ${T.timeouts?T.timeouts+' قرار ضاع بالتردد':'بلا تردد'}</small>`;
+        const stars=tr>=75&&!T.timeouts?3:tr>=45?2:tr>=20?1:0;
+        done({now:'lawdone',title:'انتهت الجلسة',stars,extra:[['info',`ثقة القاضي في نهاية الجلسة: ${tr}/100. كل قرار موقوت في القاعة يُحسب مرتين: للدليل ولهيبتك.`]],tips:['هدوء تحت النار: اطلب المهلة، اذكر الدليل، ولا تقرر نيابة عن موكلك.','جيد. أكثر ما يهدم الثقة: الكذبة الصغيرة، والجوال، والرد على ورقة لم تقرأها.','خسرت ثقة القاضي. القاعدة الذهبية: عندما تُفاجأ، اطلب مهلة؛ لا تجب ولا تكذب.']}); });
+    };
+    clearInterval(T.timer);
+    T.timer=setInterval(()=>{ left-=.25; $('#cdv').textContent=Math.ceil(left); $('#cdb').style.width=(left/20*100)+'%'; if(left<=5) cd.classList.add('low'); if(left<=0) finish(); },250);
+    const b=nextBtn('ألقِ الخلاصة',()=>{ if(on.size<3){ say('hero','لازم 3 نقاط.'); return; } finish(); });
+  }
+
+  /* =====================================================================
+     TRAVEL · LEVEL 2 : تكلّم في المطار بالإنجليزية (صوتي بالكامل)
+     ===================================================================== */
+  const TALK=[
+    {now:'counter',pos:20,who:'موظفة الكاونتر',en:"Good morning! Where are you flying to today, and do you have any bags to check?",ar:'صباح الخير! إلى أين تسافر اليوم، وهل معك حقائب لتسليمها؟',hint:'قل وجهتك وعدد الحقائب',
+     kw:[{t:'الوجهة (Dubai)',alts:['dubai','dxb']},{t:'عدد الحقائب (one bag)',alts:['one bag','1 bag','one suitcase','a bag','a suitcase','one']},{t:'تحية أو رد مهذب',alts:['good morning','morning','hello','hi','please','thank']}],
+     text:[{t:"Good morning. I'm flying to Dubai, and I have one bag to check.",ok:true},{t:'Dubai.',ok:false},{t:'أنا رايح دبي ومعي شنطة.',ok:false}]},
+    {now:'counter',pos:20,who:'موظفة الكاونتر',en:"Would you prefer a window or an aisle seat?",ar:'تفضّل مقعد النافذة أم الممر؟',hint:'اختر وقلها بجملة قصيرة',
+     kw:[{t:'window أو aisle',alts:['window','aisle']},{t:'صيغة مهذبة (please / I\'d like)',alts:['please','i would like',"i'd like",'i prefer','could i']}],need:1,
+     text:[{t:"A window seat, please.",ok:true},{t:'Seat.',ok:false},{t:'Give me window.',ok:false}]},
+    {now:'security2',pos:60,who:'ضابط التفتيش',en:"Please put your laptop in a tray. Do you have anything in your pockets?",ar:'ضع اللابتوب في صينية من فضلك. هل في جيوبك شيء؟',hint:'أخبره بما في جيوبك أو أنها فارغة',
+     kw:[{t:'ردّ واضح (nothing / just my phone…)',alts:['nothing','no,','no ','empty','just my','only my','my phone','my keys','my wallet']},{t:'تأكيد اللابتوب',alts:['laptop','tray','sure','okay','ok']}],need:1,
+     text:[{t:"Sure. Just my phone and keys — I'll put them in the tray.",ok:true},{t:'Yes.',ok:false},{t:"Why? I'm in a hurry.",ok:false}]},
+    {now:'gate',pos:40,who:'ضابط الجوازات',en:"What is the purpose of your visit, and how long will you be staying?",ar:'ما الغرض من زيارتك، وكم مدة إقامتك؟',hint:'الغرض + المدة، باختصار',
+     kw:[{t:'الغرض (tourism / business)',alts:['tourism','tourist','business','holiday','vacation','visit','conference','family']},{t:'المدة (days / week)',alts:['day','week','night','month']},{t:'رقم واضح',alts:['one','two','three','four','five','six','seven','ten','1','2','3','4','5','6','7','10']}],
+     text:[{t:"Tourism. I'm staying for five days.",ok:true},{t:"I don't know yet.",ok:false},{t:"Why do you ask?",ok:false}]},
+    {now:'pass',pos:30,who:'مضيف البوابة',en:"We're boarding group three now. May I see your boarding pass and passport?",ar:'نصعد المجموعة 3 الآن. هل لي برؤية تذكرة الصعود والجواز؟',hint:'ردّ قصير وسلّمهما',
+     kw:[{t:'ردّ إيجابي (here you are / sure)',alts:['here','sure','of course','yes','certainly']},{t:'ذكر التذكرة أو الجواز',alts:['boarding pass','passport','pass']}],need:1,
+     text:[{t:"Sure, here you are.",ok:true},{t:'Wait.',ok:false},{t:'Group three? Me.',ok:false}]},
+  ];
+  async function talk(){
+    S.talkOk=0; talkStep(0);
+  }
+  async function talkStep(i){
+    if(i>=TALK.length){ $('#lawBanner'); return done({now:'done',title:'اكتمل المستوى: تكلّم في المطار',stars:S.talkOk>=5?3:S.talkOk>=3?2:S.talkOk>=1?1:0,extra:[['info','القاعدة: جملة قصيرة كاملة + كلمة مهذبة. الموظف لا يحتاج قصة، يحتاج معلومة.']],tips:['نطق واضح وردود مكتملة في كل المواقف. جاهز للسفر.','جيد. ركّز على ذكر المعلومة المطلوبة نفسها (الوجهة، المدة، الغرض) لا الكلام حولها.','لا بأس. أعد المستوى وجرّب الردود المكتوبة أولاً ثم قلها بصوتك.']}); }
+    const m=TALK[i]; step(i); stage.dataset.now=m.now; say(); clearDock(); S.npcLabel=m.who;
+    if(m.now==='gate'){ $('#gateSign').innerHTML='PASSPORT<b>CONTROL</b>'; $('#gateSign').classList.remove('calling'); } else $('#gateSign').innerHTML='GATE B12<b id="gateNow">ZONE 3</b>';
+    if(i===0){ resetHero(-30); await sleep(60); } mood('walk'); moveTo(m.pos); await sleep(900); mood('idle');
+    bN.innerHTML=`<span class="who">${m.who}</span><span class="en">${m.en}</span><span class="ar">${m.ar}</span>`; bN.hidden=false; bH.hidden=true;
+    clearDock(`🎙 ردّ بصوتك بالإنجليزية · ${m.hint}`);
+    const alt=document.createElement('button'); alt.className='btn ghost block'; alt.textContent='بدون ميكروفون: اختر رداً مكتوباً';
+    voiceAnswer(m.kw,(ok)=>{ if(ok) S.talkOk++; alt.remove(); say('npc',ok?(i===TALK.length-1?'Welcome aboard!':'Perfect, thank you.'):'Sorry, could you repeat that?',m.who); nextBtn(i<TALK.length-1?'الموقف التالي ←':'النتيجة ←',()=>talkStep(i+1)); },
+      {lang:'en-US',max:30,need:m.need||2,maxWords:30,okMsg:'ردّ مكتمل ومفهوم.',badMsg:'الموظف ما فهم المطلوب. جملة قصيرة فيها المعلومة نفسها.'});
+    dock.appendChild(alt);
+    alt.addEventListener('click',()=>{ alt.remove(); dock.querySelector('.rec')?.remove(); dock.querySelectorAll('.btn.primary').forEach(x=>x.remove());
+      choices(m.text.map(t=>({em:t.ok?'💬':'💬',t:`<span dir="ltr" style="display:block;text-align:left">${t.t}</span>`,ok:t.ok})),(c)=>{ mark(c.ok); addPts(c.ok?60:-15); mood(c.ok?'happy':'sad',900); if(c.ok) S.talkOk++;
+        fb(c.ok?'good':'bad',c.ok?'جملة كاملة، فيها المعلومة، ومهذبة.':'ناقصة أو بلغة غير مفهومة للموظف أو بنبرة غير مناسبة.',c.ok?60:-15); say('npc',c.ok?'Perfect, thank you.':'Sorry?',m.who);
+        nextBtn(i<TALK.length-1?'الموقف التالي ←':'النتيجة ←',()=>talkStep(i+1)); }); });
+  }
+
+  /* ===== DONE (generic) ===== */
+  function done(cfg){
+    cfg=cfg||{now:'done',title:'اكتمل المستوى الأول',tips:['أداء مسافر متمرّس. في الرحلة الحقيقية كن في المطار قبل الإقلاع بثلاث ساعات للدولي.','جيد. أكثر ما يُربك المسافرين: السوائل في التفتيش والصعود قبل نداء المجموعة.','لا بأس، لهذا وُجدت المحاكاة. أعد المستوى مرة وسترى الفرق.']};
+    stage.dataset.now=cfg.now; say(); mood('walk');
+    const cf=$('#confetti'); cf.innerHTML=''; const cols=['#F6B93B','#3ED18B','#F2634E','#6FB7FF','#fff']; for(let i=0;i<36;i++){ const s=document.createElement('i'); s.style.left=(Math.random()*100)+'%'; s.style.setProperty('--c',cols[i%5]); s.style.animationDelay=(Math.random()*2)+'s'; s.style.animationDuration=(2+Math.random()*2)+'s'; cf.appendChild(s); }
+    const secs=Math.round((Date.now()-S.start)/1000), acc=S.total?Math.round(S.right/S.total*100):0, stars=cfg.stars!==undefined?cfg.stars:(acc>=90?3:acc>=65?2:1);
+    clearDock(cfg.title);
+    dock.insertAdjacentHTML('beforeend',`<div class="stars" id="stars"><span>★</span><span>★</span><span>★</span></div>
+      <div class="score"><div><b>${S.pts}</b><small>نقطة</small></div><div><b>${acc}%</b><small>دقة القرارات</small></div><div><b>${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}</b><small>الزمن</small></div></div>`);
+    fb('info', stars===3?cfg.tips[0]:stars===2?cfg.tips[1]:cfg.tips[2]);
+    if(cfg.extra) cfg.extra.forEach(x=>fb(x[0],x[1]));
+    setTimeout(()=>document.querySelectorAll('#stars span').forEach((s,i)=>setTimeout(()=>s.classList.toggle('on',i<stars),i*350)),300);
+    const P=S.prog[S.cat], lv=S.level||0, c=cat();
+    nextBtn(stars>=1?'العودة إلى المكتبة · فُتح المستوى التالي 🔓':'العودة إلى المكتبة',()=>{ if(stars>=1){ P.done=Math.max(P.done,lv+1); P.unlocked=Math.max(P.unlocked,lv+2); } $('#scanner').classList.remove('ok'); library(); });
+    const r=document.createElement('button'); r.className='btn ghost block'; r.textContent='أعد المحاولة لتحسين النتيجة'; r.addEventListener('click',()=>begin(c.levels[lv][3])); dock.appendChild(r);
+    dock.insertAdjacentHTML('beforeend','<p class="note">نموذج تجريبي · محاكاة تعليمية لا تُغني عن استشارة مختص.</p>');
+  }
+
+  store();
+})();
+</script>
+
+</body></html>
