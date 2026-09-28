@@ -1399,18 +1399,30 @@
   function wiz(i){ return `<div class="wiz"><span class="${i>0?'done':'on'}"></span><span class="${i>1?'done':i===1?'on':''}"></span><span class="${i>2?'done':i===2?'on':''}"></span><span class="${i===3?'on':''}"></span><b>${i+1}/4</b></div>`; }
   const TPL={
     job:{name:'مهنتي',npc:'الزبون',moments:[
-      {q:'أول ما يدخل {who} ماذا تفعل؟',o:['أرحّب به وأسأله عمّا يحتاج','أكمل ما بيدي حتى ينتظر','أسأله مباشرة: «وش تبغى؟»'],ok:0,why:'الترحيب أول 5 ثوانٍ يحدد الانطباع كله.'},
-      {q:'{who} يطلب شيئاً غير متأكد منه. ماذا تفعل؟',o:['أتحقق من الطلب قبل تنفيذه','أنفّذه كما قال فوراً','أقول له إنه غير موجود لأتخلص منه'],ok:0,why:'التحقق يحمي {who} ويحميك من الخطأ.'},
-      {q:'{who} غضب ورفع صوته. ماذا تفعل؟',o:['أهدأ، أعتذر عن الإزعاج، وأعرض حلاً','أرفع صوتي مثله','أتركه وأنادي المدير'],ok:0,why:'الهدوء + الاعتذار + الحل: ثلاثية تطفئ 90٪ من المواقف.'}]},
+      {scene:'office',say:'السلام عليكم… عندي طلب.',think:'أول انطباع… خلّني أبدأ صح.',q:'أول ما يدخل {who} ماذا تفعل؟',o:['أرحّب به وأسأله عمّا يحتاج','أكمل ما بيدي حتى ينتظر','أسأله مباشرة: «وش تبغى؟»'],ok:0,why:'الترحيب أول 5 ثوانٍ يحدد الانطباع كله.'},
+      {scene:'counter',say:'أبغى هذا… أظن هو المطلوب، مو متأكد.',think:'لو نفّذت غلط، المشكلة عليّ.',q:'{who} يطلب شيئاً غير متأكد منه. ماذا تفعل؟',o:['أتحقق من الطلب قبل تنفيذه','أنفّذه كما قال فوراً','أقول له إنه غير موجود لأتخلص منه'],ok:0,why:'التحقق يحمي {who} ويحميك من الخطأ.'},
+      {scene:'hall',say:'هذا مو معقول! أنا أنتظر من ساعة!',think:'الكل يطالع… لازم أهدّي الموقف.',q:'{who} غضب ورفع صوته. ماذا تفعل؟',o:['أهدأ، أعتذر عن الإزعاج، وأعرض حلاً','أرفع صوتي مثله','أتركه وأنادي المدير'],ok:0,why:'الهدوء + الاعتذار + الحل: ثلاثية تطفئ 90٪ من المواقف.'}]},
     proc:{name:'إجراء رسمي',npc:'الموظف',moments:[
-      {q:'قبل الذهاب، ما الذي تجهّزه؟',o:['المستندات المطلوبة والموعد','أذهب وأرى ماذا يطلبون','أرسل شخصاً بدلاً مني'],ok:0,why:'نصف الزيارات الفاشلة سببها ورقة ناقصة.'},
-      {q:'الموظف يقول إن ورقة ناقصة. ماذا تفعل؟',o:['أسأل بدقة ما هي وكيف أحصل عليها','أجادله بأنها غير مطلوبة','أغادر غاضباً'],ok:0,why:'سؤال واحد دقيق يوفر زيارة كاملة.'},
-      {q:'انتهى الإجراء. ماذا تطلب قبل المغادرة؟',o:['إثبات الإنجاز (رقم/إيصال) وموعد الخطوة التالية','لا شيء، انتهينا','أطلب ملفاً كاملاً بكل شيء'],ok:0,why:'بدون رقم مرجعي لا تستطيع المتابعة لاحقاً.'}]},
+      {scene:'street',say:'موعدك الساعة 9. لا تتأخر.',think:'وش يطلبون بالضبط؟',q:'قبل الذهاب، ما الذي تجهّزه؟',o:['المستندات المطلوبة والموعد','أذهب وأرى ماذا يطلبون','أرسل شخصاً بدلاً مني'],ok:0,why:'نصف الزيارات الفاشلة سببها ورقة ناقصة.'},
+      {scene:'counter',say:'الملف ناقص ورقة يا أستاذ.',think:'رجعت لهم مرتين قبل…',q:'الموظف يقول إن ورقة ناقصة. ماذا تفعل؟',o:['أسأل بدقة ما هي وكيف أحصل عليها','أجادله بأنها غير مطلوبة','أغادر غاضباً'],ok:0,why:'سؤال واحد دقيق يوفر زيارة كاملة.'},
+      {scene:'building',say:'خلصنا، تفضّل.',think:'أطلع كذا؟ ولا آخذ شي معي؟',q:'انتهى الإجراء. ماذا تطلب قبل المغادرة؟',o:['إثبات الإنجاز (رقم/إيصال) وموعد الخطوة التالية','لا شيء، انتهينا','أطلب ملفاً كاملاً بكل شيء'],ok:0,why:'بدون رقم مرجعي لا تستطيع المتابعة لاحقاً.'}]},
     skill:{name:'مهارة حياتية',npc:'الطرف الآخر',moments:[
-      {q:'بدأ الموقف. ما أول خطوة؟',o:['أستمع كاملاً قبل أن أرد','أرد فوراً بما في رأسي','أتجاهل الموقف'],ok:0,why:'الاستماع يعطيك المعلومة التي تُبنى عليها كل الخطوات.'},
-      {q:'اختلفتما في الرأي. ماذا تفعل؟',o:['أعيد صياغة رأيه لأتأكد أني فهمته ثم أعرض رأيي','أصرّ على رأيي','أوافقه لأنهي الموقف'],ok:0,why:'من يشعر أنه فُهم يهدأ ويسمعك.'},
-      {q:'كيف تُنهي الموقف؟',o:['بخلاصة واضحة ومَن يفعل ماذا','أتركه معلّقاً','أعتذر عن كل شيء'],ok:0,why:'الموقف الذي ينتهي بلا اتفاق واضح يتكرر.'}]},
+      {scene:'office',say:'أبغى أكلمك في موضوع مهم.',think:'نبرته مختلفة اليوم.',q:'بدأ الموقف. ما أول خطوة؟',o:['أستمع كاملاً قبل أن أرد','أرد فوراً بما في رأسي','أتجاهل الموقف'],ok:0,why:'الاستماع يعطيك المعلومة التي تُبنى عليها كل الخطوات.'},
+      {scene:'office',say:'لا، أنا شايف العكس تماماً.',think:'ما أبغى أخسر الموضوع ولا أخسره هو.',q:'اختلفتما في الرأي. ماذا تفعل؟',o:['أعيد صياغة رأيه لأتأكد أني فهمته ثم أعرض رأيي','أصرّ على رأيي','أوافقه لأنهي الموقف'],ok:0,why:'من يشعر أنه فُهم يهدأ ويسمعك.'},
+      {scene:'hall',say:'طيب… وش اتفقنا عليه بالضبط؟',think:'لو طلعنا بدون اتفاق، بيرجع الموضوع.',q:'كيف تُنهي الموقف؟',o:['بخلاصة واضحة ومَن يفعل ماذا','أتركه معلّقاً','أعتذر عن كل شيء'],ok:0,why:'الموقف الذي ينتهي بلا اتفاق واضح يتكرر.'}]},
   };
+  /* ===== SCENE CATALOG for generated scenarios ===== */
+  const SCENES={
+    office:{now:'office',world:'law',pos:14,desc:'مكتب مهني (مكتب، رفوف، موظف بالبدلة)'},
+    court:{now:'court',world:'law',pos:8,desc:'قاعة محكمة (قاضٍ ومنصة وطرف آخر)'},
+    building:{now:'lawlobby',world:'law',pos:40,desc:'أمام مبنى رسمي/حكومي'},
+    hall:{now:'hall',world:'travel',pos:38,desc:'صالة عامة واسعة (مطار/مجمّع/لوبي)'},
+    counter:{now:'counter',world:'travel',pos:20,desc:'كاونتر خدمة وموظفة استقبال'},
+    security:{now:'security2',world:'travel',pos:60,desc:'نقطة تفتيش/بوابة أمنية وضابط'},
+    gate:{now:'gate',world:'travel',pos:40,desc:'بوابة انتظار وصف من الناس وموظف'},
+    street:{now:'lobby',world:'travel',pos:40,desc:'الشارع/المدخل الخارجي وسيارة أجرة'},
+  };
+  function applyScene(key){ const sc=SCENES[key]||SCENES.office; stage.dataset.world=sc.world; stage.dataset.now=sc.now; if(sc.now==='gate'){ $('#gateSign').innerHTML='WAITING<b>AREA</b>'; } resetHero(sc.pos); return sc; }
   /* ===== CREATOR ACCOUNT (trial + plans) ===== */
   function acct(){ try{ return JSON.parse(localStorage.getItem('muhakat.creator')||'null')||S.acct||null; }catch(e){ return S.acct||null; } }
   function setAcct(a){ S.acct=a; try{ localStorage.setItem('muhakat.creator',JSON.stringify(a)); }catch(e){} }
@@ -1437,21 +1449,18 @@
     B={type:'job',title:'',who:'',desc:'',npc:'',moments:[],aud:'family',price:0};
     stage.dataset.now='office'; stage.dataset.world='law'; $('#brandTxt').textContent='صانع المواقف'; $('#stepChip').hidden=true; say(); resetHero(14); mood('think');
     say('npc','خبرتك تصير موقفاً يتدرّب عليه غيرك. صفه لي.','المساعد');
-    clearDock(); dock.insertAdjacentHTML('beforeend',trialBar()+wiz(0)+`<div class="h2">صف موقفاً من حياتك أو عملك<small>3 أسطر تكفي. أو اضغط الميكروفون وتكلّم.</small></div>`);
+    clearDock(); dock.insertAdjacentHTML('beforeend',trialBar()+wiz(0)+`<div class="h2">صف موقفاً من حياتك أو عملك<small>جملة أو ثلاث تكفي: مَن المتدرّب، أين، ومع مَن، وما الذي يحدث. أو اضغط الميكروفون وتكلّم.</small></div>`);
     dock.insertAdjacentHTML('beforeend',`<div class="field"><label>نوع الموقف</label><div class="chips" id="btype"><button class="chip2 on" data-t="job">💼 مهنتي / عملي</button><button class="chip2" data-t="proc">🏛️ إجراء رسمي</button><button class="chip2" data-t="skill">🤝 مهارة حياتية</button></div></div>
       <div class="field"><label>عنوان الموقف</label><input class="inp" id="btitle" placeholder="مثال: أول يوم عمل في شركة محاماة"></div>
-      <div class="field"><label>مَن يواجهه المتدرّب؟</label><input class="inp" id="bwho" placeholder="مثال: الشريك المدير، الزبون، المراجع"></div>
       <div class="field"><label>الوصف</label><textarea class="ta" id="bdesc" placeholder="مثال: أبغى تجربة لموظف في أول يوم عمل بعد التخرج في شركة محاماة: التعارف، أول مهمة من الشريك، عميل يتصل ويسأل عن قضيته، وخطأ في مذكرة قبل تسليمها."></textarea></div>`);
     document.querySelectorAll('#btype .chip2').forEach(b=>b.addEventListener('click',()=>{ document.querySelectorAll('#btype .chip2').forEach(x=>x.classList.remove('on')); b.classList.add('on'); B.type=b.dataset.t; }));
     const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
     if(SR){ const m=document.createElement('button'); m.className='btn ghost block'; m.textContent='🎙 أملِ الوصف بصوتك'; let rs=null; m.addEventListener('click',()=>{ if(rs){ try{rs.stop();}catch(e){} rs=null; m.textContent='🎙 أملِ الوصف بصوتك'; return; } try{ rs=new SR(); rs.lang='ar-SA'; rs.continuous=!IOS; rs.interimResults=true; let base=$('#bdesc').value; rs.onresult=e=>{ let t=''; for(let i=0;i<e.results.length;i++) t+=e.results[i][0].transcript+' '; $('#bdesc').value=(base+' '+t).trim(); }; rs.onend=()=>{ if(rs&&!IOS){ rs=null; m.textContent='🎙 أملِ الوصف بصوتك'; } }; rs.start(); m.textContent='⏹ إيقاف الإملاء'; }catch(e){ toast('الإملاء غير متاح هنا'); } }); dock.appendChild(m); }
-    nextBtn('ولّد مسودة الموقف ←',()=>{ B.title=$('#btitle').value.trim()||'موقف بلا عنوان'; B.who=$('#bwho').value.trim()||TPL[B.type].npc; B.desc=$('#bdesc').value.trim(); if(B.desc.length<15){ toast('اكتب أو أملِ 3 أسطر على الأقل'); return; } genDraft().then(builderEdit); });
+    nextBtn('ولّد مسودة الموقف ←',()=>{ B.title=$('#btitle').value.trim()||'موقف بلا عنوان'; B.who=TPL[B.type].npc; B.desc=$('#bdesc').value.trim(); if(B.desc.length<15){ toast('اكتب أو أملِ 3 أسطر على الأقل'); return; } genDraft().then(builderEdit); });
   }
   function genTemplate(){
     const t=TPL[B.type]; B.npc=B.who;
-    B.moments=t.moments.map(m=>({q:m.q.replace(/\{who\}/g,B.who),o:m.o.map(x=>x.replace(/\{who\}/g,B.who)),ok:m.ok,why:m.why.replace(/\{who\}/g,B.who)}));
-    const kws=B.desc.split(/[،,.\n]/).map(x=>x.trim()).filter(x=>x.length>8).slice(0,3);
-    kws.forEach((k,i)=>{ if(B.moments[i]) B.moments[i].q=B.moments[i].q+' («'+k.slice(0,40)+'»)'; });
+    B.moments=t.moments.map(m=>({scene:m.scene,say:m.say,think:m.think,q:m.q.replace(/\{who\}/g,B.who),o:m.o.map(x=>x.replace(/\{who\}/g,B.who)),ok:m.ok,why:m.why.replace(/\{who\}/g,B.who)}));
     B.gen='template';
   }
   async function genDraft(regen){
@@ -1461,13 +1470,14 @@
     say('npc','لحظة… أكتب لك الموقف.','المساعد'); mood('think');
     const ctl=new AbortController(); const stop=document.createElement('button'); stop.className='btn ghost block'; stop.textContent='إيقاف واستخدام مسودة القوالب'; stop.addEventListener('click',()=>ctl.abort()); dock.appendChild(stop);
     const prompt='أنت مصمم محاكاة تعليمية تفاعلية باللغة العربية (أسلوب سعودي مهذب، فصحى مبسطة). حوّل وصف الصانع إلى موقف تدريبي يلعبه متدرّب خطوة بخطوة.\n'
-      +'نوع الموقف: '+TPL[B.type].name+'. العنوان: '+B.title+'. الشخصية التي يواجهها المتدرّب: '+B.who+'.\n'
+      +'نوع الموقف: '+TPL[B.type].name+'. العنوان: '+B.title+'. استنتج من الوصف الشخصية الرئيسية التي يواجهها المتدرّب (مثل: الشريك المدير، الزبون، الموظف) وسمّها في npc.\n'
       +'وصف الصانع: <<<'+B.desc.slice(0,1500)+'>>>\n'
-      +'المطلوب: 5 لحظات متسلسلة زمنياً تحكي قصة يوم واقعي بتفاصيل حسّية قصيرة. كل لحظة: سؤال من سطر واحد بصيغة موقف («دخلت المكتب و…»)، 3 خيارات قصيرة واقعية (واحد صحيح، واحد خطأ شائع مغرٍ، واحد خطأ واضح) بترتيب عشوائي، وتعليل من جملة واحدة يشرح لماذا الصحيح صحيح وما يعلّمه للمتدرّب. تجنّب الوعظ، واجعل الخيارات كما يقولها الناس فعلاً.'+(regen?' اجعلها مختلفة تماماً عن أي محاولة سابقة.':'')+'\n'
-      +'أجب بـ JSON فقط بهذا الشكل بالضبط: {"npc":"اسم/صفة الشخصية","moments":[{"q":"...","o":["...","...","..."],"ok":0,"why":"..."}]} حيث ok هو فهرس الخيار الصحيح (0-2).';
+      +'المشاهد المتاحة للرسم (اختر الأنسب لكل لحظة): '+Object.keys(SCENES).map(k=>k+' = '+SCENES[k].desc).join('؛ ')+'.\n'
+      +'المطلوب: 5 لحظات متسلسلة زمنياً تحكي قصة يوم واقعي. لكل لحظة: scene (مفتاح من القائمة)، say = جملة تقولها الشخصية فعلاً في هذه اللحظة بلهجة طبيعية (حوار، لا وصف ولا سؤال)، think = خاطرة قصيرة تدور في ذهن المتدرّب، q = السؤال من سطر واحد يطلب القرار (لا يكرر جملة الشخصية)، 3 خيارات قصيرة واقعية (واحد صحيح، واحد خطأ شائع مغرٍ، واحد خطأ واضح) بترتيب عشوائي، وتعليل من جملة واحدة يشرح لماذا الصحيح صحيح وما يعلّمه للمتدرّب. تجنّب الوعظ، واجعل الخيارات كما يقولها الناس فعلاً.'+(regen?' اجعلها مختلفة تماماً عن أي محاولة سابقة.':'')+'\n'
+      +'أجب بـ JSON فقط بهذا الشكل بالضبط: {"npc":"اسم/صفة الشخصية","moments":[{"scene":"office","say":"...","think":"...","q":"...","o":["...","...","..."],"ok":0,"why":"..."}]} حيث ok هو فهرس الخيار الصحيح (0-2).';
     try{
       const data=await sample.json(prompt,{modelTier:'default',cache:false,signal:ctl.signal,onText:({text})=>{ $('#gtm').textContent='يكتب…'; $('#gtr').textContent=text.slice(-400); }});
-      const ms=(data&&Array.isArray(data.moments)?data.moments:[]).filter(m=>m&&m.q&&Array.isArray(m.o)&&m.o.length>=3).slice(0,7).map(m=>({q:String(m.q),o:m.o.slice(0,3).map(String),ok:Math.min(2,Math.max(0,parseInt(m.ok)||0)),why:String(m.why||'')}));
+      const ms=(data&&Array.isArray(data.moments)?data.moments:[]).filter(m=>m&&m.q&&Array.isArray(m.o)&&m.o.length>=3).slice(0,7).map(m=>({scene:SCENES[m.scene]?m.scene:'office',say:String(m.say||''),think:String(m.think||''),q:String(m.q),o:m.o.slice(0,3).map(String),ok:Math.min(2,Math.max(0,parseInt(m.ok)||0)),why:String(m.why||'')}));
       if(ms.length<3) throw {code:'invalid_json'};
       B.moments=ms; B.npc=String(data.npc||B.who); B.gen='ai'; B.genNote='';
     }catch(e){ genTemplate(); B.genNote=e.code==='cancelled'?'استخدمت مسودة القوالب.':e.code==='not_granted'?'لم يُسمح للصفحة باستخدام Claude، فاستخدمت القوالب.':'تعذّر التوليد الذكي ('+(e.code||'خطأ')+')، فاستخدمت القوالب.'; }
@@ -1480,12 +1490,16 @@
     const list=document.createElement('div'); list.className='choices'; dock.appendChild(list);
     const render=()=>{ list.innerHTML=''; B.moments.forEach((m,i)=>{ const c=document.createElement('div'); c.className='mcard';
         c.innerHTML=`<div class="mh"><span>اللحظة ${i+1}</span>${B.moments.length>1?`<button class="x" data-i="${i}">حذف</button>`:''}</div>
-          <input class="inp" data-f="q" data-i="${i}" value="${esc(m.q)}" placeholder="السؤال أو الموقف">
+          <div class="chips" style="gap:5px">${Object.keys(SCENES).map(k=>`<button class="chip2 sc ${(m.scene||'office')===k?'on':''}" data-i="${i}" data-s="${k}" style="padding:5px 10px;font-size:.72rem">${{office:'🏢 مكتب',court:'⚖️ محكمة',building:'🏛️ مبنى',hall:'🏬 صالة',counter:'🛎️ كاونتر',security:'🛂 تفتيش',gate:'🚪 انتظار',street:'🚕 شارع'}[k]}</button>`).join('')}</div>
+          <input class="inp" data-f="say" data-i="${i}" value="${esc(m.say||'')}" placeholder="ماذا تقول الشخصية في هذه اللحظة؟ (حوار)">
+          <input class="inp" data-f="think" data-i="${i}" value="${esc(m.think||'')}" placeholder="خاطرة المتدرّب (اختياري)">
+          <input class="inp" data-f="q" data-i="${i}" value="${esc(m.q)}" placeholder="السؤال: ما القرار؟">
           ${m.o.map((o,k)=>`<div class="opt ${m.ok===k?'ok':''}"><button class="r" data-i="${i}" data-k="${k}">${m.ok===k?'✓':''}</button><input class="inp" data-f="o${k}" data-i="${i}" value="${esc(o)}" placeholder="خيار ${k+1}"></div>`).join('')}
           <input class="inp" data-f="why" data-i="${i}" value="${esc(m.why)}" placeholder="لماذا هذا هو الصحيح؟ (يظهر بعد الإجابة)">`;
         list.appendChild(c); });
-      const add=document.createElement('button'); add.className='addm'; add.textContent='+ أضف لحظة'; add.addEventListener('click',()=>{ B.moments.push({q:'',o:['','',''],ok:0,why:''}); render(); }); list.appendChild(add);
-      list.querySelectorAll('.inp').forEach(el=>el.addEventListener('input',()=>{ const m=B.moments[+el.dataset.i], f=el.dataset.f; if(f==='q') m.q=el.value; else if(f==='why') m.why=el.value; else m.o[+f[1]]=el.value; }));
+      const add=document.createElement('button'); add.className='addm'; add.textContent='+ أضف لحظة'; add.addEventListener('click',()=>{ B.moments.push({scene:'office',say:'',think:'',q:'',o:['','',''],ok:0,why:''}); render(); }); list.appendChild(add);
+      list.querySelectorAll('.inp').forEach(el=>el.addEventListener('input',()=>{ const m=B.moments[+el.dataset.i], f=el.dataset.f; if(f==='q') m.q=el.value; else if(f==='why') m.why=el.value; else if(f==='say') m.say=el.value; else if(f==='think') m.think=el.value; else m.o[+f[1]]=el.value; }));
+      list.querySelectorAll('.sc').forEach(b=>b.addEventListener('click',()=>{ B.moments[+b.dataset.i].scene=b.dataset.s; render(); }));
       list.querySelectorAll('.r').forEach(b=>b.addEventListener('click',()=>{ B.moments[+b.dataset.i].ok=+b.dataset.k; render(); }));
       list.querySelectorAll('.x').forEach(b=>b.addEventListener('click',()=>{ B.moments.splice(+b.dataset.i,1); render(); })); };
     render();
@@ -1507,11 +1521,14 @@
   }
   function runScenario(sc,onEnd,preview,opt){ opt=opt||{};
     $('#brandTxt').textContent=sc.title; $('#stepChip').hidden=false; document.querySelectorAll('#rail span').forEach(x=>x.className='');
-    S.pts=0;S.right=0;S.total=0;S.start=Date.now(); $('#hudPts').textContent='0'; S.npcLabel=sc.npc||'الطرف الآخر'; stage.dataset.now='office'; stage.dataset.world='law'; resetHero(14);
+    S.pts=0;S.right=0;S.total=0;S.start=Date.now(); $('#hudPts').textContent='0'; S.npcLabel=sc.npc||'الطرف الآخر'; stage.dataset.now='office'; stage.dataset.world='law'; resetHero(14); $('#gateSign').innerHTML='GATE B12<b id="gateNow">ZONE 3</b>';
     let i=0; const n=sc.moments.length;
-    const stepIt=()=>{ if(i>=n&&opt.paywall){ return paywall(opt.paywall); }
-      if(i>=n){ sc.plays=(sc.plays||0)+1; const acc=S.total?Math.round(S.right/S.total*100):0; $('#lawBanner').innerHTML=`${acc>=80?'أحسنت':'انتهى الموقف'} 🧩<small>${sc.title}</small>`; done({now:'lawdone',title:preview?'هكذا سيراه المتدرّب':'اكتمل: '+sc.title,tips:['ممتاز.','جيد.','أعد المحاولة.'],extra:preview?[['info','هذه تجربة الصانع. الخطوة التالية: النشر.']]:[]}); if(!preview){ const acc2=S.total?Math.round(S.right/S.total*100):0; shareCard(sc,acc2>=90?3:acc2>=65?2:1); } if(onEnd){ const b=dock.querySelector('.btn.primary'); b.textContent=preview?'انشر الموقف ←':'العودة'; b.replaceWith(b.cloneNode(true)); dock.querySelector('.btn.primary').addEventListener('click',onEnd); } return; }
-      const m=sc.moments[i]; $('#stepChip').innerHTML=`اللحظة <b id="hudStep">${i+1}</b>/${n}`; step(Math.min(i,4)); mood('think'); say('npc',m.q,sc.npc); clearDock(m.q);
+    const stepIt=()=>{ if(i>=n&&opt.paywall){ stage.dataset.world='law'; stage.dataset.now='office'; resetHero(14); return paywall(opt.paywall); }
+      if(i>=n){ stage.dataset.world='law'; sc.plays=(sc.plays||0)+1; const acc=S.total?Math.round(S.right/S.total*100):0; $('#lawBanner').innerHTML=`${acc>=80?'أحسنت':'انتهى الموقف'} 🧩<small>${sc.title}</small>`; done({now:'lawdone',title:preview?'هكذا سيراه المتدرّب':'اكتمل: '+sc.title,tips:['ممتاز.','جيد.','أعد المحاولة.'],extra:preview?[['info','هذه تجربة الصانع. الخطوة التالية: النشر.']]:[]}); if(!preview){ const acc2=S.total?Math.round(S.right/S.total*100):0; shareCard(sc,acc2>=90?3:acc2>=65?2:1); } if(onEnd){ const b=dock.querySelector('.btn.primary'); b.textContent=preview?'انشر الموقف ←':'العودة'; b.replaceWith(b.cloneNode(true)); dock.querySelector('.btn.primary').addEventListener('click',onEnd); } return; }
+      const m=sc.moments[i]; $('#stepChip').innerHTML=`اللحظة <b id="hudStep">${i+1}</b>/${n}`; step(Math.min(i,4));
+      const scn=applyScene(m.scene||'office'); S.npcLabel=sc.npc||'الطرف الآخر'; say(); mood('walk'); moveTo(scn.pos+4);
+      setTimeout(()=>{ mood('think'); if(m.say) say('npc',m.say,sc.npc); else say('hero',m.think||'…'); },700);
+      clearDock(m.q); if(m.think&&m.say) dock.insertAdjacentHTML('beforeend',`<p class="note" style="text-align:start;margin-top:-4px">💭 ${esc(m.think)}</p>`);
       choices(m.o.map((o,k)=>({em:['🅰','🅱','🅲'][k]||'•',t:o,ok:k===m.ok})),(c)=>{ mark(c.ok); addPts(c.ok?100:-20); mood(c.ok?'happy':'sad',1000); fb(c.ok?'good':'bad',m.why||(c.ok?'صحيح.':'ليس الأفضل.'),c.ok?100:-20); i++; nextBtn(i<n?'اللحظة التالية ←':'النتيجة ←',stepIt); }); };
     stepIt();
   }
