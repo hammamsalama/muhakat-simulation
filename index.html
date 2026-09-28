@@ -445,6 +445,19 @@
   .sharecard b{display:block;font-family:"Cairo",sans-serif;font-size:1rem}
   .sharecard small{color:#6B7285;font-size:.72rem}
   .sharecard .lk{font-family:"IBM Plex Mono",monospace;font-size:.62rem;color:#151B2B;background:#EFE9DA;padding:2px 6px;border-radius:6px;display:inline-block;margin-top:4px}
+
+  .plans{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .plan{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;text-align:start;display:flex;flex-direction:column;gap:6px;position:relative}
+  .plan.best{border-color:var(--amber);box-shadow:0 0 0 3px rgba(246,185,59,.15)}
+  .plan .tag2{position:absolute;top:-10px;right:12px;background:var(--amber);color:var(--amber-ink);font-size:.62rem;font-weight:800;padding:2px 8px;border-radius:99px}
+  .plan h3{font-size:1rem}
+  .plan .pr{font-family:"IBM Plex Mono",monospace;font-size:1.3rem;color:var(--amber);font-weight:600}
+  .plan .pr small{font-family:"IBM Plex Sans Arabic",sans-serif;color:var(--muted);font-size:.7rem}
+  .plan ul{margin:0;padding:0;list-style:none;font-size:.74rem;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+  .plan ul li::before{content:"✓ ";color:var(--mint)}
+  .trialbar{display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(246,185,59,.1);border:1px solid rgba(246,185,59,.4);border-radius:14px;padding:8px 12px;font-size:.78rem}
+  .trialbar b{color:var(--amber)}
+  .trialbar button{font-size:.74rem;font-weight:700;background:var(--amber);color:var(--amber-ink);padding:5px 10px;border-radius:99px}
   /* ===== DUAL HEARING ===== */
   .stage[data-now="dual"] .laptop{display:flex!important}
   .laptop{inset:5% 5% 9% 5%;background:#1B2130;border-radius:14px;border:5px solid #2F3A4F;z-index:6;padding:8px;flex-direction:column;gap:8px;direction:rtl}
@@ -753,7 +766,7 @@
     const pub=mine.filter(x=>x.aud==='public');
     if(pub.length){ dock.insertAdjacentHTML('beforeend','<div class="prompt" style="margin-top:4px">🛒 السوق · من صنع المجتمع</div>'); const lw=document.createElement('div'); lw.className='levels';
       pub.forEach(sc=>{ const b=document.createElement('button'); b.className='lvl open'; b.innerHTML=`<span class="n">🧩</span><span class="t"><h3>${esc(sc.title)}</h3><small>${sc.moments.length} لحظات · ${sc.price?sc.price+' ر.س':'مجاني'}${sc.promo?' · <span style="color:var(--mint)">جرّب اللحظة الأولى مجاناً</span>':''}</small></span><span class="tag">${sc.price?'جرّب':'العب'}</span>`; b.addEventListener('click',()=>tryScenario(sc)); lw.appendChild(b); }); dock.appendChild(lw); }
-    dock.insertAdjacentHTML('beforeend',`<div class="tools"><button class="tool" id="toBuilder"><span class="ico">✨</span><span><b>اصنع موقفاً</b><small>من عملك أو خبرتك · 4 خطوات</small></span></button><button class="tool" id="toGroup"><span class="ico">👥</span><span><b>مجموعتي</b><small>عائلتك أو فريقك · النتائج والأرباح</small></span></button></div>`);
+    dock.insertAdjacentHTML('beforeend',`<div class="tools"><button class="tool" id="toBuilder"><span class="ico">✨</span><span><b>اصنع موقفاً</b><small>${(function(){const a=acct();return !a?'تجربة مجانية 14 يوماً':a.plan==='trial'?'تجربة · باقي '+trialLeft(a)+' يوم':a.plan==='creator'?'باقة صانع ✓':'باقة شركة ✓';})()}</small></span></button><button class="tool" id="toGroup"><span class="ico">👥</span><span><b>مجموعتي</b><small>عائلتك أو فريقك · النتائج والأرباح</small></span></button></div>`);
     $('#toBuilder').addEventListener('click',builder); $('#toGroup').addEventListener('click',group);
     dock.insertAdjacentHTML('beforeend','<p class="note">كل تصنيف يبدأ باختبار قصير يحدد المستويات المفتوحة لك.</p>');
   }
@@ -1398,12 +1411,33 @@
       {q:'اختلفتما في الرأي. ماذا تفعل؟',o:['أعيد صياغة رأيه لأتأكد أني فهمته ثم أعرض رأيي','أصرّ على رأيي','أوافقه لأنهي الموقف'],ok:0,why:'من يشعر أنه فُهم يهدأ ويسمعك.'},
       {q:'كيف تُنهي الموقف؟',o:['بخلاصة واضحة ومَن يفعل ماذا','أتركه معلّقاً','أعتذر عن كل شيء'],ok:0,why:'الموقف الذي ينتهي بلا اتفاق واضح يتكرر.'}]},
   };
+  /* ===== CREATOR ACCOUNT (trial + plans) ===== */
+  function acct(){ try{ return JSON.parse(localStorage.getItem('muhakat.creator')||'null')||S.acct||null; }catch(e){ return S.acct||null; } }
+  function setAcct(a){ S.acct=a; try{ localStorage.setItem('muhakat.creator',JSON.stringify(a)); }catch(e){} }
+  function trialLeft(a){ return a&&a.plan==='trial'?Math.max(0,Math.ceil((a.until-Date.now())/864e5)):0; }
+  function canCreate(){ const a=acct(); if(!a) return false; if(a.plan==='trial') return trialLeft(a)>0&&loadScenarios().length<2; return true; }
+  function creatorGate(next){
+    const a=acct(); stage.dataset.now='office'; stage.dataset.world='law'; $('#brandTxt').textContent='حساب الصانع'; $('#stepChip').hidden=true; resetHero(14); mood('think');
+    say('npc',a?'انتهت تجربتك أو وصلت حدّها. اختر باقة لتكمل.':'صانع المواقف بحساب اشتراك. جرّبه 14 يوماً مجاناً.','المساعد');
+    clearDock(); dock.insertAdjacentHTML('beforeend',`<div class="h2">${a?'رقِّ حسابك':'ابدأ كصانع مواقف'}<small>${a?'التجربة المجانية: موقفان ونشر خاص. الباقات تفتح السوق والأرباح.':'14 يوماً مجاناً · موقفان · نشر لعائلتك أو فريقك · بلا بطاقة'}</small></div>`);
+    if(!a){ nextBtn('ابدأ التجربة المجانية · 14 يوماً',()=>{ setAcct({plan:'trial',until:Date.now()+14*864e5,since:Date.now()}); toast('بدأت تجربتك المجانية'); next(); }); }
+    dock.insertAdjacentHTML('beforeend',`<div class="plans">
+      <button class="plan best" data-p="creator"><span class="tag2">الأكثر اختياراً</span><h3>صانع</h3><div class="pr">49 <small>ر.س/شهر</small></div><ul><li>مواقف غير محدودة</li><li>النشر في السوق + الأرباح</li><li>تحليلات المتدرّبين</li><li>توليد بالذكاء الاصطناعي</li></ul></button>
+      <button class="plan" data-p="business"><h3>شركة</h3><div class="pr">299 <small>ر.س/شهر</small></div><ul><li>كل مزايا الصانع</li><li>حتى 50 مقعداً للموظفين</li><li>تقارير وشهادات اجتياز</li><li>استيراد إجراءات الشركة</li></ul></button></div>
+      <p class="note">اشتراك تجريبي في النموذج · لا يُخصم شيء.</p>`);
+    document.querySelectorAll('.plan').forEach(b=>b.addEventListener('click',()=>{ setAcct({plan:b.dataset.p,since:Date.now()}); toast(b.dataset.p==='creator'?'اشتركت في باقة صانع':'اشتركت في باقة شركة'); next(); }));
+    const g=document.createElement('button'); g.className='btn ghost block'; g.textContent='← المتجر'; g.addEventListener('click',store); dock.appendChild(g);
+  }
+  document.addEventListener('click',e=>{ if(e.target&&e.target.id==='upg') creatorGate(store); });
+  function trialBar(){ const a=acct(); if(!a||a.plan!=='trial') return ''; return `<div class="trialbar"><span>تجربة مجانية · باقي <b>${trialLeft(a)}</b> يوم · ${loadScenarios().length}/2 مواقف</span><button id="upg">ترقية</button></div>`; }
+
   let B=null;
   function builder(){
+    if(!canCreate()) return creatorGate(builder);
     B={type:'job',title:'',who:'',desc:'',npc:'',moments:[],aud:'family',price:0};
     stage.dataset.now='office'; stage.dataset.world='law'; $('#brandTxt').textContent='صانع المواقف'; $('#stepChip').hidden=true; say(); resetHero(14); mood('think');
     say('npc','خبرتك تصير موقفاً يتدرّب عليه غيرك. صفه لي.','المساعد');
-    clearDock(); dock.insertAdjacentHTML('beforeend',wiz(0)+`<div class="h2">صف موقفاً من حياتك أو عملك<small>3 أسطر تكفي. أو اضغط الميكروفون وتكلّم.</small></div>`);
+    clearDock(); dock.insertAdjacentHTML('beforeend',trialBar()+wiz(0)+`<div class="h2">صف موقفاً من حياتك أو عملك<small>3 أسطر تكفي. أو اضغط الميكروفون وتكلّم.</small></div>`);
     dock.insertAdjacentHTML('beforeend',`<div class="field"><label>نوع الموقف</label><div class="chips" id="btype"><button class="chip2 on" data-t="job">💼 مهنتي / عملي</button><button class="chip2" data-t="proc">🏛️ إجراء رسمي</button><button class="chip2" data-t="skill">🤝 مهارة حياتية</button></div></div>
       <div class="field"><label>عنوان الموقف</label><input class="inp" id="btitle" placeholder="مثال: يوم في الصيدلية مع أبي"></div>
       <div class="field"><label>مَن يواجهه المتدرّب؟</label><input class="inp" id="bwho" placeholder="مثال: الزبون، المراجع، مدير التوظيف"></div>
@@ -1472,13 +1506,13 @@
     const upd=()=>{ if(B.promo===undefined) B.promo=true; const p=B.price, r=B.promo?.75:.7; $('#e1').textContent=(p*r).toFixed(0)+' ر.س'; $('#e2').textContent=(p*r*100).toLocaleString('en-US')+' ر.س'; $('#e3').textContent=(p*r*50).toLocaleString('en-US')+' ر.س'; document.querySelector('.earn small').textContent=`لك من كل بيع (${B.promo?75:70}٪)`; };
     document.querySelectorAll('#baud .chip2').forEach(b=>b.addEventListener('click',()=>{ document.querySelectorAll('#baud .chip2').forEach(x=>x.classList.remove('on')); b.classList.add('on'); B.aud=b.dataset.a; $('#pricebox').hidden=B.aud!=='public'; }));
     document.querySelectorAll('#bprice .chip2').forEach(b=>b.addEventListener('click',()=>{ document.querySelectorAll('#bprice .chip2').forEach(x=>x.classList.remove('on')); b.classList.add('on'); B.price=+b.dataset.p; upd(); })); upd();
-    nextBtn('نشر ✓',()=>{ const list=loadScenarios(); B.plays=0; B.id=Date.now(); B.created=new Date().toISOString().slice(0,10); list.unshift(B); saveScenarios(list); toast(B.aud==='public'?'أُرسل للمراجعة وسيظهر في السوق':'نُشر لمجموعتك'); myScenarios(); });
+    nextBtn('نشر ✓',()=>{ const a=acct(); if(B.aud==='public'&&(!a||a.plan==='trial')){ toast('النشر في السوق يتطلب باقة صانع'); return creatorGate(builderPublish); } const list=loadScenarios(); B.plays=0; B.id=Date.now(); B.created=new Date().toISOString().slice(0,10); list.unshift(B); saveScenarios(list); toast(B.aud==='public'?'أُرسل للمراجعة وسيظهر في السوق':'نُشر لمجموعتك'); myScenarios(); });
   }
   function myScenarios(){
     const list=loadScenarios(); stage.dataset.now='office'; stage.dataset.world='law'; $('#brandTxt').textContent='مواقفي'; $('#stepChip').hidden=true; say('npc',list.length?'هذه مواقفك. جرّبها أو شاركها.':'لم تصنع موقفاً بعد.','المساعد'); resetHero(14); mood('idle');
     clearDock(); dock.insertAdjacentHTML('beforeend',`<div class="libhead"><div class="prompt">مواقفي · ${list.length}</div><button class="back" id="toStore2">← المتجر</button></div>`); $('#toStore2').addEventListener('click',store);
     const earned=list.reduce((a,x)=>a+(x.aud==='public'?(x.plays||0)*x.price*.7:0),0);
-    dock.insertAdjacentHTML('beforeend',`<div class="earn"><div><b>${list.length}</b><small>موقف</small></div><div><b>${list.reduce((a,x)=>a+(x.plays||0),0)}</b><small>لعبة</small></div><div><b>${earned.toFixed(0)} ر.س</b><small>أرباحك</small></div></div>`);
+    dock.insertAdjacentHTML('beforeend',trialBar()+`<div class="earn"><div><b>${list.length}</b><small>موقف</small></div><div><b>${list.reduce((a,x)=>a+(x.plays||0),0)}</b><small>لعبة</small></div><div><b>${earned.toFixed(0)} ر.س</b><small>أرباحك</small></div></div>`);
     const w=document.createElement('div'); w.className='levels';
     list.forEach((sc,i)=>{ const b=document.createElement('button'); b.className='lvl open'; b.innerHTML=`<span class="n">🧩</span><span class="t"><h3>${esc(sc.title)}</h3><small>${sc.moments.length} لحظات · ${sc.aud==='public'?'السوق · '+(sc.price||'مجاني'):sc.aud==='team'?'فريقي':'عائلتي'} · ${sc.plays||0} لعبة</small></span><span class="tag">العب</span>`; b.addEventListener('click',()=>runScenario(sc,()=>{ saveScenarios(list); myScenarios(); })); w.appendChild(b); });
     dock.appendChild(w);
