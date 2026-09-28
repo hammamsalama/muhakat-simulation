@@ -391,6 +391,45 @@
   .kw span{font-size:.72rem;padding:3px 9px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
   .kw span.hit{border-color:var(--mint);color:var(--mint);background:rgba(62,209,139,.1)}
   .kw span.miss{border-color:var(--coral);color:var(--coral)}
+
+  /* ===== CREATOR / BUILDER ===== */
+  .wiz{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--muted)}
+  .wiz span{flex:1;height:5px;border-radius:99px;background:var(--line)}
+  .wiz span.on{background:var(--amber)} .wiz span.done{background:var(--mint)}
+  .h2{font-family:"Cairo",sans-serif;font-weight:900;font-size:1.25rem;line-height:1.35}
+  .h2 small{display:block;font-family:"IBM Plex Sans Arabic",sans-serif;font-weight:400;font-size:.8rem;color:var(--muted);margin-top:2px}
+  .field{display:flex;flex-direction:column;gap:6px}
+  .field label{font-size:.8rem;color:var(--muted);font-weight:600}
+  .inp,.ta{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;color:var(--text);font:inherit;font-size:.95rem;outline:none}
+  .inp:focus,.ta:focus{border-color:var(--sky);box-shadow:0 0 0 3px rgba(111,183,255,.2)}
+  .ta{min-height:96px;resize:vertical;line-height:1.6}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip2{padding:8px 14px;border-radius:99px;background:var(--panel);border:1px solid var(--line);font-size:.85rem;font-weight:600}
+  .chip2.on{background:var(--amber);color:var(--amber-ink);border-color:transparent}
+  .mcard{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:8px;animation:slideIn .3s ease}
+  .mcard .mh{display:flex;align-items:center;justify-content:space-between;font-family:"Cairo",sans-serif;font-weight:800}
+  .mcard .mh .x{color:var(--coral);font-size:.8rem;padding:2px 8px;border:1px solid rgba(242,99,78,.4);border-radius:99px}
+  .opt{display:flex;align-items:center;gap:8px}
+  .opt .r{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);flex:none;display:grid;place-items:center;font-size:.8rem}
+  .opt.ok .r{background:var(--mint);border-color:var(--mint);color:#06301B}
+  .opt .inp{padding:9px 12px;font-size:.88rem}
+  .addm{border:1px dashed var(--line);border-radius:16px;padding:12px;text-align:center;color:var(--muted);font-weight:600}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .earn{background:linear-gradient(135deg,#1B2642,#151E33);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+  .earn b{display:block;font-family:"IBM Plex Mono",monospace;font-size:1.15rem;color:var(--amber)}
+  .earn small{color:var(--muted);font-size:.68rem}
+  .mem{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:10px 12px}
+  .mem .av{width:40px;height:40px;border-radius:50%;background:var(--panel-2);display:grid;place-items:center;font-size:1.2rem;flex:none}
+  .mem .t{flex:1;min-width:0} .mem .t b{display:block;font-family:"Cairo",sans-serif}
+  .mem .t small{color:var(--muted);font-size:.72rem}
+  .mem .prog{margin-top:4px}
+  .mem .w{font-size:.68rem;color:var(--coral)}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--mint);color:#06301B;font-weight:700;padding:10px 18px;border-radius:99px;z-index:99;animation:pop .4s ease;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+  .tools{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .tool{display:flex;align-items:center;gap:10px;padding:12px;border-radius:16px;background:linear-gradient(135deg,rgba(246,185,59,.15),rgba(62,209,139,.08));border:1px solid rgba(246,185,59,.4);text-align:start}
+  .tool .ico{font-size:1.5rem} .tool b{display:block;font-family:"Cairo",sans-serif} .tool small{color:var(--muted);font-size:.7rem}
+  .cat.mine{border-color:rgba(62,209,139,.5)} .cat.mine::before{background:var(--mint)}
+  .badge{display:inline-block;font-size:.66rem;padding:2px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted);margin-inline-start:6px}
   /* ===== DUAL HEARING ===== */
   .stage[data-now="dual"] .laptop{display:flex!important}
   .laptop{inset:5% 5% 9% 5%;background:#1B2130;border-radius:14px;border:5px solid #2F3A4F;z-index:6;padding:8px;flex-direction:column;gap:8px;direction:rtl}
@@ -673,7 +712,7 @@
   const cat=()=>CATS[S.cat];
   function setWorld(k){ stage.dataset.world=CATS[k].world; S.npcLabel=CATS[k].npc; $('#brandTxt').textContent=CATS[k].brand; }
   function resetHero(pct){ hero.style.transition='none'; moveTo(pct); setTimeout(()=>hero.style.transition='',60); }
-  function begin(fn){ S.pts=0;S.right=0;S.total=0;S.seat=null;S.start=Date.now(); $('#hudPts').textContent='0'; $('#scanner').classList.remove('ok'); $('#stepChip').hidden=false; document.querySelectorAll('#rail span').forEach(x=>x.className=''); fn(); }
+  function begin(fn){ $('#stepChip').innerHTML='المرحلة <b id="hudStep">1</b>/5'; S.pts=0;S.right=0;S.total=0;S.seat=null;S.start=Date.now(); $('#hudPts').textContent='0'; $('#scanner').classList.remove('ok'); $('#stepChip').hidden=false; document.querySelectorAll('#rail span').forEach(x=>x.className=''); fn(); }
 
   /* ===== STORE ===== */
   async function store(){
@@ -694,6 +733,10 @@
       if(k) b.addEventListener('click',()=>{ S.cat=k; setWorld(k); mood('happy',900); S.prog[k].tested?library():placement(); });
       w.appendChild(b); });
     dock.appendChild(w);
+    const mine=loadScenarios();
+    if(mine.length){ const c=document.createElement('button'); c.className='cat mine'; c.innerHTML=`<span class="new">من صنعك</span><span class="ico">🧩</span><h3>مواقفي</h3><small>${mine.length} موقف · ${mine.reduce((a,x)=>a+(x.plays||0),0)} لعبة</small><div class="meta"><span>${mine.some(x=>x.aud==='public')?'في السوق':'خاص'}</span></div>`; c.addEventListener('click',()=>myScenarios()); w.appendChild(c); }
+    dock.insertAdjacentHTML('beforeend',`<div class="tools"><button class="tool" id="toBuilder"><span class="ico">✨</span><span><b>اصنع موقفاً</b><small>من عملك أو خبرتك · 4 خطوات</small></span></button><button class="tool" id="toGroup"><span class="ico">👥</span><span><b>مجموعتي</b><small>عائلتك أو فريقك · النتائج والأرباح</small></span></button></div>`);
+    $('#toBuilder').addEventListener('click',builder); $('#toGroup').addEventListener('click',group);
     dock.insertAdjacentHTML('beforeend','<p class="note">كل تصنيف يبدأ باختبار قصير يحدد المستويات المفتوحة لك.</p>');
   }
 
@@ -1314,6 +1357,112 @@
       choices(m.text.map(t=>({em:t.ok?'💬':'💬',t:`<span dir="ltr" style="display:block;text-align:left">${t.t}</span>`,ok:t.ok})),(c)=>{ mark(c.ok); addPts(c.ok?60:-15); mood(c.ok?'happy':'sad',900); if(c.ok) S.talkOk++;
         fb(c.ok?'good':'bad',c.ok?'جملة كاملة، فيها المعلومة، ومهذبة.':'ناقصة أو بلغة غير مفهومة للموظف أو بنبرة غير مناسبة.',c.ok?60:-15); say('npc',c.ok?'Perfect, thank you.':'Sorry?',m.who);
         nextBtn(i<TALK.length-1?'الموقف التالي ←':'النتيجة ←',()=>talkStep(i+1)); }); });
+  }
+
+  /* =====================================================================
+     CREATOR : صانع المواقف (4 خطوات) + مواقفي + مجموعتي
+     ===================================================================== */
+  function loadScenarios(){ try{ return JSON.parse(localStorage.getItem('muhakat.scenarios')||'[]'); }catch(e){ return S.mem||[]; } }
+  function saveScenarios(list){ S.mem=list; try{ localStorage.setItem('muhakat.scenarios',JSON.stringify(list)); }catch(e){} }
+  function toast(t){ const d=document.createElement('div'); d.className='toast'; d.textContent=t; document.body.appendChild(d); setTimeout(()=>d.remove(),2200); }
+  function wiz(i){ return `<div class="wiz"><span class="${i>0?'done':'on'}"></span><span class="${i>1?'done':i===1?'on':''}"></span><span class="${i>2?'done':i===2?'on':''}"></span><span class="${i===3?'on':''}"></span><b>${i+1}/4</b></div>`; }
+  const TPL={
+    job:{name:'مهنتي',npc:'الزبون',moments:[
+      {q:'أول ما يدخل {who} ماذا تفعل؟',o:['أرحّب به وأسأله عمّا يحتاج','أكمل ما بيدي حتى ينتظر','أسأله مباشرة: «وش تبغى؟»'],ok:0,why:'الترحيب أول 5 ثوانٍ يحدد الانطباع كله.'},
+      {q:'{who} يطلب شيئاً غير متأكد منه. ماذا تفعل؟',o:['أتحقق من الطلب قبل تنفيذه','أنفّذه كما قال فوراً','أقول له إنه غير موجود لأتخلص منه'],ok:0,why:'التحقق يحمي {who} ويحميك من الخطأ.'},
+      {q:'{who} غضب ورفع صوته. ماذا تفعل؟',o:['أهدأ، أعتذر عن الإزعاج، وأعرض حلاً','أرفع صوتي مثله','أتركه وأنادي المدير'],ok:0,why:'الهدوء + الاعتذار + الحل: ثلاثية تطفئ 90٪ من المواقف.'}]},
+    proc:{name:'إجراء رسمي',npc:'الموظف',moments:[
+      {q:'قبل الذهاب، ما الذي تجهّزه؟',o:['المستندات المطلوبة والموعد','أذهب وأرى ماذا يطلبون','أرسل شخصاً بدلاً مني'],ok:0,why:'نصف الزيارات الفاشلة سببها ورقة ناقصة.'},
+      {q:'الموظف يقول إن ورقة ناقصة. ماذا تفعل؟',o:['أسأل بدقة ما هي وكيف أحصل عليها','أجادله بأنها غير مطلوبة','أغادر غاضباً'],ok:0,why:'سؤال واحد دقيق يوفر زيارة كاملة.'},
+      {q:'انتهى الإجراء. ماذا تطلب قبل المغادرة؟',o:['إثبات الإنجاز (رقم/إيصال) وموعد الخطوة التالية','لا شيء، انتهينا','أطلب ملفاً كاملاً بكل شيء'],ok:0,why:'بدون رقم مرجعي لا تستطيع المتابعة لاحقاً.'}]},
+    skill:{name:'مهارة حياتية',npc:'الطرف الآخر',moments:[
+      {q:'بدأ الموقف. ما أول خطوة؟',o:['أستمع كاملاً قبل أن أرد','أرد فوراً بما في رأسي','أتجاهل الموقف'],ok:0,why:'الاستماع يعطيك المعلومة التي تُبنى عليها كل الخطوات.'},
+      {q:'اختلفتما في الرأي. ماذا تفعل؟',o:['أعيد صياغة رأيه لأتأكد أني فهمته ثم أعرض رأيي','أصرّ على رأيي','أوافقه لأنهي الموقف'],ok:0,why:'من يشعر أنه فُهم يهدأ ويسمعك.'},
+      {q:'كيف تُنهي الموقف؟',o:['بخلاصة واضحة ومَن يفعل ماذا','أتركه معلّقاً','أعتذر عن كل شيء'],ok:0,why:'الموقف الذي ينتهي بلا اتفاق واضح يتكرر.'}]},
+  };
+  let B=null;
+  function builder(){
+    B={type:'job',title:'',who:'',desc:'',npc:'',moments:[],aud:'family',price:0};
+    stage.dataset.now='office'; stage.dataset.world='law'; $('#brandTxt').textContent='صانع المواقف'; $('#stepChip').hidden=true; say(); resetHero(14); mood('think');
+    say('npc','خبرتك تصير موقفاً يتدرّب عليه غيرك. صفه لي.','المساعد');
+    clearDock(); dock.insertAdjacentHTML('beforeend',wiz(0)+`<div class="h2">صف موقفاً من حياتك أو عملك<small>3 أسطر تكفي. أو اضغط الميكروفون وتكلّم.</small></div>`);
+    dock.insertAdjacentHTML('beforeend',`<div class="field"><label>نوع الموقف</label><div class="chips" id="btype"><button class="chip2 on" data-t="job">💼 مهنتي / عملي</button><button class="chip2" data-t="proc">🏛️ إجراء رسمي</button><button class="chip2" data-t="skill">🤝 مهارة حياتية</button></div></div>
+      <div class="field"><label>عنوان الموقف</label><input class="inp" id="btitle" placeholder="مثال: يوم في الصيدلية مع أبي"></div>
+      <div class="field"><label>مَن يواجهه المتدرّب؟</label><input class="inp" id="bwho" placeholder="مثال: الزبون، المراجع، مدير التوظيف"></div>
+      <div class="field"><label>الوصف</label><textarea class="ta" id="bdesc" placeholder="مثال: أنا صيدلي. أبغى ولدي يعرف كيف يستقبل الزبون، يتأكد من الوصفة قبل الصرف، ويتعامل مع زبون عصبي بدون ما يفقد أعصابه."></textarea></div>`);
+    document.querySelectorAll('#btype .chip2').forEach(b=>b.addEventListener('click',()=>{ document.querySelectorAll('#btype .chip2').forEach(x=>x.classList.remove('on')); b.classList.add('on'); B.type=b.dataset.t; }));
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(SR){ const m=document.createElement('button'); m.className='btn ghost block'; m.textContent='🎙 أملِ الوصف بصوتك'; let rs=null; m.addEventListener('click',()=>{ if(rs){ try{rs.stop();}catch(e){} rs=null; m.textContent='🎙 أملِ الوصف بصوتك'; return; } try{ rs=new SR(); rs.lang='ar-SA'; rs.continuous=!IOS; rs.interimResults=true; let base=$('#bdesc').value; rs.onresult=e=>{ let t=''; for(let i=0;i<e.results.length;i++) t+=e.results[i][0].transcript+' '; $('#bdesc').value=(base+' '+t).trim(); }; rs.onend=()=>{ if(rs&&!IOS){ rs=null; m.textContent='🎙 أملِ الوصف بصوتك'; } }; rs.start(); m.textContent='⏹ إيقاف الإملاء'; }catch(e){ toast('الإملاء غير متاح هنا'); } }); dock.appendChild(m); }
+    nextBtn('ولّد مسودة الموقف ←',()=>{ B.title=$('#btitle').value.trim()||'موقف بلا عنوان'; B.who=$('#bwho').value.trim()||TPL[B.type].npc; B.desc=$('#bdesc').value.trim(); if(B.desc.length<15){ toast('اكتب أو أملِ 3 أسطر على الأقل'); return; } genDraft(); builderEdit(); });
+  }
+  function genDraft(){
+    const t=TPL[B.type]; B.npc=B.who;
+    B.moments=t.moments.map(m=>({q:m.q.replace(/\{who\}/g,B.who),o:m.o.map(x=>x.replace(/\{who\}/g,B.who)),ok:m.ok,why:m.why.replace(/\{who\}/g,B.who)}));
+    const kws=B.desc.split(/[،,.\n]/).map(x=>x.trim()).filter(x=>x.length>8).slice(0,3);
+    kws.forEach((k,i)=>{ if(B.moments[i]) B.moments[i].q=B.moments[i].q+' («'+k.slice(0,40)+'»)'; });
+  }
+  function builderEdit(){
+    say('npc','هذه مسودة من كلامك. عدّل ما تشاء، وحدد الإجابة الصحيحة.','المساعد'); mood('idle');
+    clearDock(); dock.insertAdjacentHTML('beforeend',wiz(1)+`<div class="h2">راجع اللحظات<small>كل لحظة = سؤال + 3 خيارات + لماذا. اضغط الدائرة لتحديد الصحيح.</small></div>`);
+    const list=document.createElement('div'); list.className='choices'; dock.appendChild(list);
+    const render=()=>{ list.innerHTML=''; B.moments.forEach((m,i)=>{ const c=document.createElement('div'); c.className='mcard';
+        c.innerHTML=`<div class="mh"><span>اللحظة ${i+1}</span>${B.moments.length>1?`<button class="x" data-i="${i}">حذف</button>`:''}</div>
+          <input class="inp" data-f="q" data-i="${i}" value="${esc(m.q)}" placeholder="السؤال أو الموقف">
+          ${m.o.map((o,k)=>`<div class="opt ${m.ok===k?'ok':''}"><button class="r" data-i="${i}" data-k="${k}">${m.ok===k?'✓':''}</button><input class="inp" data-f="o${k}" data-i="${i}" value="${esc(o)}" placeholder="خيار ${k+1}"></div>`).join('')}
+          <input class="inp" data-f="why" data-i="${i}" value="${esc(m.why)}" placeholder="لماذا هذا هو الصحيح؟ (يظهر بعد الإجابة)">`;
+        list.appendChild(c); });
+      const add=document.createElement('button'); add.className='addm'; add.textContent='+ أضف لحظة'; add.addEventListener('click',()=>{ B.moments.push({q:'',o:['','',''],ok:0,why:''}); render(); }); list.appendChild(add);
+      list.querySelectorAll('.inp').forEach(el=>el.addEventListener('input',()=>{ const m=B.moments[+el.dataset.i], f=el.dataset.f; if(f==='q') m.q=el.value; else if(f==='why') m.why=el.value; else m.o[+f[1]]=el.value; }));
+      list.querySelectorAll('.r').forEach(b=>b.addEventListener('click',()=>{ B.moments[+b.dataset.i].ok=+b.dataset.k; render(); }));
+      list.querySelectorAll('.x').forEach(b=>b.addEventListener('click',()=>{ B.moments.splice(+b.dataset.i,1); render(); })); };
+    render();
+    nextBtn('جرّبه بنفسك ←',()=>{ if(B.moments.some(m=>!m.q.trim()||m.o.some(o=>!o.trim()))){ toast('أكمل كل الأسئلة والخيارات'); return; } B.plays=0; runScenario(B,()=>builderPublish(),true); });
+    const back=document.createElement('button'); back.className='btn ghost block'; back.textContent='← رجوع'; back.addEventListener('click',builder); dock.appendChild(back);
+  }
+  function esc(t){ return (t||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+  /* generic runner for user-made scenarios */
+  function runScenario(sc,onEnd,preview){
+    $('#brandTxt').textContent=sc.title; $('#stepChip').hidden=false; document.querySelectorAll('#rail span').forEach(x=>x.className='');
+    S.pts=0;S.right=0;S.total=0;S.start=Date.now(); $('#hudPts').textContent='0'; S.npcLabel=sc.npc||'الطرف الآخر'; stage.dataset.now='office'; stage.dataset.world='law'; resetHero(14);
+    let i=0; const n=sc.moments.length;
+    const stepIt=()=>{ if(i>=n){ sc.plays=(sc.plays||0)+1; const acc=S.total?Math.round(S.right/S.total*100):0; $('#lawBanner').innerHTML=`${acc>=80?'أحسنت':'انتهى الموقف'} 🧩<small>${sc.title}</small>`; done({now:'lawdone',title:preview?'هكذا سيراه المتدرّب':'اكتمل: '+sc.title,tips:['ممتاز.','جيد.','أعد المحاولة.'],extra:preview?[['info','هذه تجربة الصانع. الخطوة التالية: النشر.']]:[]}); if(onEnd){ const b=dock.querySelector('.btn.primary'); b.textContent=preview?'انشر الموقف ←':'العودة'; b.replaceWith(b.cloneNode(true)); dock.querySelector('.btn.primary').addEventListener('click',onEnd); } return; }
+      const m=sc.moments[i]; $('#stepChip').innerHTML=`اللحظة <b id="hudStep">${i+1}</b>/${n}`; step(Math.min(i,4)); mood('think'); say('npc',m.q,sc.npc); clearDock(m.q);
+      choices(m.o.map((o,k)=>({em:['🅰','🅱','🅲'][k]||'•',t:o,ok:k===m.ok})),(c)=>{ mark(c.ok); addPts(c.ok?100:-20); mood(c.ok?'happy':'sad',1000); fb(c.ok?'good':'bad',m.why||(c.ok?'صحيح.':'ليس الأفضل.'),c.ok?100:-20); i++; nextBtn(i<n?'اللحظة التالية ←':'النتيجة ←',stepIt); }); };
+    stepIt();
+  }
+  function builderPublish(){
+    stage.dataset.now='office'; say('npc','لمن تنشره؟ الخاص مجاني، والسوق يكسبك.','المساعد'); mood('idle'); resetHero(14);
+    clearDock(); dock.insertAdjacentHTML('beforeend',wiz(3)+`<div class="h2">انشر «${esc(B.title)}»<small>اختر الجمهور. يمكنك التغيير لاحقاً.</small></div>
+      <div class="chips" id="baud"><button class="chip2 on" data-a="family">👨‍👩‍👧 عائلتي</button><button class="chip2" data-a="team">🏢 شركتي / فريقي</button><button class="chip2" data-a="public">🛒 السوق العام</button></div>
+      <div id="pricebox" hidden><div class="field"><label>السعر لكل متدرّب</label><div class="chips" id="bprice"><button class="chip2 on" data-p="0">مجاني</button><button class="chip2" data-p="9">9 ر.س</button><button class="chip2" data-p="29">29 ر.س</button><button class="chip2" data-p="99">99 ر.س</button><button class="chip2" data-p="299">299 ر.س (للشركات)</button></div></div>
+      <div class="earn"><div><b id="e1">0</b><small>لك من كل بيع (70٪)</small></div><div><b id="e2">0</b><small>100 متدرّب</small></div><div><b id="e3">0</b><small>شركة 50 مقعداً</small></div></div>
+      <p class="note">المحتوى المدفوع يمرّ بمراجعة قبل الظهور في السوق. نسبة المنصة 30٪.</p></div>`);
+    const upd=()=>{ const p=B.price; $('#e1').textContent=(p*.7).toFixed(0)+' ر.س'; $('#e2').textContent=(p*.7*100).toLocaleString('en-US')+' ر.س'; $('#e3').textContent=(p*.7*50).toLocaleString('en-US')+' ر.س'; };
+    document.querySelectorAll('#baud .chip2').forEach(b=>b.addEventListener('click',()=>{ document.querySelectorAll('#baud .chip2').forEach(x=>x.classList.remove('on')); b.classList.add('on'); B.aud=b.dataset.a; $('#pricebox').hidden=B.aud!=='public'; }));
+    document.querySelectorAll('#bprice .chip2').forEach(b=>b.addEventListener('click',()=>{ document.querySelectorAll('#bprice .chip2').forEach(x=>x.classList.remove('on')); b.classList.add('on'); B.price=+b.dataset.p; upd(); })); upd();
+    nextBtn('نشر ✓',()=>{ const list=loadScenarios(); B.plays=0; B.id=Date.now(); B.created=new Date().toISOString().slice(0,10); list.unshift(B); saveScenarios(list); toast(B.aud==='public'?'أُرسل للمراجعة وسيظهر في السوق':'نُشر لمجموعتك'); myScenarios(); });
+  }
+  function myScenarios(){
+    const list=loadScenarios(); stage.dataset.now='office'; stage.dataset.world='law'; $('#brandTxt').textContent='مواقفي'; $('#stepChip').hidden=true; say('npc',list.length?'هذه مواقفك. جرّبها أو شاركها.':'لم تصنع موقفاً بعد.','المساعد'); resetHero(14); mood('idle');
+    clearDock(); dock.insertAdjacentHTML('beforeend',`<div class="libhead"><div class="prompt">مواقفي · ${list.length}</div><button class="back" id="toStore2">← المتجر</button></div>`); $('#toStore2').addEventListener('click',store);
+    const earned=list.reduce((a,x)=>a+(x.aud==='public'?(x.plays||0)*x.price*.7:0),0);
+    dock.insertAdjacentHTML('beforeend',`<div class="earn"><div><b>${list.length}</b><small>موقف</small></div><div><b>${list.reduce((a,x)=>a+(x.plays||0),0)}</b><small>لعبة</small></div><div><b>${earned.toFixed(0)} ر.س</b><small>أرباحك</small></div></div>`);
+    const w=document.createElement('div'); w.className='levels';
+    list.forEach((sc,i)=>{ const b=document.createElement('button'); b.className='lvl open'; b.innerHTML=`<span class="n">🧩</span><span class="t"><h3>${esc(sc.title)}</h3><small>${sc.moments.length} لحظات · ${sc.aud==='public'?'السوق · '+(sc.price||'مجاني'):sc.aud==='team'?'فريقي':'عائلتي'} · ${sc.plays||0} لعبة</small></span><span class="tag">العب</span>`; b.addEventListener('click',()=>runScenario(sc,()=>{ saveScenarios(list); myScenarios(); })); w.appendChild(b); });
+    dock.appendChild(w);
+    nextBtn('+ اصنع موقفاً جديداً',builder);
+  }
+  /* ===== GROUP DASHBOARD (mock data) ===== */
+  function group(){
+    stage.dataset.now='office'; stage.dataset.world='law'; $('#brandTxt').textContent='مجموعتي'; $('#stepChip').hidden=true; say('npc','هنا ترى تقدّم أعضاء عائلتك أو فريقك.','المساعد'); resetHero(14); mood('idle');
+    const mine=loadScenarios();
+    const M=[{n:'سارة',ic:'👧',lv:'المطار · 3 نجوم',p:80,w:'التفتيش الأمني'},{n:'فهد',ic:'👦',lv:'تكلّم في المطار · نجمتان',p:45,w:'الإطالة في الردود'},{n:'محمد',ic:'👨‍💼',lv:'مطالبة مالية · نجمة',p:30,w:'الاختصاص القضائي'}];
+    clearDock(); dock.insertAdjacentHTML('beforeend',`<div class="libhead"><div class="prompt">مجموعتي · عائلة</div><button class="back" id="toStore3">← المتجر</button></div>`); $('#toStore3').addEventListener('click',store);
+    dock.insertAdjacentHTML('beforeend',`<div class="earn"><div><b>3</b><small>أعضاء</small></div><div><b>52٪</b><small>متوسط التقدم</small></div><div><b>${mine.length}</b><small>مواقف صنعتها</small></div></div>`);
+    M.forEach(m=>dock.insertAdjacentHTML('beforeend',`<div class="mem"><span class="av">${m.ic}</span><span class="t"><b>${m.n}</b><small>آخر مستوى: ${m.lv}</small><div class="prog"><i style="width:${m.p}%"></i></div><span class="w">نقطة ضعف: ${m.w}</span></span><button class="chip2">أسند موقفاً</button></div>`));
+    document.querySelectorAll('.mem .chip2').forEach(b=>b.addEventListener('click',()=>toast('أُرسل الموقف إلى العضو (تجريبي)')));
+    dock.insertAdjacentHTML('beforeend','<p class="note">بيانات تجريبية للعرض. في المنتج: دعوة أعضاء برابط، تقارير أسبوعية، وشهادات اجتياز.</p>');
+    nextBtn('✨ اصنع موقفاً لهم',builder);
   }
 
   /* ===== DONE (generic) ===== */
