@@ -430,6 +430,21 @@
   .tool .ico{font-size:1.5rem} .tool b{display:block;font-family:"Cairo",sans-serif} .tool small{color:var(--muted);font-size:.7rem}
   .cat.mine{border-color:rgba(62,209,139,.5)} .cat.mine::before{background:var(--mint)}
   .badge{display:inline-block;font-size:.66rem;padding:2px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted);margin-inline-start:6px}
+
+  .consent{display:flex;gap:10px;align-items:flex-start;background:rgba(62,209,139,.08);border:1px solid rgba(62,209,139,.4);border-radius:16px;padding:12px}
+  .consent .box{width:24px;height:24px;border-radius:7px;border:2px solid var(--line);display:grid;place-items:center;flex:none;font-size:.85rem;margin-top:2px}
+  .consent.on .box{background:var(--mint);border-color:var(--mint);color:#06301B}
+  .consent b{display:block;font-family:"Cairo",sans-serif}
+  .consent small{color:var(--muted);font-size:.74rem;line-height:1.5}
+  .paywall{background:linear-gradient(135deg,#1B2642,#0E1424);border:1px solid var(--amber);border-radius:20px;padding:16px;text-align:center;display:flex;flex-direction:column;gap:10px}
+  .paywall .lock{font-size:2rem}
+  .paywall .pr{font-family:"IBM Plex Mono",monospace;font-size:1.6rem;color:var(--amber);font-weight:600}
+  .paywall small{color:var(--muted);font-size:.74rem}
+  .sharecard{background:#FBF8F1;color:#151B2B;border-radius:18px;padding:14px;direction:rtl;box-shadow:0 18px 50px rgba(0,0,0,.45);display:flex;gap:12px;align-items:center}
+  .sharecard .st{font-size:1.6rem;color:#F6B93B}
+  .sharecard b{display:block;font-family:"Cairo",sans-serif;font-size:1rem}
+  .sharecard small{color:#6B7285;font-size:.72rem}
+  .sharecard .lk{font-family:"IBM Plex Mono",monospace;font-size:.62rem;color:#151B2B;background:#EFE9DA;padding:2px 6px;border-radius:6px;display:inline-block;margin-top:4px}
   /* ===== DUAL HEARING ===== */
   .stage[data-now="dual"] .laptop{display:flex!important}
   .laptop{inset:5% 5% 9% 5%;background:#1B2130;border-radius:14px;border:5px solid #2F3A4F;z-index:6;padding:8px;flex-direction:column;gap:8px;direction:rtl}
@@ -735,6 +750,9 @@
     dock.appendChild(w);
     const mine=loadScenarios();
     if(mine.length){ const c=document.createElement('button'); c.className='cat mine'; c.innerHTML=`<span class="new">من صنعك</span><span class="ico">🧩</span><h3>مواقفي</h3><small>${mine.length} موقف · ${mine.reduce((a,x)=>a+(x.plays||0),0)} لعبة</small><div class="meta"><span>${mine.some(x=>x.aud==='public')?'في السوق':'خاص'}</span></div>`; c.addEventListener('click',()=>myScenarios()); w.appendChild(c); }
+    const pub=mine.filter(x=>x.aud==='public');
+    if(pub.length){ dock.insertAdjacentHTML('beforeend','<div class="prompt" style="margin-top:4px">🛒 السوق · من صنع المجتمع</div>'); const lw=document.createElement('div'); lw.className='levels';
+      pub.forEach(sc=>{ const b=document.createElement('button'); b.className='lvl open'; b.innerHTML=`<span class="n">🧩</span><span class="t"><h3>${esc(sc.title)}</h3><small>${sc.moments.length} لحظات · ${sc.price?sc.price+' ر.س':'مجاني'}${sc.promo?' · <span style="color:var(--mint)">جرّب اللحظة الأولى مجاناً</span>':''}</small></span><span class="tag">${sc.price?'جرّب':'العب'}</span>`; b.addEventListener('click',()=>tryScenario(sc)); lw.appendChild(b); }); dock.appendChild(lw); }
     dock.insertAdjacentHTML('beforeend',`<div class="tools"><button class="tool" id="toBuilder"><span class="ico">✨</span><span><b>اصنع موقفاً</b><small>من عملك أو خبرتك · 4 خطوات</small></span></button><button class="tool" id="toGroup"><span class="ico">👥</span><span><b>مجموعتي</b><small>عائلتك أو فريقك · النتائج والأرباح</small></span></button></div>`);
     $('#toBuilder').addEventListener('click',builder); $('#toGroup').addEventListener('click',group);
     dock.insertAdjacentHTML('beforeend','<p class="note">كل تصنيف يبدأ باختبار قصير يحدد المستويات المفتوحة لك.</p>');
@@ -1421,11 +1439,23 @@
   }
   function esc(t){ return (t||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
   /* generic runner for user-made scenarios */
-  function runScenario(sc,onEnd,preview){
+  function tryScenario(sc){ if(!sc.price){ return runScenario(sc,store); } const cp=Object.assign({},sc,{moments:sc.moments.slice(0,1)}); runScenario(cp,null,false,{paywall:sc}); }
+  function paywall(sc){
+    clearDock(); mood('think'); say('npc','أعجبك؟ الباقي بعد الشراء.',sc.npc);
+    dock.insertAdjacentHTML('beforeend',`<div class="paywall"><span class="lock">🔓</span><div class="h2">أكمل «${esc(sc.title)}»</div><small>${sc.moments.length-1} لحظات متبقية · تقييم كامل · شهادة اجتياز</small><div class="pr">${sc.price} ر.س</div><small>يذهب ${sc.promo?75:70}٪ منها لصانع الموقف</small></div>`);
+    nextBtn('اشترِ وأكمل ←',()=>{ toast('شراء تجريبي · تم'); sc.plays=(sc.plays||0)+1; saveScenarios(loadScenarios().map(x=>x.id===sc.id?sc:x)); runScenario(Object.assign({},sc,{moments:sc.moments.slice(1)}),store); });
+    const g=document.createElement('button'); g.className='btn ghost block'; g.textContent='← العودة للمتجر'; g.addEventListener('click',store); dock.appendChild(g);
+  }
+  function shareCard(sc,stars){
+    const d=document.createElement('div'); d.className='sharecard'; d.innerHTML=`<span class="st">${'★'.repeat(stars)}${'☆'.repeat(3-stars)}</span><span><b>${esc(sc.title)}</b><small>حصلت على ${stars} من 3 نجوم · تحدّاني</small><br><span class="lk">muhakat.app/s/${(sc.id||0).toString(36)}?ref=you</span></span>`; dock.appendChild(d);
+    const b=document.createElement('button'); b.className='btn ghost block'; b.textContent='📤 شارك النتيجة (لك 10٪ من كل شراء عبر رابطك)'; b.addEventListener('click',async()=>{ const txt=`جرّب «${sc.title}» — حصلت على ${stars}/3 نجوم. ${location.href}`; try{ if(navigator.share) await navigator.share({title:sc.title,text:txt,url:location.href}); else { await navigator.clipboard.writeText(txt); toast('نُسخ الرابط'); } }catch(e){} }); dock.appendChild(b);
+  }
+  function runScenario(sc,onEnd,preview,opt){ opt=opt||{};
     $('#brandTxt').textContent=sc.title; $('#stepChip').hidden=false; document.querySelectorAll('#rail span').forEach(x=>x.className='');
     S.pts=0;S.right=0;S.total=0;S.start=Date.now(); $('#hudPts').textContent='0'; S.npcLabel=sc.npc||'الطرف الآخر'; stage.dataset.now='office'; stage.dataset.world='law'; resetHero(14);
     let i=0; const n=sc.moments.length;
-    const stepIt=()=>{ if(i>=n){ sc.plays=(sc.plays||0)+1; const acc=S.total?Math.round(S.right/S.total*100):0; $('#lawBanner').innerHTML=`${acc>=80?'أحسنت':'انتهى الموقف'} 🧩<small>${sc.title}</small>`; done({now:'lawdone',title:preview?'هكذا سيراه المتدرّب':'اكتمل: '+sc.title,tips:['ممتاز.','جيد.','أعد المحاولة.'],extra:preview?[['info','هذه تجربة الصانع. الخطوة التالية: النشر.']]:[]}); if(onEnd){ const b=dock.querySelector('.btn.primary'); b.textContent=preview?'انشر الموقف ←':'العودة'; b.replaceWith(b.cloneNode(true)); dock.querySelector('.btn.primary').addEventListener('click',onEnd); } return; }
+    const stepIt=()=>{ if(i>=n&&opt.paywall){ return paywall(opt.paywall); }
+      if(i>=n){ sc.plays=(sc.plays||0)+1; const acc=S.total?Math.round(S.right/S.total*100):0; $('#lawBanner').innerHTML=`${acc>=80?'أحسنت':'انتهى الموقف'} 🧩<small>${sc.title}</small>`; done({now:'lawdone',title:preview?'هكذا سيراه المتدرّب':'اكتمل: '+sc.title,tips:['ممتاز.','جيد.','أعد المحاولة.'],extra:preview?[['info','هذه تجربة الصانع. الخطوة التالية: النشر.']]:[]}); if(!preview){ const acc2=S.total?Math.round(S.right/S.total*100):0; shareCard(sc,acc2>=90?3:acc2>=65?2:1); } if(onEnd){ const b=dock.querySelector('.btn.primary'); b.textContent=preview?'انشر الموقف ←':'العودة'; b.replaceWith(b.cloneNode(true)); dock.querySelector('.btn.primary').addEventListener('click',onEnd); } return; }
       const m=sc.moments[i]; $('#stepChip').innerHTML=`اللحظة <b id="hudStep">${i+1}</b>/${n}`; step(Math.min(i,4)); mood('think'); say('npc',m.q,sc.npc); clearDock(m.q);
       choices(m.o.map((o,k)=>({em:['🅰','🅱','🅲'][k]||'•',t:o,ok:k===m.ok})),(c)=>{ mark(c.ok); addPts(c.ok?100:-20); mood(c.ok?'happy':'sad',1000); fb(c.ok?'good':'bad',m.why||(c.ok?'صحيح.':'ليس الأفضل.'),c.ok?100:-20); i++; nextBtn(i<n?'اللحظة التالية ←':'النتيجة ←',stepIt); }); };
     stepIt();
@@ -1436,8 +1466,10 @@
       <div class="chips" id="baud"><button class="chip2 on" data-a="family">👨‍👩‍👧 عائلتي</button><button class="chip2" data-a="team">🏢 شركتي / فريقي</button><button class="chip2" data-a="public">🛒 السوق العام</button></div>
       <div id="pricebox" hidden><div class="field"><label>السعر لكل متدرّب</label><div class="chips" id="bprice"><button class="chip2 on" data-p="0">مجاني</button><button class="chip2" data-p="9">9 ر.س</button><button class="chip2" data-p="29">29 ر.س</button><button class="chip2" data-p="99">99 ر.س</button><button class="chip2" data-p="299">299 ر.س (للشركات)</button></div></div>
       <div class="earn"><div><b id="e1">0</b><small>لك من كل بيع (70٪)</small></div><div><b id="e2">0</b><small>100 متدرّب</small></div><div><b id="e3">0</b><small>شركة 50 مقعداً</small></div></div>
-      <p class="note">المحتوى المدفوع يمرّ بمراجعة قبل الظهور في السوق. نسبة المنصة 30٪.</p></div>`);
-    const upd=()=>{ const p=B.price; $('#e1').textContent=(p*.7).toFixed(0)+' ر.س'; $('#e2').textContent=(p*.7*100).toLocaleString('en-US')+' ر.س'; $('#e3').textContent=(p*.7*50).toLocaleString('en-US')+' ر.س'; };
+      <button class="consent on" id="bconsent"><span class="box">✓</span><span><b>أسمح باستخدام موقفي في التسويق</b><small>اللحظة الأولى مجانية لكل الزوار + ظهور مميز في المتجر + نسبتك تصير 75٪ بدل 70٪. ترخيص غير حصري للترويج فقط، والملكية لك، وتلغيه متى شئت.</small></span></button>
+      <p class="note">المحتوى المدفوع يمرّ بمراجعة قبل الظهور في السوق. نسبة المنصة 30٪ (25٪ مع التسويق).</p></div>`);
+    B.promo=true; $('#bconsent').addEventListener('click',()=>{ B.promo=!B.promo; $('#bconsent').classList.toggle('on',B.promo); $('#bconsent .box').textContent=B.promo?'✓':''; upd(); });
+    const upd=()=>{ if(B.promo===undefined) B.promo=true; const p=B.price, r=B.promo?.75:.7; $('#e1').textContent=(p*r).toFixed(0)+' ر.س'; $('#e2').textContent=(p*r*100).toLocaleString('en-US')+' ر.س'; $('#e3').textContent=(p*r*50).toLocaleString('en-US')+' ر.س'; document.querySelector('.earn small').textContent=`لك من كل بيع (${B.promo?75:70}٪)`; };
     document.querySelectorAll('#baud .chip2').forEach(b=>b.addEventListener('click',()=>{ document.querySelectorAll('#baud .chip2').forEach(x=>x.classList.remove('on')); b.classList.add('on'); B.aud=b.dataset.a; $('#pricebox').hidden=B.aud!=='public'; }));
     document.querySelectorAll('#bprice .chip2').forEach(b=>b.addEventListener('click',()=>{ document.querySelectorAll('#bprice .chip2').forEach(x=>x.classList.remove('on')); b.classList.add('on'); B.price=+b.dataset.p; upd(); })); upd();
     nextBtn('نشر ✓',()=>{ const list=loadScenarios(); B.plays=0; B.id=Date.now(); B.created=new Date().toISOString().slice(0,10); list.unshift(B); saveScenarios(list); toast(B.aud==='public'?'أُرسل للمراجعة وسيظهر في السوق':'نُشر لمجموعتك'); myScenarios(); });
