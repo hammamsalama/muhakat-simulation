@@ -292,9 +292,29 @@
   .stage[data-world="law"] .wall{background:linear-gradient(#F4EDDF,#E4D8C3)}
   .stage[data-world="law"] .floor{background:repeating-linear-gradient(90deg,#C9B899 0 40px,#BCA987 40px 42px),#C9B899}
   .stage[data-world="law"] .window,.stage[data-world="law"] .plane,.stage[data-world="law"] .cloud{display:none}
-  .hero .outfit.law{display:none}
-  .stage[data-world="law"] .hero .outfit.law{display:block}
-  .stage[data-world="law"] .hero .outfit.travel{display:none}
+  .hero .sk{fill:var(--skin,#E9B58E)}
+  .hero .outfit,.hero .hd,.hero .prop{display:none}
+  .stage:not([data-outfit]) .hero .outfit.hoodie,.stage:not([data-outfit]) .hero .hd.hair{display:block}
+  .stage[data-world="law"]:not([data-outfit]) .hero .outfit.hoodie,.stage[data-world="law"]:not([data-outfit]) .hero .hd.hair{display:none}
+  .stage[data-world="law"]:not([data-outfit]) .hero .outfit.thobe,.stage[data-world="law"]:not([data-outfit]) .hero .hd.ghutra{display:block}
+  .stage[data-outfit="hoodie"] .hero .outfit.hoodie,.stage[data-outfit="hoodie"] .hero .hd.hair,
+  .stage[data-outfit="suit"] .hero .outfit.suit,.stage[data-outfit="suit"] .hero .hd.hair,
+  .stage[data-outfit="thobe"] .hero .outfit.thobe,.stage[data-outfit="thobe"] .hero .hd.ghutra,
+  .stage[data-outfit="abaya"] .hero .outfit.abaya,.stage[data-outfit="abaya"] .hero .hd.hijab{display:block}
+  .stage[data-world="travel"] .hero .prop.suitcase{display:block}
+  .stage[data-world="law"] .hero .prop.briefcase{display:block}
+  .stage[data-now="store"] .hero .prop.suitcase,.stage[data-gen="1"] .hero .prop.suitcase,.stage[data-gen="1"] .hero .prop.briefcase{display:none}
+  .stage[data-gen="1"] .npc,.stage[data-gen="1"] .defendant{display:none!important}
+  .dynnpc{bottom:24%;right:10%;width:16%;z-index:3;display:none}
+  .stage[data-gen="1"]:not([data-now="court"]) .dynnpc{display:block}
+  .dynnpc svg{width:100%;height:auto;display:block;overflow:visible}
+  .dynnpc .arm{transform-origin:20% 10%;animation:wave 2.2s ease-in-out infinite}
+  .stage[data-now="counter"] .dynnpc,.stage[data-now="security2"] .dynnpc{bottom:24%}
+  .stage[data-now="hall"] .dynnpc,.stage[data-now="lobby"] .dynnpc,.stage[data-now="lawlobby"] .dynnpc{bottom:8%;width:20%}
+  .stage[data-now="gate"] .dynnpc{bottom:16%;right:30%;width:14%}
+  .avrow{display:flex;gap:8px;flex-wrap:wrap}
+  .sw{width:38px;height:38px;border-radius:50%;border:3px solid var(--line)} .sw.on{border-color:var(--amber);box-shadow:0 0 0 3px rgba(246,185,59,.3)}
+  .topbar .av{width:30px;height:30px;border-radius:50%;background:var(--panel-2);border:1px solid var(--line);display:grid;place-items:center;font-size:.95rem}
   .facade{top:5%;left:8%;width:84%;height:56%;z-index:1}
   .facade .roof{position:absolute;top:0;left:-2%;right:-2%;height:24%;background:#D9CBB0;clip-path:polygon(50% 0,100% 100%,0 100%)}
   .facade .cols{position:absolute;top:24%;left:4%;right:4%;bottom:0;display:flex;justify-content:space-between;background:#E8DCC6;padding:0 2%}
@@ -504,7 +524,7 @@
 <div class="phone" id="app" dir="rtl" lang="ar">
   <div class="topbar">
     <div class="brand"><span class="dot"></span> <span id="brandTxt">منصة المحاكاة</span></div>
-    <div class="hud"><span class="chip" id="ptsChip">⭐ <b id="hudPts">0</b></span><span class="chip" id="stepChip">المرحلة <b id="hudStep">1</b>/5</span></div>
+    <div class="hud"><button class="av" id="avBtn" title="شخصيتي">🙂</button><span class="chip" id="ptsChip">⭐ <b id="hudPts">0</b></span><span class="chip" id="stepChip">المرحلة <b id="hudStep">1</b>/5</span></div>
   </div>
   <div class="rail" id="rail"><span class="now"></span><span></span><span></span><span></span><span></span></div>
 
@@ -633,40 +653,62 @@
     <div class="confetti" data-scene="done lawdone" id="confetti"></div>
     <div class="banner" data-scene="done">على متن الطائرة ✈<small>رحلة سعيدة يا مسافر</small></div>
 
+    <div class="dynnpc" id="dynNpc"></div>
     <!-- hero -->
     <div class="hero idle" id="hero">
       <div class="emote q">؟</div><div class="emote ex">!</div><div class="emote dr">…</div>
       <svg viewBox="0 0 120 160">
         <g class="body">
-          <!-- ===== TRAVELER OUTFIT ===== -->
-          <g class="outfit travel">
-            <g class="suitcase" transform="translate(84,96)"><rect x="0" y="0" width="30" height="44" rx="6" fill="#5B7BD9" stroke="#2C4488" stroke-width="3"/><rect x="10" y="-12" width="10" height="14" rx="3" fill="none" stroke="#2C4488" stroke-width="3"/><rect x="5" y="14" width="20" height="4" rx="2" fill="#fff" opacity=".5"/><circle cx="7" cy="46" r="3" fill="#222"/><circle cx="23" cy="46" r="3" fill="#222"/></g>
+          <!-- props -->
+          <g class="prop suitcase" transform="translate(84,96)"><rect x="0" y="0" width="30" height="44" rx="6" fill="#5B7BD9" stroke="#2C4488" stroke-width="3"/><rect x="10" y="-12" width="10" height="14" rx="3" fill="none" stroke="#2C4488" stroke-width="3"/><rect x="5" y="14" width="20" height="4" rx="2" fill="#fff" opacity=".5"/><circle cx="7" cy="46" r="3" fill="#222"/><circle cx="23" cy="46" r="3" fill="#222"/></g>
+          <g class="prop briefcase" transform="translate(84,100)"><rect x="0" y="0" width="30" height="22" rx="3" fill="#5A3A1F" stroke="#3A2412" stroke-width="2"/><rect x="10" y="-6" width="10" height="7" rx="3" fill="none" stroke="#3A2412" stroke-width="2.5"/><rect x="0" y="8" width="30" height="3" fill="#3A2412"/><rect x="12" y="7" width="6" height="5" rx="1" fill="#F6B93B"/></g>
+          <!-- outfit: hoodie -->
+          <g class="outfit hoodie">
             <rect x="40" y="108" width="14" height="36" rx="6" fill="#2F3A4F"/><rect x="58" y="108" width="14" height="36" rx="6" fill="#2F3A4F"/>
             <rect x="36" y="140" width="20" height="10" rx="5" fill="#F6B93B"/><rect x="56" y="140" width="20" height="10" rx="5" fill="#F6B93B"/>
-            <path d="M34 66 Q56 56 78 66 L82 112 L30 112 Z" fill="#F2634E"/>
-            <rect x="46" y="84" width="20" height="14" rx="4" fill="#D4503D"/>
+            <path d="M34 66 Q56 56 78 66 L82 112 L30 112 Z" fill="#F2634E"/><rect x="46" y="84" width="20" height="14" rx="4" fill="#D4503D"/>
             <path d="M42 68 L38 110" stroke="#2F3A4F" stroke-width="6" stroke-linecap="round"/>
-            <path d="M76 72 Q92 80 96 92" stroke="#F2634E" stroke-width="10" stroke-linecap="round" fill="none"/><circle cx="97" cy="92" r="6" fill="#E9B58E"/>
-            <path d="M38 72 Q28 84 32 98" stroke="#F2634E" stroke-width="10" stroke-linecap="round" fill="none"/><circle cx="32" cy="100" r="6" fill="#E9B58E"/>
+            <path d="M76 72 Q92 80 96 92" stroke="#F2634E" stroke-width="10" stroke-linecap="round" fill="none"/><circle class="sk" cx="97" cy="92" r="6"/>
+            <path d="M38 72 Q28 84 32 98" stroke="#F2634E" stroke-width="10" stroke-linecap="round" fill="none"/><circle class="sk" cx="32" cy="100" r="6"/>
           </g>
-          <!-- ===== LAWYER OUTFIT (ثوب + غترة + بشت + حقيبة) ===== -->
-          <g class="outfit law">
+          <!-- outfit: thobe + bisht -->
+          <g class="outfit thobe">
             <path d="M30 70 Q56 58 82 70 L92 150 L20 150 Z" fill="#2B2118"/>
             <path d="M36 68 Q56 58 76 68 L80 150 L32 150 Z" fill="#F7F5EE"/>
             <path d="M36 68 Q56 60 76 68 L76 78 Q56 70 36 78 Z" fill="#B8860B" opacity=".85"/>
             <path d="M50 66 L56 80 L62 66" stroke="#D9D3C4" stroke-width="2" fill="none"/>
             <rect x="34" y="146" width="20" height="8" rx="4" fill="#3A2A1E"/><rect x="58" y="146" width="20" height="8" rx="4" fill="#3A2A1E"/>
-            <path d="M76 74 Q92 82 96 96" stroke="#2B2118" stroke-width="10" stroke-linecap="round" fill="none"/><circle cx="97" cy="96" r="6" fill="#E9B58E"/>
-            <g transform="translate(84,100)"><rect x="0" y="0" width="30" height="22" rx="3" fill="#5A3A1F" stroke="#3A2412" stroke-width="2"/><rect x="10" y="-6" width="10" height="7" rx="3" fill="none" stroke="#3A2412" stroke-width="2.5"/><rect x="0" y="8" width="30" height="3" fill="#3A2412"/><rect x="12" y="7" width="6" height="5" rx="1" fill="#F6B93B"/></g>
-            <path d="M38 74 Q28 86 32 100" stroke="#2B2118" stroke-width="10" stroke-linecap="round" fill="none"/><circle cx="32" cy="102" r="6" fill="#E9B58E"/>
+            <path d="M76 74 Q92 82 96 96" stroke="#2B2118" stroke-width="10" stroke-linecap="round" fill="none"/><circle class="sk" cx="97" cy="96" r="6"/>
+            <path d="M38 74 Q28 86 32 100" stroke="#2B2118" stroke-width="10" stroke-linecap="round" fill="none"/><circle class="sk" cx="32" cy="102" r="6"/>
+          </g>
+          <!-- outfit: suit -->
+          <g class="outfit suit">
+            <rect x="40" y="108" width="14" height="36" rx="6" fill="#23293A"/><rect x="58" y="108" width="14" height="36" rx="6" fill="#23293A"/>
+            <rect x="36" y="140" width="20" height="10" rx="5" fill="#111"/><rect x="56" y="140" width="20" height="10" rx="5" fill="#111"/>
+            <path d="M34 66 Q56 56 78 66 L82 112 L30 112 Z" fill="#1F2A44"/>
+            <path d="M48 66 L56 92 L64 66 Z" fill="#fff"/><rect x="53" y="70" width="6" height="22" rx="2" fill="#B03A2E"/>
+            <path d="M76 72 Q92 80 96 92" stroke="#1F2A44" stroke-width="10" stroke-linecap="round" fill="none"/><circle class="sk" cx="97" cy="92" r="6"/>
+            <path d="M38 72 Q28 84 32 98" stroke="#1F2A44" stroke-width="10" stroke-linecap="round" fill="none"/><circle class="sk" cx="32" cy="100" r="6"/>
+          </g>
+          <!-- outfit: abaya -->
+          <g class="outfit abaya">
+            <path d="M32 68 Q56 58 80 68 L90 150 L22 150 Z" fill="#1B1B1F"/>
+            <path d="M40 72 Q56 66 72 72 L74 80 Q56 74 38 80Z" fill="#3A3A44"/>
+            <rect x="36" y="146" width="18" height="8" rx="4" fill="#3A2A1E"/><rect x="58" y="146" width="18" height="8" rx="4" fill="#3A2A1E"/>
+            <path d="M76 74 Q92 82 96 96" stroke="#1B1B1F" stroke-width="10" stroke-linecap="round" fill="none"/><circle class="sk" cx="97" cy="96" r="6"/>
+            <path d="M38 74 Q28 86 32 100" stroke="#1B1B1F" stroke-width="10" stroke-linecap="round" fill="none"/><circle class="sk" cx="32" cy="102" r="6"/>
           </g>
           <!-- head -->
-          <circle cx="56" cy="40" r="26" fill="#E9B58E"/>
-          <g class="outfit travel"><path d="M30 38 Q34 8 60 12 Q84 14 82 40 Q78 26 66 26 Q52 22 40 30 Q32 34 30 38Z" fill="#2B1D16"/></g>
-          <g class="outfit law">
+          <circle class="sk" cx="56" cy="40" r="26"/>
+          <g class="hd hair"><path d="M30 38 Q34 8 60 12 Q84 14 82 40 Q78 26 66 26 Q52 22 40 30 Q32 34 30 38Z" fill="#2B1D16"/></g>
+          <g class="hd ghutra">
             <path d="M30 40 Q30 8 56 8 Q82 8 82 40 L88 78 Q76 68 70 66 L68 34 Q62 26 56 26 Q50 26 44 34 L42 66 Q36 68 24 78 Z" fill="#F7F5EE"/>
             <path d="M44 34 Q56 24 68 34 L66 30 Q56 20 46 30Z" fill="#E4DFD2"/>
             <rect x="30" y="20" width="52" height="7" rx="3.5" fill="#111"/><rect x="31" y="28" width="50" height="4" rx="2" fill="#111" opacity=".85"/>
+          </g>
+          <g class="hd hijab">
+            <path d="M30 40 Q30 8 56 8 Q82 8 82 40 L86 80 Q70 70 68 62 L68 34 Q62 26 56 26 Q50 26 44 34 L44 62 Q42 70 26 80 Z" fill="#4A4A5A"/>
+            <path d="M40 60 Q56 78 72 60 L74 74 Q56 84 38 74Z" fill="#4A4A5A"/>
           </g>
           <g class="brows"><path class="brow-up" d="M42 30 L52 27 M62 27 L72 31" stroke="#2B1D16" stroke-width="3" stroke-linecap="round"/></g>
           <g class="eye" style="transform-origin:48px 42px"><circle cx="48" cy="42" r="3.2" fill="#1B1B1B"/></g>
@@ -698,7 +740,7 @@
 
   function mood(m,ms){ hero.className='hero '+m; if(ms) setTimeout(()=>{hero.className='hero idle'},ms); }
   function moveTo(pct){ hero.style.left=pct+'%'; }
-  function say(who,txt,label){ const b=who==='hero'?bH:bN; const o=who==='hero'?bN:bH; o.hidden=true; if(!txt){b.hidden=true;return;} b.innerHTML=`<span class="who">${who==='hero'?'أنت':(label||S.npcLabel||'الموظف')}</span>${txt}`; b.hidden=false; }
+  function say(who,txt,label){ const b=who==='hero'?bH:bN; const o=who==='hero'?bN:bH; o.hidden=true; if(!txt){b.hidden=true;return;} b.innerHTML=`<span class="who">${who==='hero'?(S.name||'أنت'):(label||S.npcLabel||'الموظف')}</span>${txt}`; b.hidden=false; }
   function addPts(n){ S.pts=Math.max(0,S.pts+n); $('#hudPts').textContent=S.pts; const c=$('#ptsChip'); c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop'); }
   function mark(ok){ S.total++; if(ok) S.right++; }
   function step(i){ document.querySelectorAll('#rail span').forEach((s,k)=>s.className=k<i?'done':k===i?'now':''); $('#hudStep').textContent=i+1; }
@@ -744,7 +786,7 @@
 
   /* ===== STORE ===== */
   async function store(){
-    stage.dataset.now='store'; stage.dataset.world='travel'; $('#brandTxt').textContent='منصة المحاكاة'; say(); clearDock(); document.querySelectorAll('#rail span').forEach(x=>x.className=''); $('#stepChip').hidden=true;
+    stage.dataset.now='store'; stage.dataset.world='travel'; delete stage.dataset.gen; $('#brandTxt').textContent='منصة المحاكاة'; say(); clearDock(); document.querySelectorAll('#rail span').forEach(x=>x.className=''); $('#stepChip').hidden=true;
     resetHero(-30); await sleep(60); mood('walk'); moveTo(40); await sleep(1000); mood('think');
     say('hero','وش نتدرّب عليه اليوم؟');
     clearDock('المتجر · اختر تصنيفاً');
@@ -1399,18 +1441,64 @@
   function wiz(i){ return `<div class="wiz"><span class="${i>0?'done':'on'}"></span><span class="${i>1?'done':i===1?'on':''}"></span><span class="${i>2?'done':i===2?'on':''}"></span><span class="${i===3?'on':''}"></span><b>${i+1}/4</b></div>`; }
   const TPL={
     job:{name:'مهنتي',npc:'الزبون',moments:[
-      {scene:'office',say:'السلام عليكم… عندي طلب.',think:'أول انطباع… خلّني أبدأ صح.',q:'أول ما يدخل {who} ماذا تفعل؟',o:['أرحّب به وأسأله عمّا يحتاج','أكمل ما بيدي حتى ينتظر','أسأله مباشرة: «وش تبغى؟»'],ok:0,why:'الترحيب أول 5 ثوانٍ يحدد الانطباع كله.'},
-      {scene:'counter',say:'أبغى هذا… أظن هو المطلوب، مو متأكد.',think:'لو نفّذت غلط، المشكلة عليّ.',q:'{who} يطلب شيئاً غير متأكد منه. ماذا تفعل؟',o:['أتحقق من الطلب قبل تنفيذه','أنفّذه كما قال فوراً','أقول له إنه غير موجود لأتخلص منه'],ok:0,why:'التحقق يحمي {who} ويحميك من الخطأ.'},
-      {scene:'hall',say:'هذا مو معقول! أنا أنتظر من ساعة!',think:'الكل يطالع… لازم أهدّي الموقف.',q:'{who} غضب ورفع صوته. ماذا تفعل؟',o:['أهدأ، أعتذر عن الإزعاج، وأعرض حلاً','أرفع صوتي مثله','أتركه وأنادي المدير'],ok:0,why:'الهدوء + الاعتذار + الحل: ثلاثية تطفئ 90٪ من المواقف.'}]},
+      {scene:'office',look:'casual',say:'السلام عليكم… عندي طلب.',think:'أول انطباع… خلّني أبدأ صح.',q:'أول ما يدخل {who} ماذا تفعل؟',o:['أرحّب به وأسأله عمّا يحتاج','أكمل ما بيدي حتى ينتظر','أسأله مباشرة: «وش تبغى؟»'],ok:0,why:'الترحيب أول 5 ثوانٍ يحدد الانطباع كله.'},
+      {scene:'counter',look:'thobe_red',say:'أبغى هذا… أظن هو المطلوب، مو متأكد.',think:'لو نفّذت غلط، المشكلة عليّ.',q:'{who} يطلب شيئاً غير متأكد منه. ماذا تفعل؟',o:['أتحقق من الطلب قبل تنفيذه','أنفّذه كما قال فوراً','أقول له إنه غير موجود لأتخلص منه'],ok:0,why:'التحقق يحمي {who} ويحميك من الخطأ.'},
+      {scene:'hall',look:'thobe_red',say:'هذا مو معقول! أنا أنتظر من ساعة!',think:'الكل يطالع… لازم أهدّي الموقف.',q:'{who} غضب ورفع صوته. ماذا تفعل؟',o:['أهدأ، أعتذر عن الإزعاج، وأعرض حلاً','أرفع صوتي مثله','أتركه وأنادي المدير'],ok:0,why:'الهدوء + الاعتذار + الحل: ثلاثية تطفئ 90٪ من المواقف.'}]},
     proc:{name:'إجراء رسمي',npc:'الموظف',moments:[
-      {scene:'street',say:'موعدك الساعة 9. لا تتأخر.',think:'وش يطلبون بالضبط؟',q:'قبل الذهاب، ما الذي تجهّزه؟',o:['المستندات المطلوبة والموعد','أذهب وأرى ماذا يطلبون','أرسل شخصاً بدلاً مني'],ok:0,why:'نصف الزيارات الفاشلة سببها ورقة ناقصة.'},
-      {scene:'counter',say:'الملف ناقص ورقة يا أستاذ.',think:'رجعت لهم مرتين قبل…',q:'الموظف يقول إن ورقة ناقصة. ماذا تفعل؟',o:['أسأل بدقة ما هي وكيف أحصل عليها','أجادله بأنها غير مطلوبة','أغادر غاضباً'],ok:0,why:'سؤال واحد دقيق يوفر زيارة كاملة.'},
-      {scene:'building',say:'خلصنا، تفضّل.',think:'أطلع كذا؟ ولا آخذ شي معي؟',q:'انتهى الإجراء. ماذا تطلب قبل المغادرة؟',o:['إثبات الإنجاز (رقم/إيصال) وموعد الخطوة التالية','لا شيء، انتهينا','أطلب ملفاً كاملاً بكل شيء'],ok:0,why:'بدون رقم مرجعي لا تستطيع المتابعة لاحقاً.'}]},
+      {scene:'street',look:'casual',say:'موعدك الساعة 9. لا تتأخر.',think:'وش يطلبون بالضبط؟',q:'قبل الذهاب، ما الذي تجهّزه؟',o:['المستندات المطلوبة والموعد','أذهب وأرى ماذا يطلبون','أرسل شخصاً بدلاً مني'],ok:0,why:'نصف الزيارات الفاشلة سببها ورقة ناقصة.'},
+      {scene:'counter',look:'hijab_pro',say:'الملف ناقص ورقة يا أستاذ.',think:'رجعت لهم مرتين قبل…',q:'الموظف يقول إن ورقة ناقصة. ماذا تفعل؟',o:['أسأل بدقة ما هي وكيف أحصل عليها','أجادله بأنها غير مطلوبة','أغادر غاضباً'],ok:0,why:'سؤال واحد دقيق يوفر زيارة كاملة.'},
+      {scene:'building',look:'thobe_white',say:'خلصنا، تفضّل.',think:'أطلع كذا؟ ولا آخذ شي معي؟',q:'انتهى الإجراء. ماذا تطلب قبل المغادرة؟',o:['إثبات الإنجاز (رقم/إيصال) وموعد الخطوة التالية','لا شيء، انتهينا','أطلب ملفاً كاملاً بكل شيء'],ok:0,why:'بدون رقم مرجعي لا تستطيع المتابعة لاحقاً.'}]},
     skill:{name:'مهارة حياتية',npc:'الطرف الآخر',moments:[
-      {scene:'office',say:'أبغى أكلمك في موضوع مهم.',think:'نبرته مختلفة اليوم.',q:'بدأ الموقف. ما أول خطوة؟',o:['أستمع كاملاً قبل أن أرد','أرد فوراً بما في رأسي','أتجاهل الموقف'],ok:0,why:'الاستماع يعطيك المعلومة التي تُبنى عليها كل الخطوات.'},
-      {scene:'office',say:'لا، أنا شايف العكس تماماً.',think:'ما أبغى أخسر الموضوع ولا أخسره هو.',q:'اختلفتما في الرأي. ماذا تفعل؟',o:['أعيد صياغة رأيه لأتأكد أني فهمته ثم أعرض رأيي','أصرّ على رأيي','أوافقه لأنهي الموقف'],ok:0,why:'من يشعر أنه فُهم يهدأ ويسمعك.'},
-      {scene:'hall',say:'طيب… وش اتفقنا عليه بالضبط؟',think:'لو طلعنا بدون اتفاق، بيرجع الموضوع.',q:'كيف تُنهي الموقف؟',o:['بخلاصة واضحة ومَن يفعل ماذا','أتركه معلّقاً','أعتذر عن كل شيء'],ok:0,why:'الموقف الذي ينتهي بلا اتفاق واضح يتكرر.'}]},
+      {scene:'office',look:'suit',say:'أبغى أكلمك في موضوع مهم.',think:'نبرته مختلفة اليوم.',q:'بدأ الموقف. ما أول خطوة؟',o:['أستمع كاملاً قبل أن أرد','أرد فوراً بما في رأسي','أتجاهل الموقف'],ok:0,why:'الاستماع يعطيك المعلومة التي تُبنى عليها كل الخطوات.'},
+      {scene:'office',look:'suit',say:'لا، أنا شايف العكس تماماً.',think:'ما أبغى أخسر الموضوع ولا أخسره هو.',q:'اختلفتما في الرأي. ماذا تفعل؟',o:['أعيد صياغة رأيه لأتأكد أني فهمته ثم أعرض رأيي','أصرّ على رأيي','أوافقه لأنهي الموقف'],ok:0,why:'من يشعر أنه فُهم يهدأ ويسمعك.'},
+      {scene:'hall',look:'casual',say:'طيب… وش اتفقنا عليه بالضبط؟',think:'لو طلعنا بدون اتفاق، بيرجع الموضوع.',q:'كيف تُنهي الموقف؟',o:['بخلاصة واضحة ومَن يفعل ماذا','أتركه معلّقاً','أعتذر عن كل شيء'],ok:0,why:'الموقف الذي ينتهي بلا اتفاق واضح يتكرر.'}]},
   };
+  /* ===== AVATAR (player) ===== */
+  const SKINS=['#F1D2B6','#E9B58E','#C98E6A','#8D5A3B'];
+  const OUTFITS={hoodie:'👕 كاجوال',thobe:'🤍 ثوب وغترة',suit:'🕴️ بدلة',abaya:'🧕 عباية وحجاب'};
+  function avatar(){ try{ return JSON.parse(localStorage.getItem('muhakat.avatar')||'null')||S.av||null; }catch(e){ return S.av||null; } }
+  function applyAvatar(){ const a=avatar(); if(!a) return; if(a.outfit) stage.dataset.outfit=a.outfit; else delete stage.dataset.outfit; hero.style.setProperty('--skin',a.skin||'#E9B58E'); S.name=a.name||''; }
+  function avatarScreen(){
+    const a=Object.assign({name:'',skin:'#E9B58E',outfit:''},avatar()||{});
+    stage.dataset.now='lobby'; stage.dataset.world='travel'; delete stage.dataset.gen; $('#brandTxt').textContent='شخصيتي'; $('#stepChip').hidden=true; say(); resetHero(40); mood('happy',1200);
+    const prev=()=>{ if(a.outfit) stage.dataset.outfit=a.outfit; else delete stage.dataset.outfit; hero.style.setProperty('--skin',a.skin); say('hero',a.name?`أنا ${a.name}.`:'هذا أنا.'); };
+    prev();
+    clearDock(); dock.insertAdjacentHTML('beforeend',`<div class="libhead"><div class="prompt">شخصيتي</div><button class="back" id="toStore4">← المتجر</button></div>
+      <div class="field"><label>اسمك في المحاكاة</label><input class="inp" id="avName" value="${esc(a.name)}" placeholder="مثال: همام"></div>
+      <div class="field"><label>لون البشرة</label><div class="avrow" id="avSkin">${SKINS.map(c=>`<button class="sw ${a.skin===c?'on':''}" data-c="${c}" style="background:${c}"></button>`).join('')}</div></div>
+      <div class="field"><label>الزيّ</label><div class="chips" id="avOut">${Object.keys(OUTFITS).map(k=>`<button class="chip2 ${a.outfit===k?'on':''}" data-o="${k}">${OUTFITS[k]}</button>`).join('')}<button class="chip2 ${!a.outfit?'on':''}" data-o="">🎭 حسب الموقف</button></div></div>`);
+    $('#toStore4').addEventListener('click',store);
+    $('#avName').addEventListener('input',e=>{ a.name=e.target.value.trim(); prev(); });
+    document.querySelectorAll('#avSkin .sw').forEach(b=>b.addEventListener('click',()=>{ a.skin=b.dataset.c; document.querySelectorAll('#avSkin .sw').forEach(x=>x.classList.toggle('on',x===b)); prev(); }));
+    document.querySelectorAll('#avOut .chip2').forEach(b=>b.addEventListener('click',()=>{ a.outfit=b.dataset.o; document.querySelectorAll('#avOut .chip2').forEach(x=>x.classList.toggle('on',x===b)); prev(); mood('happy',900); }));
+    nextBtn('حفظ شخصيتي ✓',()=>{ S.av=a; try{ localStorage.setItem('muhakat.avatar',JSON.stringify(a)); }catch(e){} applyAvatar(); toast('حُفظت شخصيتك'); store(); });
+  }
+  /* ===== NPC GENERATOR (looks chosen by the situation) ===== */
+  const NPC_LOOKS={
+    suit:{d:'بدلة رسمية (مدير، محامٍ، موظف بنك)'},thobe_red:{d:'ثوب أبيض وشماغ أحمر (رجل سعودي عادي)'},thobe_white:{d:'ثوب وغترة بيضاء (مسؤول، قاضٍ، شيخ)'},
+    uniform:{d:'زيّ رسمي كحلي بشارة (أمن، شرطة، جوازات، مضيف)'},doctor:{d:'معطف أبيض (طبيب، صيدلي، مختبر)'},casual:{d:'قميص عادي (زبون، شاب، صديق)'},
+    abaya:{d:'عباية وحجاب أسود (سيدة، مراجعة، أم)'},hijab_pro:{d:'بليزر وحجاب ملوّن (موظفة، طبيبة، مديرة)'},
+  };
+  function npcSVG(look,skin){
+    skin=skin||['#E9B58E','#D9A47E','#C98E6A'][Math.floor(Math.random()*3)];
+    const head=`<circle cx="40" cy="32" r="20" fill="${skin}"/>`, face=`<circle cx="33" cy="34" r="2.4" fill="#222"/><circle cx="47" cy="34" r="2.4" fill="#222"/><path d="M33 43 Q40 47 47 43" stroke="#8B3A3A" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+    const hair=`<path d="M20 30 Q40 2 60 30 L60 22 Q40 6 20 22Z" fill="#2B1D16"/>`;
+    const arm=(c)=>`<g class="arm"><rect x="54" y="54" width="10" height="34" rx="5" fill="${c}"/><circle cx="59" cy="90" r="6" fill="${skin}"/></g>`;
+    const B={
+      suit:`<rect x="20" y="52" width="40" height="52" rx="10" fill="#1F2A44"/><path d="M32 52 L40 70 L48 52Z" fill="#fff"/><rect x="38" y="56" width="5" height="24" rx="2" fill="#B03A2E"/>${arm('#1F2A44')}${head}${hair}${face}`,
+      thobe_red:`<rect x="18" y="52" width="44" height="56" rx="12" fill="#F7F5EE"/>${arm('#F7F5EE')}${head}<path d="M18 30 Q40 2 62 30 L64 50 Q40 44 16 50Z" fill="#B03A2E"/><rect x="19" y="19" width="42" height="6" rx="3" fill="#111"/>${face}`,
+      thobe_white:`<rect x="18" y="52" width="44" height="56" rx="12" fill="#F7F5EE"/>${arm('#F7F5EE')}${head}<path d="M18 30 Q40 2 62 30 L64 50 Q40 44 16 50Z" fill="#F7F5EE"/><rect x="19" y="19" width="42" height="6" rx="3" fill="#111"/>${face}`,
+      uniform:`<rect x="20" y="52" width="40" height="52" rx="10" fill="#151B2B"/><rect x="27" y="58" width="8" height="8" rx="2" fill="#F6B93B"/><rect x="36" y="52" width="8" height="30" fill="#2A3757"/>${arm('#151B2B')}${head}<path d="M18 28 Q40 6 62 28 L62 34 L18 34Z" fill="#151B2B"/><rect x="16" y="30" width="48" height="5" rx="2" fill="#0B0F1A"/>${face}`,
+      doctor:`<rect x="18" y="52" width="44" height="54" rx="10" fill="#F4F6FA"/><rect x="36" y="52" width="8" height="26" fill="#6FB7FF"/><rect x="24" y="72" width="12" height="4" rx="1" fill="#9BA6C3"/>${arm('#F4F6FA')}${head}${hair}${face}`,
+      casual:`<rect x="20" y="52" width="40" height="50" rx="10" fill="#3B7A57"/>${arm('#3B7A57')}${head}${hair}${face}`,
+      abaya:`<path d="M20 52 Q40 44 60 52 L66 112 L14 112Z" fill="#1B1B1F"/>${arm('#1B1B1F')}${head}<path d="M18 30 Q40 4 62 30 L66 70 Q40 60 14 70Z" fill="#1B1B1F"/><circle cx="40" cy="34" r="15" fill="${skin}"/><circle cx="34" cy="34" r="2.2" fill="#222"/><circle cx="46" cy="34" r="2.2" fill="#222"/><path d="M34 42 Q40 46 46 42" stroke="#8B3A3A" stroke-width="2" fill="none" stroke-linecap="round"/>`,
+      hijab_pro:`<rect x="20" y="52" width="40" height="52" rx="10" fill="#6B4A8A"/><path d="M32 52 L40 66 L48 52Z" fill="#fff"/>${arm('#6B4A8A')}${head}<path d="M18 30 Q40 4 62 30 L64 64 Q40 56 16 64Z" fill="#C9A24A"/><circle cx="40" cy="34" r="15" fill="${skin}"/><circle cx="34" cy="34" r="2.2" fill="#222"/><circle cx="46" cy="34" r="2.2" fill="#222"/><path d="M34 42 Q40 46 46 42" stroke="#8B3A3A" stroke-width="2" fill="none" stroke-linecap="round"/>`,
+    };
+    return `<svg viewBox="0 0 80 120">${B[look]||B.casual}</svg>`;
+  }
+  const DEFAULT_LOOK={office:'suit',court:'thobe_white',building:'thobe_red',hall:'casual',counter:'hijab_pro',security:'uniform',gate:'uniform',street:'casual'};
+  function showNpc(look,scene){ $('#dynNpc').innerHTML=npcSVG(look||DEFAULT_LOOK[scene]||'casual'); }
+
   /* ===== SCENE CATALOG for generated scenarios ===== */
   const SCENES={
     office:{now:'office',world:'law',pos:14,desc:'مكتب مهني (مكتب، رفوف، موظف بالبدلة)'},
@@ -1447,7 +1535,7 @@
   function builder(){
     if(!canCreate()) return creatorGate(builder);
     B={type:'job',title:'',who:'',desc:'',npc:'',moments:[],aud:'family',price:0};
-    stage.dataset.now='office'; stage.dataset.world='law'; $('#brandTxt').textContent='صانع المواقف'; $('#stepChip').hidden=true; say(); resetHero(14); mood('think');
+    stage.dataset.now='office'; stage.dataset.world='law'; delete stage.dataset.gen; $('#brandTxt').textContent='صانع المواقف'; $('#stepChip').hidden=true; say(); resetHero(14); mood('think');
     say('npc','خبرتك تصير موقفاً يتدرّب عليه غيرك. صفه لي.','المساعد');
     clearDock(); dock.insertAdjacentHTML('beforeend',trialBar()+wiz(0)+`<div class="h2">صف موقفاً من حياتك أو عملك<small>جملة أو ثلاث تكفي: مَن المتدرّب، أين، ومع مَن، وما الذي يحدث. أو اضغط الميكروفون وتكلّم.</small></div>`);
     dock.insertAdjacentHTML('beforeend',`<div class="field"><label>نوع الموقف</label><div class="chips" id="btype"><button class="chip2 on" data-t="job">💼 مهنتي / عملي</button><button class="chip2" data-t="proc">🏛️ إجراء رسمي</button><button class="chip2" data-t="skill">🤝 مهارة حياتية</button></div></div>
@@ -1460,7 +1548,7 @@
   }
   function genTemplate(){
     const t=TPL[B.type]; B.npc=B.who;
-    B.moments=t.moments.map(m=>({scene:m.scene,say:m.say,think:m.think,q:m.q.replace(/\{who\}/g,B.who),o:m.o.map(x=>x.replace(/\{who\}/g,B.who)),ok:m.ok,why:m.why.replace(/\{who\}/g,B.who)}));
+    B.moments=t.moments.map(m=>({scene:m.scene,look:m.look,say:m.say,think:m.think,q:m.q.replace(/\{who\}/g,B.who),o:m.o.map(x=>x.replace(/\{who\}/g,B.who)),ok:m.ok,why:m.why.replace(/\{who\}/g,B.who)}));
     B.gen='template';
   }
   async function genDraft(regen){
@@ -1473,11 +1561,12 @@
       +'نوع الموقف: '+TPL[B.type].name+'. العنوان: '+B.title+'. استنتج من الوصف الشخصية الرئيسية التي يواجهها المتدرّب (مثل: الشريك المدير، الزبون، الموظف) وسمّها في npc.\n'
       +'وصف الصانع: <<<'+B.desc.slice(0,1500)+'>>>\n'
       +'المشاهد المتاحة للرسم (اختر الأنسب لكل لحظة): '+Object.keys(SCENES).map(k=>k+' = '+SCENES[k].desc).join('؛ ')+'.\n'
-      +'المطلوب: 5 لحظات متسلسلة زمنياً تحكي قصة يوم واقعي. لكل لحظة: scene (مفتاح من القائمة)، say = جملة تقولها الشخصية فعلاً في هذه اللحظة بلهجة طبيعية (حوار، لا وصف ولا سؤال)، think = خاطرة قصيرة تدور في ذهن المتدرّب، q = السؤال من سطر واحد يطلب القرار (لا يكرر جملة الشخصية)، 3 خيارات قصيرة واقعية (واحد صحيح، واحد خطأ شائع مغرٍ، واحد خطأ واضح) بترتيب عشوائي، وتعليل من جملة واحدة يشرح لماذا الصحيح صحيح وما يعلّمه للمتدرّب. تجنّب الوعظ، واجعل الخيارات كما يقولها الناس فعلاً.'+(regen?' اجعلها مختلفة تماماً عن أي محاولة سابقة.':'')+'\n'
-      +'أجب بـ JSON فقط بهذا الشكل بالضبط: {"npc":"اسم/صفة الشخصية","moments":[{"scene":"office","say":"...","think":"...","q":"...","o":["...","...","..."],"ok":0,"why":"..."}]} حيث ok هو فهرس الخيار الصحيح (0-2).';
+      +'أزياء الشخصيات المتاحة (اختر لكل لحظة ما يناسب مَن يتكلم فيها): '+Object.keys(NPC_LOOKS).map(k=>k+' = '+NPC_LOOKS[k].d).join('؛ ')+'.\n'
+      +'المطلوب: 5 لحظات متسلسلة زمنياً تحكي قصة يوم واقعي. لكل لحظة: scene (مفتاح من القائمة)، npc = مَن يتكلم في هذه اللحظة (صفة قصيرة مثل «الشريك المدير»)، look = مفتاح زيّه من القائمة، say = جملة تقولها الشخصية فعلاً في هذه اللحظة بلهجة طبيعية (حوار، لا وصف ولا سؤال)، think = خاطرة قصيرة تدور في ذهن المتدرّب، q = السؤال من سطر واحد يطلب القرار (لا يكرر جملة الشخصية)، 3 خيارات قصيرة واقعية (واحد صحيح، واحد خطأ شائع مغرٍ، واحد خطأ واضح) بترتيب عشوائي، وتعليل من جملة واحدة يشرح لماذا الصحيح صحيح وما يعلّمه للمتدرّب. تجنّب الوعظ، واجعل الخيارات كما يقولها الناس فعلاً.'+(regen?' اجعلها مختلفة تماماً عن أي محاولة سابقة.':'')+'\n'
+      +'أجب بـ JSON فقط بهذا الشكل بالضبط: {"npc":"اسم/صفة الشخصية","moments":[{"scene":"office","npc":"الشريك المدير","look":"suit","say":"...","think":"...","q":"...","o":["...","...","..."],"ok":0,"why":"..."}]} حيث ok هو فهرس الخيار الصحيح (0-2).';
     try{
       const data=await sample.json(prompt,{modelTier:'default',cache:false,signal:ctl.signal,onText:({text})=>{ $('#gtm').textContent='يكتب…'; $('#gtr').textContent=text.slice(-400); }});
-      const ms=(data&&Array.isArray(data.moments)?data.moments:[]).filter(m=>m&&m.q&&Array.isArray(m.o)&&m.o.length>=3).slice(0,7).map(m=>({scene:SCENES[m.scene]?m.scene:'office',say:String(m.say||''),think:String(m.think||''),q:String(m.q),o:m.o.slice(0,3).map(String),ok:Math.min(2,Math.max(0,parseInt(m.ok)||0)),why:String(m.why||'')}));
+      const ms=(data&&Array.isArray(data.moments)?data.moments:[]).filter(m=>m&&m.q&&Array.isArray(m.o)&&m.o.length>=3).slice(0,7).map(m=>({scene:SCENES[m.scene]?m.scene:'office',npc:String(m.npc||''),look:NPC_LOOKS[m.look]?m.look:'',say:String(m.say||''),think:String(m.think||''),q:String(m.q),o:m.o.slice(0,3).map(String),ok:Math.min(2,Math.max(0,parseInt(m.ok)||0)),why:String(m.why||'')}));
       if(ms.length<3) throw {code:'invalid_json'};
       B.moments=ms; B.npc=String(data.npc||B.who); B.gen='ai'; B.genNote='';
     }catch(e){ genTemplate(); B.genNote=e.code==='cancelled'?'استخدمت مسودة القوالب.':e.code==='not_granted'?'لم يُسمح للصفحة باستخدام Claude، فاستخدمت القوالب.':'تعذّر التوليد الذكي ('+(e.code||'خطأ')+')، فاستخدمت القوالب.'; }
@@ -1491,6 +1580,7 @@
     const render=()=>{ list.innerHTML=''; B.moments.forEach((m,i)=>{ const c=document.createElement('div'); c.className='mcard';
         c.innerHTML=`<div class="mh"><span>اللحظة ${i+1}</span>${B.moments.length>1?`<button class="x" data-i="${i}">حذف</button>`:''}</div>
           <div class="chips" style="gap:5px">${Object.keys(SCENES).map(k=>`<button class="chip2 sc ${(m.scene||'office')===k?'on':''}" data-i="${i}" data-s="${k}" style="padding:5px 10px;font-size:.72rem">${{office:'🏢 مكتب',court:'⚖️ محكمة',building:'🏛️ مبنى',hall:'🏬 صالة',counter:'🛎️ كاونتر',security:'🛂 تفتيش',gate:'🚪 انتظار',street:'🚕 شارع'}[k]}</button>`).join('')}</div>
+          <div class="chips" style="gap:5px">${Object.keys(NPC_LOOKS).map(k=>`<button class="chip2 lk ${(m.look||DEFAULT_LOOK[m.scene||'office'])===k?'on':''}" data-i="${i}" data-l="${k}" style="padding:5px 10px;font-size:.72rem">${{suit:'🕴️ بدلة',thobe_red:'🔴 شماغ',thobe_white:'⚪ غترة',uniform:'👮 زيّ رسمي',doctor:'🥼 طبيب',casual:'👕 كاجوال',abaya:'🧕 عباية',hijab_pro:'👩‍💼 حجاب مهني'}[k]}</button>`).join('')}</div>
           <input class="inp" data-f="say" data-i="${i}" value="${esc(m.say||'')}" placeholder="ماذا تقول الشخصية في هذه اللحظة؟ (حوار)">
           <input class="inp" data-f="think" data-i="${i}" value="${esc(m.think||'')}" placeholder="خاطرة المتدرّب (اختياري)">
           <input class="inp" data-f="q" data-i="${i}" value="${esc(m.q)}" placeholder="السؤال: ما القرار؟">
@@ -1500,6 +1590,7 @@
       const add=document.createElement('button'); add.className='addm'; add.textContent='+ أضف لحظة'; add.addEventListener('click',()=>{ B.moments.push({scene:'office',say:'',think:'',q:'',o:['','',''],ok:0,why:''}); render(); }); list.appendChild(add);
       list.querySelectorAll('.inp').forEach(el=>el.addEventListener('input',()=>{ const m=B.moments[+el.dataset.i], f=el.dataset.f; if(f==='q') m.q=el.value; else if(f==='why') m.why=el.value; else if(f==='say') m.say=el.value; else if(f==='think') m.think=el.value; else m.o[+f[1]]=el.value; }));
       list.querySelectorAll('.sc').forEach(b=>b.addEventListener('click',()=>{ B.moments[+b.dataset.i].scene=b.dataset.s; render(); }));
+      list.querySelectorAll('.lk').forEach(b=>b.addEventListener('click',()=>{ B.moments[+b.dataset.i].look=b.dataset.l; render(); }));
       list.querySelectorAll('.r').forEach(b=>b.addEventListener('click',()=>{ B.moments[+b.dataset.i].ok=+b.dataset.k; render(); }));
       list.querySelectorAll('.x').forEach(b=>b.addEventListener('click',()=>{ B.moments.splice(+b.dataset.i,1); render(); })); };
     render();
@@ -1521,13 +1612,13 @@
   }
   function runScenario(sc,onEnd,preview,opt){ opt=opt||{};
     $('#brandTxt').textContent=sc.title; $('#stepChip').hidden=false; document.querySelectorAll('#rail span').forEach(x=>x.className='');
-    S.pts=0;S.right=0;S.total=0;S.start=Date.now(); $('#hudPts').textContent='0'; S.npcLabel=sc.npc||'الطرف الآخر'; stage.dataset.now='office'; stage.dataset.world='law'; resetHero(14); $('#gateSign').innerHTML='GATE B12<b id="gateNow">ZONE 3</b>';
+    S.pts=0;S.right=0;S.total=0;S.start=Date.now(); $('#hudPts').textContent='0'; S.npcLabel=sc.npc||'الطرف الآخر'; stage.dataset.gen='1'; stage.dataset.now='office'; stage.dataset.world='law'; resetHero(14); $('#gateSign').innerHTML='GATE B12<b id="gateNow">ZONE 3</b>';
     let i=0; const n=sc.moments.length;
-    const stepIt=()=>{ if(i>=n&&opt.paywall){ stage.dataset.world='law'; stage.dataset.now='office'; resetHero(14); return paywall(opt.paywall); }
-      if(i>=n){ stage.dataset.world='law'; sc.plays=(sc.plays||0)+1; const acc=S.total?Math.round(S.right/S.total*100):0; $('#lawBanner').innerHTML=`${acc>=80?'أحسنت':'انتهى الموقف'} 🧩<small>${sc.title}</small>`; done({now:'lawdone',title:preview?'هكذا سيراه المتدرّب':'اكتمل: '+sc.title,tips:['ممتاز.','جيد.','أعد المحاولة.'],extra:preview?[['info','هذه تجربة الصانع. الخطوة التالية: النشر.']]:[]}); if(!preview){ const acc2=S.total?Math.round(S.right/S.total*100):0; shareCard(sc,acc2>=90?3:acc2>=65?2:1); } if(onEnd){ const b=dock.querySelector('.btn.primary'); b.textContent=preview?'انشر الموقف ←':'العودة'; b.replaceWith(b.cloneNode(true)); dock.querySelector('.btn.primary').addEventListener('click',onEnd); } return; }
+    const stepIt=()=>{ if(i>=n&&opt.paywall){ delete stage.dataset.gen; stage.dataset.world='law'; stage.dataset.now='office'; resetHero(14); return paywall(opt.paywall); }
+      if(i>=n){ delete stage.dataset.gen; stage.dataset.world='law'; sc.plays=(sc.plays||0)+1; const acc=S.total?Math.round(S.right/S.total*100):0; $('#lawBanner').innerHTML=`${acc>=80?'أحسنت':'انتهى الموقف'} 🧩<small>${sc.title}</small>`; done({now:'lawdone',title:preview?'هكذا سيراه المتدرّب':'اكتمل: '+sc.title,tips:['ممتاز.','جيد.','أعد المحاولة.'],extra:preview?[['info','هذه تجربة الصانع. الخطوة التالية: النشر.']]:[]}); if(!preview){ const acc2=S.total?Math.round(S.right/S.total*100):0; shareCard(sc,acc2>=90?3:acc2>=65?2:1); } if(onEnd){ const b=dock.querySelector('.btn.primary'); b.textContent=preview?'انشر الموقف ←':'العودة'; b.replaceWith(b.cloneNode(true)); dock.querySelector('.btn.primary').addEventListener('click',onEnd); } return; }
       const m=sc.moments[i]; $('#stepChip').innerHTML=`اللحظة <b id="hudStep">${i+1}</b>/${n}`; step(Math.min(i,4));
-      const scn=applyScene(m.scene||'office'); S.npcLabel=sc.npc||'الطرف الآخر'; say(); mood('walk'); moveTo(scn.pos+4);
-      setTimeout(()=>{ mood('think'); if(m.say) say('npc',m.say,sc.npc); else say('hero',m.think||'…'); },700);
+      const scn=applyScene(m.scene||'office'); showNpc(m.look,m.scene||'office'); S.npcLabel=m.npc||sc.npc||'الطرف الآخر'; say(); mood('walk'); moveTo(scn.pos+4);
+      setTimeout(()=>{ mood('think'); if(m.say) say('npc',m.say,m.npc||sc.npc); else say('hero',m.think||'…'); },700);
       clearDock(m.q); if(m.think&&m.say) dock.insertAdjacentHTML('beforeend',`<p class="note" style="text-align:start;margin-top:-4px">💭 ${esc(m.think)}</p>`);
       choices(m.o.map((o,k)=>({em:['🅰','🅱','🅲'][k]||'•',t:o,ok:k===m.ok})),(c)=>{ mark(c.ok); addPts(c.ok?100:-20); mood(c.ok?'happy':'sad',1000); fb(c.ok?'good':'bad',m.why||(c.ok?'صحيح.':'ليس الأفضل.'),c.ok?100:-20); i++; nextBtn(i<n?'اللحظة التالية ←':'النتيجة ←',stepIt); }); };
     stepIt();
@@ -1587,6 +1678,7 @@
     dock.insertAdjacentHTML('beforeend','<p class="note">نموذج تجريبي · محاكاة تعليمية لا تُغني عن استشارة مختص.</p>');
   }
 
+  applyAvatar(); $('#avBtn').addEventListener('click',avatarScreen);
   store();
 })();
 </script>
