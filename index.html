@@ -993,6 +993,27 @@
     });
   }
 
+  /* ===== RULE-BASED MATCHING (no AI) ===== */
+  function normAr(t){ return t.replace(/[\u064B-\u0652\u0640]/g,'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/(^|\s)ال(?=\S)/g,'$1').replace(/[^\p{L}\p{N}\s]/gu,' ').replace(/\s+/g,' ').trim().toLowerCase(); }
+  function lev(a,b){ const m=a.length,n=b.length; if(!m) return n; if(!n) return m; let prev=[...Array(n+1).keys()]; for(let i=1;i<=m;i++){ const cur=[i]; for(let j=1;j<=n;j++){ cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1)); } prev=cur; } return prev[n]; }
+  function fuzzyHas(text,word){ const w=word.toLowerCase(); if(text.includes(w)) return true; if(w.length<4) return false; const tol=w.length>8?2:1; return text.split(/\s+/).some(t=>Math.abs(t.length-w.length)<=tol&&lev(t,w)<=tol); }
+  const NEG=/(^|\s)(not|no|never|don't|dont|didn't|isn't|ain't|ما|لا|لم|لن|ليس|مو|مب|بدون)(\s|$)/;
+  function negatedBefore(text,idx){ const before=text.slice(Math.max(0,idx-28),idx); return NEG.test(before); }
+  function kwHit(low,alts){ const n=normAr(low); return alts.some(a=>{ const w=a.toLowerCase(); const i=n.indexOf(normAr(w)); if(i>=0) return !negatedBefore(n,i); return fuzzyHas(n,w); }); }
+  const CITIES=('dubai dxb abu dhabi auh doha doh riyadh ruh jeddah jed dammam dmm medina madinah med makkah mecca taif abha tabuk yanbu jizan hail qassim buraidah kuwait kwi manama bah muscat mct cairo cai alexandria amman amm beirut bey baghdad istanbul ist ankara antalya trabzon bursa london lhr lgw paris cdg orly rome fco milan madrid barcelona lisbon berlin munich frankfurt vienna zurich geneva amsterdam brussels prague budapest warsaw athens moscow stockholm oslo copenhagen helsinki dublin edinburgh manchester new york nyc jfk washington chicago los angeles miami boston toronto vancouver montreal mexico sao paulo buenos aires tokyo osaka seoul beijing shanghai hong kong singapore kuala lumpur bangkok phuket bali jakarta manila hanoi ho chi minh delhi mumbai bangalore hyderabad karachi lahore islamabad dhaka colombo kathmandu maldives male tehran tashkent baku tbilisi sarajevo tirana casablanca marrakech tunis algiers tripoli khartoum addis ababa nairobi johannesburg cape town lagos accra sydney melbourne auckland perth brisbane bosnia georgia azerbaijan turkey egypt uk england france italy spain germany switzerland malaysia indonesia thailand japan china india pakistan morocco jordan lebanon qatar bahrain oman kuwait uae emirates saudi arabia america usa canada australia').split(' ');
+  const CITY_PHRASES=['abu dhabi','new york','los angeles','hong kong','kuala lumpur','sao paulo','buenos aires','ho chi minh','cape town','addis ababa','saudi arabia'];
+  const CITIES_AR=('دبي ابوظبي الدوحه الرياض جده الدمام المدينه مكه الطائف ابها تبوك القصيم الكويت المنامه مسقط القاهره الاسكندريه عمان بيروت اسطنبول انقره لندن باريس روما ميلانو مدريد برشلونه برلين فيينا جنيف امستردام نيويورك تورنتو طوكيو سول بكين شنغهاي سنغافوره كوالالمبور بانكوك بالي جاكرتا دلهي مومباي كراتشي الدار البيضاء مراكش تونس القاهره الخرطوم نيروبي سيدني تركيا مصر بريطانيا فرنسا ايطاليا اسبانيا المانيا ماليزيا اندونيسيا تايلند اليابان الصين الهند المغرب الاردن لبنان قطر البحرين عمان الامارات امريكا').split(' ');
+  function hasDestination(low){ const n=normAr(low); if(/(^|\s)(not|never|no)\s+(going|flying|travel)/.test(n)||/(^|\s)(ما|مو|مب|لا)\s*(مسافر|رايح|اسافر)/.test(n)) return false;
+    if(CITY_PHRASES.some(p=>n.includes(p))) return true;
+    const toks=n.split(/\s+/);
+    if(toks.some(t=>t.length>=3&&CITIES.includes(t))) return true;
+    if(toks.some(t=>CITIES_AR.includes(t))) return true;
+    if(toks.some(t=>t.length>=5&&CITIES.some(c=>c.length>=5&&Math.abs(c.length-t.length)<=1&&lev(t,c)<=1))) return true;
+    const m=n.match(/\b(?:flying|going|heading|travel(?:l)?ing|off)\s+to\s+([a-z\u0600-\u06FF]{3,})/)||n.match(/\bto\s+([a-z\u0600-\u06FF]{4,})\b/);
+    if(m&&!['check','the','get','see','my','have','go','do','be'].includes(m[1])) return true;
+    return /\b(الي|إلى|على|ل)\s*[\u0600-\u06FF]{3,}/.test(n)&&/\b(مسافر|رايح|سافر|اسافر|طاير)\b/.test(n);
+  }
+
   /* ===== VOICE ANSWER ===== */
   const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
   function voiceAnswer(keywords,onDone,opts){
@@ -1032,7 +1053,7 @@
     function evaluate(){
       const txt=transcript.trim(), low=txt.toLowerCase();
       const kw=document.createElement('div'); kw.className='kw'; let hits=0;
-      if(txt){ keywords.forEach(k=>{ const h=k.alts.some(a=>low.includes(a.toLowerCase())); if(h) hits++; kw.insertAdjacentHTML('beforeend',`<span class="${h?'hit':'miss'}">${h?'✓':'✕'} ${k.t}</span>`); }); box.appendChild(kw);
+      if(txt){ keywords.forEach(k=>{ const h=k.test?k.test(low,txt):kwHit(low,k.alts); if(h) hits++; kw.insertAdjacentHTML('beforeend',`<span class="${h?'hit':'miss'}">${h?'✓':'✕'} ${k.t}</span>`); }); box.appendChild(kw);
         const need=opts.need||2, words=txt.split(/\s+/).length, long=words>(opts.maxWords||45);
         const pts=hits*35-(long?15:0); mark(hits>=need); addPts(pts); mood(hits>=need?'happy':'sad',1000);
         fb(hits>=need?'good':'bad',`ذكرت ${hits} من ${keywords.length} عناصر الردّ`+`${long?'، وأطلت أكثر من اللازم':''}. ${hits>=need?(opts.okMsg||'ممتاز.'):(opts.badMsg||'ناقص.')}`,pts); onDone(hits>=need); }
@@ -1260,8 +1281,8 @@
      ===================================================================== */
   const TALK=[
     {now:'counter',pos:20,who:'موظفة الكاونتر',en:"Good morning! Where are you flying to today, and do you have any bags to check?",ar:'صباح الخير! إلى أين تسافر اليوم، وهل معك حقائب لتسليمها؟',hint:'قل وجهتك وعدد الحقائب',
-     kw:[{t:'الوجهة (Dubai)',alts:['dubai','dxb']},{t:'عدد الحقائب (one bag)',alts:['one bag','1 bag','one suitcase','a bag','a suitcase','one']},{t:'تحية أو رد مهذب',alts:['good morning','morning','hello','hi','please','thank']}],
-     text:[{t:"Good morning. I'm flying to Dubai, and I have one bag to check.",ok:true},{t:'Dubai.',ok:false},{t:'أنا رايح دبي ومعي شنطة.',ok:false}]},
+     kw:[{t:'الوجهة (أي مدينة أو دولة)',alts:['dubai'],test:(low)=>hasDestination(low)},{t:'الحقائب (one bag / two bags / no bags)',alts:['one bag','1 bag','two bags','2 bags','three bags','one suitcase','a bag','a suitcase','no bags','no bag','carry on','carry-on','hand luggage','luggage','suitcase','bags']},{t:'تحية أو رد مهذب',alts:['good morning','morning','hello','hi','please','thank']}],
+     text:[{t:"Good morning. I'm flying to Paris, and I have one bag to check.",ok:true},{t:'Dubai.',ok:false},{t:'أنا رايح دبي ومعي شنطة.',ok:false}]},
     {now:'counter',pos:20,who:'موظفة الكاونتر',en:"Would you prefer a window or an aisle seat?",ar:'تفضّل مقعد النافذة أم الممر؟',hint:'اختر وقلها بجملة قصيرة',
      kw:[{t:'window أو aisle',alts:['window','aisle']},{t:'صيغة مهذبة (please / I\'d like)',alts:['please','i would like',"i'd like",'i prefer','could i']}],need:1,
      text:[{t:"A window seat, please.",ok:true},{t:'Seat.',ok:false},{t:'Give me window.',ok:false}]},
