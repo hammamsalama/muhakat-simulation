@@ -1439,23 +1439,44 @@
     say('npc','خبرتك تصير موقفاً يتدرّب عليه غيرك. صفه لي.','المساعد');
     clearDock(); dock.insertAdjacentHTML('beforeend',trialBar()+wiz(0)+`<div class="h2">صف موقفاً من حياتك أو عملك<small>3 أسطر تكفي. أو اضغط الميكروفون وتكلّم.</small></div>`);
     dock.insertAdjacentHTML('beforeend',`<div class="field"><label>نوع الموقف</label><div class="chips" id="btype"><button class="chip2 on" data-t="job">💼 مهنتي / عملي</button><button class="chip2" data-t="proc">🏛️ إجراء رسمي</button><button class="chip2" data-t="skill">🤝 مهارة حياتية</button></div></div>
-      <div class="field"><label>عنوان الموقف</label><input class="inp" id="btitle" placeholder="مثال: يوم في الصيدلية مع أبي"></div>
-      <div class="field"><label>مَن يواجهه المتدرّب؟</label><input class="inp" id="bwho" placeholder="مثال: الزبون، المراجع، مدير التوظيف"></div>
-      <div class="field"><label>الوصف</label><textarea class="ta" id="bdesc" placeholder="مثال: أنا صيدلي. أبغى ولدي يعرف كيف يستقبل الزبون، يتأكد من الوصفة قبل الصرف، ويتعامل مع زبون عصبي بدون ما يفقد أعصابه."></textarea></div>`);
+      <div class="field"><label>عنوان الموقف</label><input class="inp" id="btitle" placeholder="مثال: أول يوم عمل في شركة محاماة"></div>
+      <div class="field"><label>مَن يواجهه المتدرّب؟</label><input class="inp" id="bwho" placeholder="مثال: الشريك المدير، الزبون، المراجع"></div>
+      <div class="field"><label>الوصف</label><textarea class="ta" id="bdesc" placeholder="مثال: أبغى تجربة لموظف في أول يوم عمل بعد التخرج في شركة محاماة: التعارف، أول مهمة من الشريك، عميل يتصل ويسأل عن قضيته، وخطأ في مذكرة قبل تسليمها."></textarea></div>`);
     document.querySelectorAll('#btype .chip2').forEach(b=>b.addEventListener('click',()=>{ document.querySelectorAll('#btype .chip2').forEach(x=>x.classList.remove('on')); b.classList.add('on'); B.type=b.dataset.t; }));
     const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
     if(SR){ const m=document.createElement('button'); m.className='btn ghost block'; m.textContent='🎙 أملِ الوصف بصوتك'; let rs=null; m.addEventListener('click',()=>{ if(rs){ try{rs.stop();}catch(e){} rs=null; m.textContent='🎙 أملِ الوصف بصوتك'; return; } try{ rs=new SR(); rs.lang='ar-SA'; rs.continuous=!IOS; rs.interimResults=true; let base=$('#bdesc').value; rs.onresult=e=>{ let t=''; for(let i=0;i<e.results.length;i++) t+=e.results[i][0].transcript+' '; $('#bdesc').value=(base+' '+t).trim(); }; rs.onend=()=>{ if(rs&&!IOS){ rs=null; m.textContent='🎙 أملِ الوصف بصوتك'; } }; rs.start(); m.textContent='⏹ إيقاف الإملاء'; }catch(e){ toast('الإملاء غير متاح هنا'); } }); dock.appendChild(m); }
-    nextBtn('ولّد مسودة الموقف ←',()=>{ B.title=$('#btitle').value.trim()||'موقف بلا عنوان'; B.who=$('#bwho').value.trim()||TPL[B.type].npc; B.desc=$('#bdesc').value.trim(); if(B.desc.length<15){ toast('اكتب أو أملِ 3 أسطر على الأقل'); return; } genDraft(); builderEdit(); });
+    nextBtn('ولّد مسودة الموقف ←',()=>{ B.title=$('#btitle').value.trim()||'موقف بلا عنوان'; B.who=$('#bwho').value.trim()||TPL[B.type].npc; B.desc=$('#bdesc').value.trim(); if(B.desc.length<15){ toast('اكتب أو أملِ 3 أسطر على الأقل'); return; } genDraft().then(builderEdit); });
   }
-  function genDraft(){
+  function genTemplate(){
     const t=TPL[B.type]; B.npc=B.who;
     B.moments=t.moments.map(m=>({q:m.q.replace(/\{who\}/g,B.who),o:m.o.map(x=>x.replace(/\{who\}/g,B.who)),ok:m.ok,why:m.why.replace(/\{who\}/g,B.who)}));
     const kws=B.desc.split(/[،,.\n]/).map(x=>x.trim()).filter(x=>x.length>8).slice(0,3);
     kws.forEach((k,i)=>{ if(B.moments[i]) B.moments[i].q=B.moments[i].q+' («'+k.slice(0,40)+'»)'; });
+    B.gen='template';
+  }
+  async function genDraft(regen){
+    const sample=(window.claude&&claude.use)?await claude.use('sample'):null;
+    if(!sample){ genTemplate(); B.genNote='التوليد الذكي غير متاح في هذه النسخة؛ هذه مسودة من قوالب.'; return; }
+    clearDock(); dock.insertAdjacentHTML('beforeend',wiz(1)+`<div class="h2">أكتب لك الموقف…<small>أخترع اللحظات والأسئلة والإجابات من وصفك. 10–40 ثانية.</small></div><div class="rec on"><div class="head"><span class="dot"></span><span class="tm" id="gtm">يفكر…</span></div><div class="tr" id="gtr"><small>سيظهر الموقف هنا أثناء كتابته</small></div></div>`);
+    say('npc','لحظة… أكتب لك الموقف.','المساعد'); mood('think');
+    const ctl=new AbortController(); const stop=document.createElement('button'); stop.className='btn ghost block'; stop.textContent='إيقاف واستخدام مسودة القوالب'; stop.addEventListener('click',()=>ctl.abort()); dock.appendChild(stop);
+    const prompt='أنت مصمم محاكاة تعليمية تفاعلية باللغة العربية (أسلوب سعودي مهذب، فصحى مبسطة). حوّل وصف الصانع إلى موقف تدريبي يلعبه متدرّب خطوة بخطوة.\n'
+      +'نوع الموقف: '+TPL[B.type].name+'. العنوان: '+B.title+'. الشخصية التي يواجهها المتدرّب: '+B.who+'.\n'
+      +'وصف الصانع: <<<'+B.desc.slice(0,1500)+'>>>\n'
+      +'المطلوب: 5 لحظات متسلسلة زمنياً تحكي قصة يوم واقعي بتفاصيل حسّية قصيرة. كل لحظة: سؤال من سطر واحد بصيغة موقف («دخلت المكتب و…»)، 3 خيارات قصيرة واقعية (واحد صحيح، واحد خطأ شائع مغرٍ، واحد خطأ واضح) بترتيب عشوائي، وتعليل من جملة واحدة يشرح لماذا الصحيح صحيح وما يعلّمه للمتدرّب. تجنّب الوعظ، واجعل الخيارات كما يقولها الناس فعلاً.'+(regen?' اجعلها مختلفة تماماً عن أي محاولة سابقة.':'')+'\n'
+      +'أجب بـ JSON فقط بهذا الشكل بالضبط: {"npc":"اسم/صفة الشخصية","moments":[{"q":"...","o":["...","...","..."],"ok":0,"why":"..."}]} حيث ok هو فهرس الخيار الصحيح (0-2).';
+    try{
+      const data=await sample.json(prompt,{modelTier:'default',cache:false,signal:ctl.signal,onText:({text})=>{ $('#gtm').textContent='يكتب…'; $('#gtr').textContent=text.slice(-400); }});
+      const ms=(data&&Array.isArray(data.moments)?data.moments:[]).filter(m=>m&&m.q&&Array.isArray(m.o)&&m.o.length>=3).slice(0,7).map(m=>({q:String(m.q),o:m.o.slice(0,3).map(String),ok:Math.min(2,Math.max(0,parseInt(m.ok)||0)),why:String(m.why||'')}));
+      if(ms.length<3) throw {code:'invalid_json'};
+      B.moments=ms; B.npc=String(data.npc||B.who); B.gen='ai'; B.genNote='';
+    }catch(e){ genTemplate(); B.genNote=e.code==='cancelled'?'استخدمت مسودة القوالب.':e.code==='not_granted'?'لم يُسمح للصفحة باستخدام Claude، فاستخدمت القوالب.':'تعذّر التوليد الذكي ('+(e.code||'خطأ')+')، فاستخدمت القوالب.'; }
   }
   function builderEdit(){
     say('npc','هذه مسودة من كلامك. عدّل ما تشاء، وحدد الإجابة الصحيحة.','المساعد'); mood('idle');
-    clearDock(); dock.insertAdjacentHTML('beforeend',wiz(1)+`<div class="h2">راجع اللحظات<small>كل لحظة = سؤال + 3 خيارات + لماذا. اضغط الدائرة لتحديد الصحيح.</small></div>`);
+    clearDock(); dock.insertAdjacentHTML('beforeend',wiz(1)+`<div class="h2">راجع اللحظات<small>${B.gen==='ai'?'كتبها الذكاء الاصطناعي من وصفك. ':''}كل لحظة = سؤال + 3 خيارات + لماذا. اضغط الدائرة لتحديد الصحيح.</small></div>`);
+    if(B.genNote) fb('info',B.genNote);
+    if(B.gen==='ai'){ const rg=document.createElement('button'); rg.className='btn ghost block'; rg.textContent='🔄 ولّد نسخة مختلفة'; rg.addEventListener('click',()=>genDraft(true).then(builderEdit)); dock.appendChild(rg); }
     const list=document.createElement('div'); list.className='choices'; dock.appendChild(list);
     const render=()=>{ list.innerHTML=''; B.moments.forEach((m,i)=>{ const c=document.createElement('div'); c.className='mcard';
         c.innerHTML=`<div class="mh"><span>اللحظة ${i+1}</span>${B.moments.length>1?`<button class="x" data-i="${i}">حذف</button>`:''}</div>
