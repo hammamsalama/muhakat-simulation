@@ -280,7 +280,7 @@
   .cat small{display:block;color:var(--muted);font-size:.72rem;margin-top:2px}
   .cat .meta{display:flex;gap:5px;margin-top:10px;flex-wrap:wrap}
   .cat .meta span{font-size:.66rem;padding:2px 8px;border-radius:99px;border:1px solid var(--line);color:var(--muted)}
-  .cat.travel{border-color:rgba(111,183,255,.45)} .cat.law{border-color:rgba(246,185,59,.5)}
+  .cat.travel{border-color:rgba(111,183,255,.45)} .cat.law{border-color:rgba(246,185,59,.5)} .cat.work{border-color:rgba(113,75,103,.8)} .cat.work::before{background:#714B67}
   .cat::before{content:"";position:absolute;inset:auto -30% -40% auto;width:60%;aspect-ratio:1;border-radius:50%;opacity:.12;background:var(--dim)}
   .cat.travel::before{background:var(--sky)} .cat.law::before{background:var(--amber)}
   .cat.soon{opacity:.5;cursor:not-allowed}
@@ -517,6 +517,39 @@
   .taskbar .n{width:28px;height:28px;border-radius:8px;background:var(--amber);color:var(--amber-ink);display:grid;place-items:center;font-weight:900;flex:none;font-family:"Cairo",sans-serif}
   .taskbar b{font-family:"Cairo",sans-serif}
   .taskbar small{display:block;color:var(--muted);font-size:.74rem}
+
+  .appframe{--th:#1E5C4A}
+  .appframe .abar{background:var(--th)}
+  .appframe h4{color:var(--th)} .fld input:focus{outline-color:var(--th)} .radio.on .r{border-color:var(--th);background:radial-gradient(var(--th) 45%,#fff 50%)} .chk2.on .b{background:var(--th);border-color:var(--th)} .abtn{background:var(--th)} .abtn.sec{color:var(--th);border-color:var(--th)} .okbox{border-color:var(--th)} .okbox b{color:var(--th)} .rowi .i{color:var(--th)}
+  .apps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:6px 0}
+  .app{background:#fff;border:1px solid #E4E7EE;border-radius:10px;padding:8px 2px;font-size:.58rem;color:#1A2233;display:flex;flex-direction:column;align-items:center;gap:3px;direction:ltr}
+  .app .ai{font-size:1.3rem}
+  .cp{display:flex;align-items:center;justify-content:space-between;gap:6px;direction:ltr;padding:2px 0;flex-wrap:wrap}
+  .cpl{display:flex;align-items:center;gap:6px;flex-wrap:wrap} .cpl b{font-size:.8rem;color:#1A2233}
+  .cpr{display:flex;align-items:center;gap:6px} .pg{font-size:.6rem;color:#6B7285}
+  .obtn{background:var(--th);color:#fff;border-radius:4px;padding:5px 9px;font-size:.62rem;font-weight:600;direction:ltr}
+  .obtn.sec{background:#fff;color:#1A2233;border:1px solid #C9D2DE}
+  .save{background:#fff;border:1px solid #C9D2DE;border-radius:4px;padding:5px 8px;font-size:.62rem;color:var(--th);font-weight:700}
+  .stbar{display:flex;direction:ltr;border:1px solid #C9D2DE;border-radius:4px;overflow:hidden;font-size:.56rem}
+  .stbar span{padding:4px 8px;background:#fff;color:#6B7285;border-right:1px solid #C9D2DE} .stbar span:last-child{border:0}
+  .stbar span.on{background:var(--th);color:#fff;font-weight:700} .stbar span.done{color:var(--th);font-weight:600}
+  .olist{width:100%;border-collapse:collapse;font-size:.6rem;direction:ltr;background:#fff;border:1px solid #E4E7EE;border-radius:6px;overflow:hidden}
+  .olist th{text-align:left;color:#6B7285;font-weight:600;padding:5px 6px;border-bottom:1px solid #E4E7EE;background:#F7F8FB}
+  .olist td{padding:5px 6px;border-bottom:1px solid #F0F2F6;color:#1A2233}
+  .olist select,.olist input{width:100%;border:0;border-bottom:1px solid #C9D2DE;background:transparent;font:inherit;font-size:.62rem;padding:2px 0;color:#1A2233} .olist input.num{width:52px;text-align:right}
+  .orow{cursor:pointer} .orow:hover td{background:#F3F0F7}
+  .st{font-size:.54rem;padding:1px 6px;border-radius:99px;background:#EEF0F5;color:#4B5163} .st.sent{background:#E3F2FD;color:#1565C0} .st.so{background:#E8F5E9;color:#2E7D32}
+  .oform{background:#fff;border:1px solid #E4E7EE;border-radius:6px;padding:8px;direction:ltr;display:flex;flex-direction:column;gap:6px}
+  .oform h3{margin:0;font-size:.95rem;color:#1A2233;font-family:"Cairo",sans-serif} .oform h3 small{font-weight:400;color:#6B7285;font-size:.62rem}
+  .ogrid{display:grid;grid-template-columns:1fr 1fr;gap:6px} .ogrid .fld{direction:ltr} .ogrid .fld span{text-align:left}
+  .otabs{display:flex;gap:10px;border-bottom:1px solid #E4E7EE;font-size:.62rem;color:#6B7285} .otabs span{padding:4px 2px} .otabs span.on{color:var(--th);border-bottom:2px solid var(--th);font-weight:700}
+  .olink{color:var(--th);font-size:.62rem;text-align:left;padding:4px 2px;font-weight:600}
+  .totals{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:.62rem;color:#6B7285} .totals div{display:flex;gap:10px} .totals b{color:#1A2233;min-width:70px;text-align:right} .totals .grand{font-size:.72rem;border-top:1px solid #E4E7EE;padding-top:2px} .totals .grand b{color:var(--th)}
+  .dlg{background:#fff;border:1px solid #E4E7EE;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px;direction:ltr;box-shadow:0 10px 30px rgba(0,0,0,.15)}
+  .dlg h3{margin:0;font-size:.85rem;color:#1A2233} .dlg .fld{direction:ltr} .dlg .fld span{text-align:left} .dlg textarea{background:#fff;border:1px solid #C9D2DE;border-radius:8px;padding:6px 8px;font:inherit;font-size:.64rem;width:100%;resize:none}
+  .dlg .radio{direction:ltr;text-align:left} .att{font-size:.6rem;color:#6B7285;background:#F7F8FB;border-radius:6px;padding:4px 8px}
+  .chat{font-size:.6rem;color:#4B5163;background:#F7F8FB;border-radius:6px;padding:5px 8px;border-left:3px solid var(--th)}
+  .smart{display:flex;gap:6px} .smart span{font-size:.58rem;border:1px solid #E4E7EE;border-radius:6px;padding:4px 8px;color:#4B5163}
   /* ===== DUAL HEARING ===== */
   .stage[data-now="dual"] .laptop{display:flex!important}
   .laptop{inset:5% 5% 9% 5%;background:#1B2130;border-radius:14px;border:5px solid #2F3A4F;z-index:6;padding:8px;flex-direction:column;gap:8px;direction:rtl}
@@ -819,7 +852,17 @@
         ['جلسة صلح وتسوية','التفاوض أمام المصلح دون خسارة موقفك','٨ دقائق'],
       ]},
   };
-  S.cat='travel'; S.prog={travel:{unlocked:2,done:0,tested:false},law:{unlocked:4,done:0,tested:false}};
+  CATS.work={name:'الأعمال والبرامج',ico:'💼',brand:'محاكي الأعمال',lib:'مكتبتي · الأعمال',world:'law',lobby:'office',npc:'المدير',
+      q:'هل سبق أن عملت على نظام مبيعات أو محاسبة؟',opts:[['🐣','ولا مرة',1],['🙂','أعرف الأساسيات',2],['💼','أستخدمه يومياً',3],['🧠','أدرّب غيري عليه',4]],
+      react:{1:'أول مرة… خطوة خطوة.',4:'تمام، خبرة في الأنظمة.',x:'طيب، عندي فكرة.'},
+      levels:[
+        ['عرض سعر في نظام المبيعات — محاكاة الشاشات','Sales ← New ← البنود ← Send ← Confirm ← Invoice (بأسلوب Odoo)','٧ دقائق',()=>odooSales()],
+        ['أول يوم عمل بعد التخرج','التعارف، أول مهمة، عميل يتصل، خطأ قبل التسليم','١٠ دقائق'],
+        ['المقابلة الوظيفية الأولى','أسئلة الموارد البشرية والراتب','١٠ دقائق'],
+        ['إقفال الشهر المحاسبي','التسويات، الضريبة، التقرير','١٢ دقيقة'],
+        ['اجتماع مع عميل غاضب','الاستماع، الحل، المتابعة','٨ دقائق'],
+      ]};
+  S.cat='travel'; S.prog={travel:{unlocked:2,done:0,tested:false},law:{unlocked:4,done:0,tested:false},work:{unlocked:1,done:0,tested:false}};
   const cat=()=>CATS[S.cat];
   function setWorld(k){ stage.dataset.world=CATS[k].world; S.npcLabel=CATS[k].npc; $('#brandTxt').textContent=CATS[k].brand; }
   function resetHero(pct){ hero.style.transition='none'; moveTo(pct); setTimeout(()=>hero.style.transition='',60); }
@@ -835,7 +878,7 @@
     const cards=[
       ['travel','✈️','السفر','المطار، الترانزيت، الجوازات، الفندق',['٥ مستويات','مجاني'],''],
       ['law','⚖️','المحاماة','الدعاوى، المرافعة، الجلسات، التنفيذ',['٥ مستويات','جديد'],'<span class="new">جديد ✨</span>'],
-      [null,'💼','الوظائف','المقابلة الأولى، الموارد البشرية، أول يوم عمل',['قريباً'],'<span class="soonTag">قريباً</span>'],
+      ['work','💼','الأعمال والبرامج','عرض سعر في نظام المبيعات، أول يوم عمل، المقابلة',['٥ مستويات','جديد'],'<span class="new">جديد ✨</span>'],
       [null,'🎓','التعليم','التسجيل الجامعي، اختيار التخصص',['قريباً'],'<span class="soonTag">قريباً</span>'],
     ];
     cards.forEach(([k,ico,t,d,meta,badge],i)=>{
@@ -1722,19 +1765,24 @@
      multi:['c1','c2','c3'],bad:{c4:'الصورة الشخصية ليست مستنداً في الدعوى.'},target:'submit',needPick:'أرفق المستندات الثلاثة أولاً.',wrong:{back:'لا داعي للرجوع.'}},
   ];
   let SC=null;
-  function najiz(){
-    stage.dataset.now='app'; delete stage.dataset.gen; $('#stepChip').hidden=false; say(); SC={i:0,picked:null,checked:new Set(),wrongs:0};
-    clearDock(); dock.insertAdjacentHTML('beforeend',`<div class="h2">قيد دعوى إلكترونياً<small>شاشات تحاكي بوابة القضاء الإلكترونية · اضغط حيث يضغط المحامي فعلاً</small></div>`);
-    fb('info','ستنتقل عبر 5 شاشات. الضغط الخاطئ يخصم ويشرح لك لماذا.');
+  function najiz(){ runScreens({brand:'بوابة القضاء الإلكترونية',theme:'#1E5C4A',steps:NAJIZ},{name:'قيد دعوى إلكترونياً',doneHtml:()=>`<div class="okbox">✅ تم قيد الدعوى<b>4521/1448</b><small>المحكمة التجارية · الدائرة الثالثة<br>موعد الجلسة الأولى: بعد 21 يوماً · عن بُعد</small></div>`,banner:'قُيّدت الدعوى ⚖️',tips:['تعرف الطريق بلا تردد: الخدمات ← صحيفة جديدة ← التصنيف الصحيح ← بيانات دقيقة ← المرفقات.','جيد. أكثر ما يُربك: الخلط بين التنفيذ والدعوى، ونسيان محضر الاستلام.','أعد المستوى وركّز على ترتيب الشاشات؛ التلميح الذهبي يظهر بعد خطأين.'],note:'الشاشات محاكاة تدريبية بأسلوب البوابة لا نسخة منها؛ الإجراء الحقيقي قد يختلف في التفاصيل.'}); }
+  function runScreens(spec,cfg){
+    stage.dataset.now='app'; delete stage.dataset.gen; $('#stepChip').hidden=false; say(); SC={spec,cfg,i:0,picked:null,checked:new Set(),wrongs:0,total:''};
+    $('#appframe').style.setProperty('--th',spec.theme||'#1E5C4A');
+    clearDock(); dock.insertAdjacentHTML('beforeend',`<div class="h2">${cfg.name}<small>${spec.steps.length} شاشات تحاكي النظام · اضغط واكتب كما في الواقع</small></div>`);
+    fb('info','الضغط الخاطئ يخصم ويشرح لك لماذا. بعد خطأين يتوهّج الزر الصحيح.');
     nextBtn('ابدأ',()=>screenStep(0));
   }
+  function fmt(n){ return (Math.round(n*100)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
   function screenStep(i){
-    if(i>=NAJIZ.length) return screenDone();
-    const st=NAJIZ[i]; SC.i=i; SC.picked=null; SC.checked=new Set(); step(Math.min(i,4)); $('#stepChip').innerHTML=`الشاشة <b id="hudStep">${i+1}</b>/5`;
-    const app=$('#appframe'); app.innerHTML=`<div class="abar"><b>بوابة القضاء الإلكترونية</b><span class="sim">محاكاة تدريبية</span></div><div class="abody"><div class="crumb">${st.crumb}</div>${st.html}</div>`;
+    const steps=SC.spec.steps; if(i>=steps.length) return screenDone();
+    const st=steps[i]; SC.i=i; SC.picked=null; SC.checked=new Set(); step(Math.min(Math.floor(i*5/steps.length),4)); $('#stepChip').innerHTML=`الشاشة <b id="hudStep">${i+1}</b>/${steps.length}`;
+    const app=$('#appframe'); app.innerHTML=`<div class="abar"><b>${SC.spec.brand}</b><span class="sim">محاكاة تدريبية</span></div><div class="abody"><div class="crumb">${st.crumb}</div>${st.html}</div>`;
+    ['t3b','t3c'].forEach(id=>{ const el=app.querySelector('#'+id); if(el&&SC.total) el.textContent=SC.total; });
     clearDock(); dock.insertAdjacentHTML('beforeend',`<div class="taskbar"><span class="n">${i+1}</span><span><b>${st.task}</b><small>${st.hint}</small></span></div>`);
     const log=document.createElement('div'); log.className='choices'; dock.appendChild(log);
-    const flash=(el,msg,pts)=>{ el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); SC.wrongs++; mark(false); addPts(pts||-10); beep(220,120); const d=document.createElement('div'); d.className='fb bad'; d.innerHTML=`<span>✕</span><span>${msg}</span><span class="pts">${pts||-10}</span>`; log.prepend(d); if(SC.wrongs%2===0){ const t=app.querySelector(`[data-k="${st.target}"]`); if(t) t.classList.add('glow'); } };
+    if(st.live){ const q=app.querySelector('#qty'), p=app.querySelector('#price'); const upd=()=>{ const v=(parseFloat(q.value)||0)*(parseFloat(p.value)||0); app.querySelector('#amt').textContent=fmt(v); app.querySelector('#t1').textContent=fmt(v); app.querySelector('#t2').textContent=fmt(v*.15); app.querySelector('#t3').textContent=fmt(v*1.15); SC.total=fmt(v*1.15); }; q.addEventListener('input',upd); p.addEventListener('input',upd); }
+    const flash=(el,msg,pts)=>{ if(el){ el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); } SC.wrongs++; mark(false); addPts(pts||-10); beep(220,120); const d=document.createElement('div'); d.className='fb bad'; d.innerHTML=`<span>✕</span><span>${msg}</span><span class="pts">${pts||-10}</span>`; log.prepend(d); if(SC.wrongs%2===0){ const t=app.querySelector(`[data-k="${st.target}"]`); if(t) t.classList.add('glow'); } };
     app.querySelectorAll('[data-k]').forEach(el=>el.addEventListener('click',()=>{ const k=el.dataset.k;
       if(st.pick&&k===st.pick){ app.querySelectorAll('.radio').forEach(x=>x.classList.remove('on')); el.classList.add('on'); SC.picked=k; return; }
       if(st.multi&&st.multi.includes(k)){ el.classList.toggle('on'); el.classList.contains('on')?SC.checked.add(k):SC.checked.delete(k); return; }
@@ -1742,18 +1790,58 @@
       if(k===st.target){
         if(st.pick&&SC.picked!==st.pick){ flash(el,st.needPick); return; }
         if(st.multi&&st.multi.some(x=>!SC.checked.has(x))){ flash(el,st.needPick); return; }
+        if(st.select){ const sel=app.querySelector('#'+st.select.id); if(!sel||!sel.value){ flash(sel,st.select.msg); return; } }
         if(st.input){ const v=(app.querySelector('#'+st.input.id)||{}).value||''; if(!st.input.re.test(v.trim())){ flash(app.querySelector('#'+st.input.id),st.input.msg); return; } }
+        if(st.inputs){ for(const inp of st.inputs){ const el2=app.querySelector('#'+inp.id); const v=(el2||{}).value||''; if(!inp.re.test(v.trim())||(inp.min!==undefined&&parseFloat(v)<inp.min)){ flash(el2,inp.msg); return; } } }
         mark(true); addPts(60); beep(880,120); const d=document.createElement('div'); d.className='fb good'; d.innerHTML=`<span>✓</span><span>صحيح.</span><span class="pts">+60</span>`; log.prepend(d);
         setTimeout(()=>screenStep(i+1),500); return; }
       if(st.wrong&&st.wrong[k]) flash(el,st.wrong[k]); }));
   }
   function screenDone(){
-    const no='4521/1448'; const app=$('#appframe');
-    app.innerHTML=`<div class="abar"><b>بوابة القضاء الإلكترونية</b><span class="sim">محاكاة تدريبية</span></div><div class="abody"><div class="okbox">✅ تم قيد الدعوى<b>${no}</b><small>المحكمة التجارية · الدائرة الثالثة<br>موعد الجلسة الأولى: بعد 21 يوماً · عن بُعد</small></div><div class="fld"><span>رسالة نصية</span><input value="تم قيد دعواكم رقم ${no}. تابعوا الحالة عبر البوابة." readonly></div></div>`;
+    const app=$('#appframe'), cfg=SC.cfg;
+    app.innerHTML=`<div class="abar"><b>${SC.spec.brand}</b><span class="sim">محاكاة تدريبية</span></div><div class="abody">${cfg.doneHtml(SC)}</div>`;
     step(4); beep(880,200);
-    $('#lawBanner').innerHTML=`قُيّدت الدعوى ⚖️<small>${no} · ${SC.wrongs?SC.wrongs+' ضغطة خاطئة':'بلا أخطاء'}</small>`;
-    setTimeout(()=>{ stage.dataset.world='law'; done({now:'lawdone',title:'اكتمل: قيد دعوى إلكترونياً',stars:SC.wrongs===0?3:SC.wrongs<=2?2:1,tips:['تعرف الطريق بلا تردد: الخدمات ← صحيفة جديدة ← التصنيف الصحيح ← بيانات دقيقة ← المرفقات.','جيد. أكثر ما يُربك: الخلط بين التنفيذ والدعوى، ونسيان محضر الاستلام.','أعد المستوى وركّز على ترتيب الشاشات؛ التلميح الذهبي يظهر بعد خطأين.'],extra:[['info','الشاشات محاكاة تدريبية بأسلوب البوابة لا نسخة منها؛ الإجراء الحقيقي قد يختلف في التفاصيل.']]}); },1800);
+    $('#lawBanner').innerHTML=`${cfg.banner}<small>${SC.wrongs?SC.wrongs+' ضغطة خاطئة':'بلا أخطاء'}</small>`;
+    setTimeout(()=>{ stage.dataset.world='law'; done({now:'lawdone',title:'اكتمل: '+cfg.name,stars:SC.wrongs===0?3:SC.wrongs<=2?2:1,tips:cfg.tips,extra:[['info',cfg.note]]}); },1800);
   }
+  /* ===== ODOO-STYLE SALES FLOW (Quotation -> Sales Order -> Invoice) ===== */
+  const ODOO={brand:'ERP · Sales',theme:'#714B67',steps:[
+    {title:'Apps',crumb:'Home',task:'افتح تطبيق المبيعات (Sales)',hint:'عرض السعر يُنشأ من تطبيق Sales لا من Invoicing.',
+     html:`<div class="apps">${[['💬','Discuss','discuss'],['📅','Calendar','cal'],['👥','Contacts','contacts'],['🎯','CRM','crm'],['🛒','Sales','sales'],['🧾','Invoicing','inv'],['📦','Inventory','stock'],['⚙️','Settings','set']].map(a=>`<button class="app" data-k="${a[2]}"><span class="ai">${a[0]}</span>${a[1]}</button>`).join('')}</div>`,
+     target:'sales',wrong:{inv:'Invoicing للفواتير؛ عرض السعر يبدأ من Sales.',crm:'CRM للفرص البيعية قبل العرض.',contacts:'جهات الاتصال لا تنشئ عروضاً.'}},
+    {title:'Quotations',crumb:'Sales › Orders › Quotations',task:'أنشئ عرض سعر جديداً بزر New',hint:'الصفوف عروض قائمة؛ المطلوب عرض جديد.',
+     html:`<div class="cp"><div class="cpl"><button class="obtn" data-k="new">New</button><b>Quotations</b></div><div class="cpr"><span class="pg">1-3 / 3</span></div></div><table class="olist"><tr><th>Number</th><th>Customer</th><th>Total</th><th>Status</th></tr><tr class="orow" data-k="r1"><td>S00012</td><td>Bawared Co.</td><td>12,650.00</td><td><span class="st">Quotation</span></td></tr><tr class="orow" data-k="r2"><td>S00011</td><td>Al Fateh Restaurant</td><td>4,600.00</td><td><span class="st sent">Sent</span></td></tr><tr class="orow" data-k="r3"><td>S00010</td><td>Neu Standard</td><td>28,750.00</td><td><span class="st so">Sales Order</span></td></tr></table>`,
+     target:'new',wrong:{r1:'هذا عرض قائم لعميل آخر.',r2:'عرض مُرسل سابقاً؛ لا تعدّله لعميل جديد.',r3:'أمر بيع مؤكّد.'}},
+    {title:'New Quotation',crumb:'Sales › Quotations › New',task:'اختر العميل ثم اضغط Add a product',hint:'العميل حقل إلزامي قبل إضافة البنود.',
+     html:`<div class="cp"><div class="cpl"><button class="obtn sec" data-k="send">Send by Email</button><button class="obtn sec" data-k="confirm">Confirm</button></div><div class="stbar"><span class="on">Quotation</span><span>Quotation Sent</span><span>Sales Order</span></div></div>
+       <div class="oform"><h3>New</h3><div class="ogrid"><div class="fld"><span>Customer</span><select id="cust"><option value="">Select a customer…</option><option>Al Fateh Restaurant</option><option>Bawared Co.</option><option>Hota Marine</option></select></div><div class="fld"><span>Expiration</span><input value="10/30/2026"></div><div class="fld"><span>Payment Terms</span><select><option>30 Days</option><option>Immediate</option></select></div><div class="fld"><span>Pricelist</span><input value="Default (SAR)" readonly></div></div>
+       <div class="otabs"><span class="on">Order Lines</span><span>Optional Products</span><span>Other Info</span></div><table class="olist"><tr><th>Product</th><th>Quantity</th><th>Unit Price</th><th>Taxes</th><th>Amount</th></tr></table><button class="olink" data-k="addline">Add a product</button></div>`,
+     select:{id:'cust',msg:'اختر العميل أولاً.'},target:'addline',wrong:{send:'لا شيء لإرساله بعد.',confirm:'لا يمكن تأكيد عرض بلا بنود.'}},
+    {title:'Order Line',crumb:'Sales › Quotations › New',task:'اختر المنتج، أدخل الكمية والسعر، ثم احفظ (☁)',hint:'الإجماليات تتحدّث تلقائياً؛ الضريبة 15٪.',
+     html:`<div class="cp"><div class="cpl"><button class="obtn sec" data-k="send">Send by Email</button><button class="obtn sec" data-k="confirm">Confirm</button></div><div class="cpr"><button class="save" data-k="save" title="Save">☁ Save</button></div></div>
+       <div class="oform"><h3>New <small>· Al Fateh Restaurant</small></h3><table class="olist"><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Taxes</th><th>Amount</th></tr><tr><td><select id="prod"><option value="">Product…</option><option>Audit Service</option><option>Bookkeeping (Monthly)</option><option>VAT Filing</option></select></td><td><input id="qty" class="num" inputmode="decimal" placeholder="1.00"></td><td><input id="price" class="num" inputmode="decimal" placeholder="0.00"></td><td>15%</td><td id="amt">0.00</td></tr></table>
+       <div class="totals"><div><span>Untaxed Amount:</span><b id="t1">0.00</b></div><div><span>VAT 15%:</span><b id="t2">0.00</b></div><div class="grand"><span>Total:</span><b id="t3">0.00</b></div></div></div>`,
+     live:true,select:{id:'prod',msg:'اختر المنتج أولاً.'},inputs:[{id:'qty',re:/^\d+(\.\d+)?$/,min:0.01,msg:'الكمية رقم أكبر من صفر.'},{id:'price',re:/^\d+(\.\d+)?$/,min:0.01,msg:'السعر رقم أكبر من صفر.'}],target:'save',wrong:{send:'احفظ البنود أولاً.',confirm:'احفظ أولاً.'}},
+    {title:'Quotation S00013',crumb:'Sales › Quotations › S00013',task:'أرسل العرض للعميل بالبريد (Send by Email)',hint:'التأكيد قبل إرسال العرض يتجاوز موافقة العميل.',
+     html:`<div class="cp"><div class="cpl"><button class="obtn" data-k="send">Send by Email</button><button class="obtn sec" data-k="confirm">Confirm</button><button class="obtn sec" data-k="preview">Preview</button><button class="obtn sec" data-k="cancel">Cancel</button></div><div class="stbar"><span class="on">Quotation</span><span>Quotation Sent</span><span>Sales Order</span></div></div>
+       <div class="oform"><h3>S00013 <small>· Al Fateh Restaurant</small></h3><div class="ogrid"><div class="fld"><span>Expiration</span><input value="10/30/2026" readonly></div><div class="fld"><span>Payment Terms</span><input value="30 Days" readonly></div></div><div class="totals"><div class="grand"><span>Total:</span><b id="t3b">—</b></div></div></div>`,
+     target:'send',wrong:{confirm:'يمكن تقنياً، لكن العميل لم يرَ العرض؛ الأصل: أرسل ← وافق ← أكّد.',cancel:'الإلغاء يُسقط العرض.',preview:'المعاينة لا تُرسل شيئاً.'}},
+    {title:'Send Email',crumb:'Sales › S00013 › Send',task:'راجع الرسالة واضغط Send',hint:'المرفق PDF يُضاف تلقائياً.',
+     html:`<div class="dlg"><h3>Send</h3><div class="fld"><span>Recipients</span><input value="Al Fateh Restaurant <finance@alfateh.example>" readonly></div><div class="fld"><span>Subject</span><input value="Neu Standard Quotation (Ref S00013)"></div><div class="fld"><span>Body</span><textarea rows="3">Dear Customer, please find attached quotation S00013. Best regards.</textarea></div><div class="att">📎 S00013.pdf</div><div class="abtns"><button class="obtn" data-k="dosend">Send</button><button class="obtn sec" data-k="discard">Discard</button></div></div>`,
+     target:'dosend',wrong:{discard:'الإلغاء يغلق النافذة بلا إرسال.'}},
+    {title:'Quotation Sent',crumb:'Sales › Quotations › S00013',task:'وافق العميل هاتفياً. أكّد العرض (Confirm)',hint:'التأكيد يحوّله إلى أمر بيع Sales Order.',
+     html:`<div class="cp"><div class="cpl"><button class="obtn" data-k="confirm">Confirm</button><button class="obtn sec" data-k="send">Send by Email</button><button class="obtn sec" data-k="cancel">Cancel</button></div><div class="stbar"><span class="done">Quotation</span><span class="on">Quotation Sent</span><span>Sales Order</span></div></div>
+       <div class="oform"><h3>S00013 <small>· Al Fateh Restaurant</small></h3><div class="chat">✉️ Quotation sent to finance@alfateh.example · now</div><div class="chat">📞 Customer approved by phone · <i>Note</i></div></div>`,
+     target:'confirm',wrong:{send:'أُرسل بالفعل.',cancel:'العميل وافق؛ لا تلغِ.'}},
+    {title:'Sales Order',crumb:'Sales › Orders › S00013',task:'أنشئ الفاتورة (Create Invoice)',hint:'بعد التأكيد يظهر زر Create Invoice.',
+     html:`<div class="cp"><div class="cpl"><button class="obtn" data-k="createinv">Create Invoice</button><button class="obtn sec" data-k="send">Send by Email</button><button class="obtn sec" data-k="cancel">Cancel</button></div><div class="stbar"><span class="done">Quotation</span><span class="done">Quotation Sent</span><span class="on">Sales Order</span></div></div>
+       <div class="oform"><h3>S00013 <small>· Al Fateh Restaurant</small></h3><div class="smart"><span>📦 Delivery 0</span><span>🧾 Invoices 0</span></div><div class="totals"><div class="grand"><span>Total:</span><b id="t3c">—</b></div></div></div>`,
+     target:'createinv',wrong:{send:'أُرسل سابقاً.',cancel:'أمر مؤكّد؛ لا تلغِه.'}},
+    {title:'Create invoices',crumb:'Sales › S00013 › Create Invoice',task:'اختر Regular invoice ثم Create Draft Invoice',hint:'الدفعة المقدمة للمشاريع الطويلة فقط.',
+     html:`<div class="dlg"><h3>Create invoices</h3><button class="radio" data-k="regular"><span class="r"></span>Regular invoice</button><button class="radio" data-k="down"><span class="r"></span>Down payment (percentage)</button><button class="radio" data-k="fixed"><span class="r"></span>Down payment (fixed amount)</button><div class="abtns"><button class="obtn" data-k="draft">Create Draft Invoice</button><button class="obtn sec" data-k="discard">Discard</button></div></div>`,
+     pick:'regular',target:'draft',needPick:'اختر نوع الفاتورة أولاً.',wrong:{down:'دفعة مقدمة؟ الخدمة اكتملت؛ فاتورة عادية.',fixed:'دفعة مقدمة بمبلغ ثابت ليست المطلوب.',discard:'الإلغاء يغلق النافذة.'}},
+  ]};
+  function odooSales(){ runScreens(ODOO,{name:'عرض سعر في نظام المبيعات',doneHtml:(sc)=>`<div class="okbox">✅ Draft invoice created<b>INV/2026/00045</b><small>Al Fateh Restaurant · Total ${sc.total||'—'} SAR<br>Status: Draft → Post لإرسالها للعميل</small></div>`,banner:'فاتورة جاهزة 🧾',tips:['تعرف المسار كاملاً: Sales ← New ← العميل والبنود ← Send ← Confirm ← Create Invoice.','جيد. أكثر ما يُربك: التأكيد قبل الإرسال، والدخول من Invoicing بدل Sales.','أعد المستوى وركّز على ترتيب الأزرار في شريط الحالة.'],note:'الشاشات محاكاة تدريبية بأسلوب Odoo لا نسخة منه؛ تختلف التفاصيل حسب الإصدار والإعدادات.'}); }
 
   /* ===== DONE (generic) ===== */
   function done(cfg){
