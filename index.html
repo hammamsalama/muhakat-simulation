@@ -63,6 +63,7 @@
   .stage[data-now="verdict"] [data-scene~="verdict"],
   .stage[data-now="surprise"] [data-scene~="surprise"],
   .stage[data-now="dual"] [data-scene~="dual"],
+  .stage[data-now="app"] [data-scene~="app"],
   .stage[data-now="lawdone"] [data-scene~="lawdone"],
   .stage[data-now="lobby"] [data-scene~="lobby"],
   .stage[data-now="library"] [data-scene~="library"],
@@ -478,6 +479,44 @@
   .trialbar{display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(246,185,59,.1);border:1px solid rgba(246,185,59,.4);border-radius:14px;padding:8px 12px;font-size:.78rem}
   .trialbar b{color:var(--amber)}
   .trialbar button{font-size:.74rem;font-weight:700;background:var(--amber);color:var(--amber-ink);padding:5px 10px;border-radius:99px}
+  /* ===== SCREEN SIMULATION ===== */
+  .appframe{inset:0;z-index:12;background:#F3F5F9;direction:rtl;color:#1A2233;font-family:"IBM Plex Sans Arabic",system-ui,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+  .stage[data-now="app"] .appframe{display:flex!important}
+  .stage[data-now="app"] .hero,.stage[data-now="app"] .bubble{display:none!important}
+  .appframe .abar{background:#1E5C4A;color:#fff;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;font-size:.7rem}
+  .appframe .abar b{font-family:"Cairo",sans-serif;font-size:.8rem}
+  .appframe .sim{font-size:.58rem;background:#F6B93B;color:#1A1300;padding:2px 7px;border-radius:99px;font-weight:800}
+  .appframe .abody{flex:1;padding:10px;overflow:auto;display:flex;flex-direction:column;gap:8px}
+  .appframe .crumb{font-size:.62rem;color:#6B7285}
+  .appframe h4{margin:0;font-family:"Cairo",sans-serif;font-size:.85rem;color:#1E5C4A}
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .tile2{background:#fff;border:1px solid #DDE3EC;border-radius:10px;padding:10px 8px;text-align:center;font-size:.68rem;font-weight:600;color:#1A2233;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+  .tile2 .i{font-size:1.3rem}
+  .rowi{background:#fff;border:1px solid #DDE3EC;border-radius:10px;padding:9px 10px;font-size:.7rem;display:flex;align-items:center;justify-content:space-between;color:#1A2233;text-align:start;width:100%}
+  .rowi .i{color:#1E5C4A}
+  .fld{display:flex;flex-direction:column;gap:3px;font-size:.62rem;color:#6B7285}
+  .fld input,.fld select{background:#fff;border:1px solid #C9D2DE;border-radius:8px;padding:7px 9px;font:inherit;font-size:.72rem;color:#1A2233;width:100%}
+  .fld input:focus{outline:2px solid #1E5C4A}
+  .radio{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #DDE3EC;border-radius:10px;padding:8px 10px;font-size:.7rem;color:#1A2233;text-align:start;width:100%}
+  .radio .r{width:16px;height:16px;border-radius:50%;border:2px solid #C9D2DE;flex:none}
+  .radio.on .r{border-color:#1E5C4A;background:radial-gradient(#1E5C4A 45%,#fff 50%)}
+  .chk2{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #DDE3EC;border-radius:10px;padding:8px 10px;font-size:.7rem;color:#1A2233;text-align:start;width:100%}
+  .chk2 .b{width:16px;height:16px;border-radius:4px;border:2px solid #C9D2DE;flex:none;display:grid;place-items:center;font-size:.6rem;color:#fff}
+  .chk2.on .b{background:#1E5C4A;border-color:#1E5C4A}
+  .abtn{background:#1E5C4A;color:#fff;border-radius:8px;padding:9px 12px;font-size:.72rem;font-weight:700;text-align:center}
+  .abtn.sec{background:#fff;color:#1E5C4A;border:1px solid #1E5C4A}
+  .abtns{display:flex;gap:8px;margin-top:auto}
+  .abtns .abtn{flex:1}
+  .hit{animation:hit .5s ease}
+  @keyframes hit{30%{box-shadow:0 0 0 4px rgba(242,99,78,.6)}}
+  .glow{box-shadow:0 0 0 3px rgba(246,185,59,.8)!important;animation:pulse 1.2s infinite}
+  .okbox{background:#E8F5EE;border:1px solid #1E5C4A;border-radius:12px;padding:14px;text-align:center}
+  .okbox b{display:block;font-family:"IBM Plex Mono",monospace;font-size:1.1rem;color:#1E5C4A}
+  .okbox small{color:#6B7285;font-size:.64rem}
+  .taskbar{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;gap:10px;align-items:center}
+  .taskbar .n{width:28px;height:28px;border-radius:8px;background:var(--amber);color:var(--amber-ink);display:grid;place-items:center;font-weight:900;flex:none;font-family:"Cairo",sans-serif}
+  .taskbar b{font-family:"Cairo",sans-serif}
+  .taskbar small{display:block;color:var(--muted);font-size:.74rem}
   /* ===== DUAL HEARING ===== */
   .stage[data-now="dual"] .laptop{display:flex!important}
   .laptop{inset:5% 5% 9% 5%;background:#1B2130;border-radius:14px;border:5px solid #2F3A4F;z-index:6;padding:8px;flex-direction:column;gap:8px;direction:rtl}
@@ -647,6 +686,7 @@
     <div class="trust" data-scene="surprise" id="trust"><b><span>ثقة القاضي</span><span id="trustV">60</span></b><div class="tm"><i id="trustBar"></i></div></div>
     <div class="alertcard" data-scene="surprise" id="alertCard" hidden></div>
     <div class="laptop" data-scene="dual" id="laptop"></div>
+    <div class="appframe" data-scene="app" id="appframe"></div>
     <div class="lawbanner" data-scene="lawdone" id="lawBanner">اكتمل المستوى ⚖️<small>مرافعة موفّقة</small></div>
 
     <!-- done -->
@@ -773,12 +813,13 @@
         ['مطالبة مالية: من الفاتورة إلى الحكم','الإنذار، المستندات، رفع الدعوى، الجلسة، الصك','١٢ دقيقة',()=>lawIntro()],
         ['المرافعة تحت الضغط: جلستان في وقت واحد','قاضيان عن بُعد، صبر ينفد، وأنت وحدك','٥ دقائق',()=>dual()],
         ['جلسة مليئة بالمفاجآت','دليل مفاجئ، اتصال العميل، مستند ناقص، عرض صلح… وقرارات موقوتة','٧ دقائق',()=>surprise()],
+        ['قيد دعوى إلكترونياً — محاكاة الشاشات','5 شاشات تحاكي بوابة القضاء: اضغط واكتب كما في النظام','٦ دقائق',()=>najiz()],
         ['توقيع عقد تجاري: بنود لا تفوتك','الشرط الجزائي، الاختصاص، التحكيم','١٠ دقائق'],
         ['التنفيذ: من الحكم إلى التحصيل','محكمة التنفيذ، الإيقاف، الحجز','٨ دقائق'],
         ['جلسة صلح وتسوية','التفاوض أمام المصلح دون خسارة موقفك','٨ دقائق'],
       ]},
   };
-  S.cat='travel'; S.prog={travel:{unlocked:2,done:0,tested:false},law:{unlocked:3,done:0,tested:false}};
+  S.cat='travel'; S.prog={travel:{unlocked:2,done:0,tested:false},law:{unlocked:4,done:0,tested:false}};
   const cat=()=>CATS[S.cat];
   function setWorld(k){ stage.dataset.world=CATS[k].world; S.npcLabel=CATS[k].npc; $('#brandTxt').textContent=CATS[k].brand; }
   function resetHero(pct){ hero.style.transition='none'; moveTo(pct); setTimeout(()=>hero.style.transition='',60); }
@@ -830,7 +871,7 @@
   /* ===== LIBRARY ===== */
   function library(){
     const c=cat(), P=S.prog[S.cat]; stage.dataset.now=c.lobby; mood('idle'); $('#stepChip').hidden=true; resetHero(40);
-    const msgs={1:'فتحنا لك المستوى الأول، والباقي يُفتح بالإنجاز.',2:'فتحنا لك مستويين. ابدأ بأيهما شئت.',3:'فتحنا لك ثلاثة مستويات. ابدأ بأيها شئت.',4:'معظم المستويات مفتوحة، والأخير بالإنجاز.'};
+    const msgs={1:'فتحنا لك المستوى الأول، والباقي يُفتح بالإنجاز.',2:'فتحنا لك مستويين. ابدأ بأيهما شئت.',3:'فتحنا لك ثلاثة مستويات. ابدأ بأيها شئت.',4:'أربعة مستويات مفتوحة، والأخير بالإنجاز.'};
     say('hero',msgs[Math.min(P.unlocked,4)]);
     clearDock();
     dock.insertAdjacentHTML('beforeend',`<div class="libhead"><div class="prompt">${c.lib}</div><button class="back" id="toStore">← المتجر</button></div><div class="prog"><i style="width:${P.done*20}%"></i></div>`);
@@ -1658,6 +1699,60 @@
     document.querySelectorAll('.mem .chip2').forEach(b=>b.addEventListener('click',()=>toast('أُرسل الموقف إلى العضو (تجريبي)')));
     dock.insertAdjacentHTML('beforeend','<p class="note">بيانات تجريبية للعرض. في المنتج: دعوة أعضاء برابط، تقارير أسبوعية، وشهادات اجتياز.</p>');
     nextBtn('✨ اصنع موقفاً لهم',builder);
+  }
+
+  /* =====================================================================
+     SCREEN SIMULATION ENGINE + LAW LEVEL 4 : قيد دعوى إلكترونياً
+     ===================================================================== */
+  const NAJIZ=[
+    {title:'الصفحة الرئيسية',crumb:'الرئيسية',task:'افتح قسم الخدمات الإلكترونية',hint:'ابحث عن الأيقونة التي تجمع كل الخدمات، لا الاستعلامات.',
+     html:`<h4>مرحباً بك</h4><div class="tiles"><button class="tile2" data-k="inq"><span class="i">🔎</span>الاستعلامات</button><button class="tile2" data-k="svc"><span class="i">🧩</span>الخدمات الإلكترونية</button><button class="tile2" data-k="appt"><span class="i">📅</span>المواعيد</button><button class="tile2" data-k="help"><span class="i">💬</span>الدعم</button></div>`,
+     target:'svc',wrong:{inq:'الاستعلام يعرض قضايا قائمة؛ أنت تريد رفع دعوى جديدة.',appt:'المواعيد لحجز حضور، لا لرفع دعوى.',help:'الدعم لا يقيّد الدعاوى.'}},
+    {title:'الخدمات الإلكترونية',crumb:'الرئيسية › الخدمات',task:'اختر خدمة صحيفة دعوى جديدة',hint:'التنفيذ للأحكام والسندات؛ الاستئناف للأحكام الصادرة.',
+     html:`<h4>الخدمات</h4><button class="rowi" data-k="exec"><span>طلب تنفيذ</span><span class="i">›</span></button><button class="rowi" data-k="new"><span>صحيفة دعوى جديدة</span><span class="i">›</span></button><button class="rowi" data-k="appeal"><span>طلب استئناف</span><span class="i">›</span></button><button class="rowi" data-k="notary"><span>التوثيق</span><span class="i">›</span></button>`,
+     target:'new',wrong:{exec:'التنفيذ يحتاج سنداً تنفيذياً (حكم/سند لأمر)؛ لديك فاتورة وعقد فقط.',appeal:'لا يوجد حكم لتستأنفه بعد.',notary:'التوثيق لتوثيق العقود لا لرفع الدعاوى.'}},
+    {title:'تصنيف الدعوى',crumb:'الخدمات › صحيفة دعوى › التصنيف',task:'اختر التصنيف الصحيح ثم اضغط التالي',hint:'نزاع بين تاجرين بسبب عمل تجاري.',
+     html:`<h4>نوع الدعوى</h4><button class="radio" data-k="gen"><span class="r"></span>عامة</button><button class="radio" data-k="com"><span class="r"></span>تجارية</button><button class="radio" data-k="lab"><span class="r"></span>عمالية</button><button class="radio" data-k="fam"><span class="r"></span>أحوال شخصية</button><div class="abtns"><button class="abtn sec" data-k="back">رجوع</button><button class="abtn" data-k="next">التالي</button></div>`,
+     pick:'com',target:'next',wrong:{gen:'المحكمة العامة تنظر ما ليس من اختصاص غيرها.',lab:'العمالية لنزاعات العامل وصاحب العمل.',fam:'الأحوال الشخصية للأسرة.',back:'لا داعي للرجوع.'},needPick:'اختر التصنيف أولاً.'},
+    {title:'بيانات المدعى عليه',crumb:'صحيفة دعوى › الأطراف',task:'أدخل رقم السجل التجاري (10 أرقام) ثم التالي',hint:'الرقم يجب أن يكون 10 أرقام.',
+     html:`<h4>المدعى عليه</h4><div class="fld"><span>نوع الهوية</span><select><option>سجل تجاري</option><option>هوية وطنية</option></select></div><div class="fld"><span>رقم السجل التجاري</span><input id="crno" inputmode="numeric" placeholder="4030XXXXXX"></div><div class="fld"><span>الاسم</span><input value="مؤسسة الأفق التجارية"></div><div class="abtns"><button class="abtn sec" data-k="back">رجوع</button><button class="abtn" data-k="next">التالي</button></div>`,
+     input:{id:'crno',re:/^\d{10}$/,msg:'رقم السجل التجاري 10 أرقام بالضبط.'},target:'next',wrong:{back:'أكمل البيانات أولاً.'}},
+    {title:'الطلبات والمرفقات',crumb:'صحيفة دعوى › المرفقات',task:'أرفق المستندات الثلاثة اللازمة ثم اضغط تقديم',hint:'العقد + الفواتير + محضر الاستلام. الصورة الشخصية لا علاقة لها.',
+     html:`<h4>المرفقات</h4><button class="chk2" data-k="c1"><span class="b">✓</span>العقد الموقّع</button><button class="chk2" data-k="c2"><span class="b">✓</span>الفواتير</button><button class="chk2" data-k="c3"><span class="b">✓</span>محضر الاستلام</button><button class="chk2" data-k="c4"><span class="b">✓</span>صورة شخصية</button><div class="fld"><span>الطلبات</span><input value="إلزام المدعى عليها بسداد 85,000 ريال والمصاريف"></div><div class="abtns"><button class="abtn sec" data-k="back">رجوع</button><button class="abtn" data-k="submit">تقديم الصحيفة</button></div>`,
+     multi:['c1','c2','c3'],bad:{c4:'الصورة الشخصية ليست مستنداً في الدعوى.'},target:'submit',needPick:'أرفق المستندات الثلاثة أولاً.',wrong:{back:'لا داعي للرجوع.'}},
+  ];
+  let SC=null;
+  function najiz(){
+    stage.dataset.now='app'; delete stage.dataset.gen; $('#stepChip').hidden=false; say(); SC={i:0,picked:null,checked:new Set(),wrongs:0};
+    clearDock(); dock.insertAdjacentHTML('beforeend',`<div class="h2">قيد دعوى إلكترونياً<small>شاشات تحاكي بوابة القضاء الإلكترونية · اضغط حيث يضغط المحامي فعلاً</small></div>`);
+    fb('info','ستنتقل عبر 5 شاشات. الضغط الخاطئ يخصم ويشرح لك لماذا.');
+    nextBtn('ابدأ',()=>screenStep(0));
+  }
+  function screenStep(i){
+    if(i>=NAJIZ.length) return screenDone();
+    const st=NAJIZ[i]; SC.i=i; SC.picked=null; SC.checked=new Set(); step(Math.min(i,4)); $('#stepChip').innerHTML=`الشاشة <b id="hudStep">${i+1}</b>/5`;
+    const app=$('#appframe'); app.innerHTML=`<div class="abar"><b>بوابة القضاء الإلكترونية</b><span class="sim">محاكاة تدريبية</span></div><div class="abody"><div class="crumb">${st.crumb}</div>${st.html}</div>`;
+    clearDock(); dock.insertAdjacentHTML('beforeend',`<div class="taskbar"><span class="n">${i+1}</span><span><b>${st.task}</b><small>${st.hint}</small></span></div>`);
+    const log=document.createElement('div'); log.className='choices'; dock.appendChild(log);
+    const flash=(el,msg,pts)=>{ el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit'); SC.wrongs++; mark(false); addPts(pts||-10); beep(220,120); const d=document.createElement('div'); d.className='fb bad'; d.innerHTML=`<span>✕</span><span>${msg}</span><span class="pts">${pts||-10}</span>`; log.prepend(d); if(SC.wrongs%2===0){ const t=app.querySelector(`[data-k="${st.target}"]`); if(t) t.classList.add('glow'); } };
+    app.querySelectorAll('[data-k]').forEach(el=>el.addEventListener('click',()=>{ const k=el.dataset.k;
+      if(st.pick&&k===st.pick){ app.querySelectorAll('.radio').forEach(x=>x.classList.remove('on')); el.classList.add('on'); SC.picked=k; return; }
+      if(st.multi&&st.multi.includes(k)){ el.classList.toggle('on'); el.classList.contains('on')?SC.checked.add(k):SC.checked.delete(k); return; }
+      if(st.bad&&st.bad[k]){ el.classList.toggle('on'); if(el.classList.contains('on')) flash(el,st.bad[k],-10); return; }
+      if(k===st.target){
+        if(st.pick&&SC.picked!==st.pick){ flash(el,st.needPick); return; }
+        if(st.multi&&st.multi.some(x=>!SC.checked.has(x))){ flash(el,st.needPick); return; }
+        if(st.input){ const v=(app.querySelector('#'+st.input.id)||{}).value||''; if(!st.input.re.test(v.trim())){ flash(app.querySelector('#'+st.input.id),st.input.msg); return; } }
+        mark(true); addPts(60); beep(880,120); const d=document.createElement('div'); d.className='fb good'; d.innerHTML=`<span>✓</span><span>صحيح.</span><span class="pts">+60</span>`; log.prepend(d);
+        setTimeout(()=>screenStep(i+1),500); return; }
+      if(st.wrong&&st.wrong[k]) flash(el,st.wrong[k]); }));
+  }
+  function screenDone(){
+    const no='4521/1448'; const app=$('#appframe');
+    app.innerHTML=`<div class="abar"><b>بوابة القضاء الإلكترونية</b><span class="sim">محاكاة تدريبية</span></div><div class="abody"><div class="okbox">✅ تم قيد الدعوى<b>${no}</b><small>المحكمة التجارية · الدائرة الثالثة<br>موعد الجلسة الأولى: بعد 21 يوماً · عن بُعد</small></div><div class="fld"><span>رسالة نصية</span><input value="تم قيد دعواكم رقم ${no}. تابعوا الحالة عبر البوابة." readonly></div></div>`;
+    step(4); beep(880,200);
+    $('#lawBanner').innerHTML=`قُيّدت الدعوى ⚖️<small>${no} · ${SC.wrongs?SC.wrongs+' ضغطة خاطئة':'بلا أخطاء'}</small>`;
+    setTimeout(()=>{ stage.dataset.world='law'; done({now:'lawdone',title:'اكتمل: قيد دعوى إلكترونياً',stars:SC.wrongs===0?3:SC.wrongs<=2?2:1,tips:['تعرف الطريق بلا تردد: الخدمات ← صحيفة جديدة ← التصنيف الصحيح ← بيانات دقيقة ← المرفقات.','جيد. أكثر ما يُربك: الخلط بين التنفيذ والدعوى، ونسيان محضر الاستلام.','أعد المستوى وركّز على ترتيب الشاشات؛ التلميح الذهبي يظهر بعد خطأين.'],extra:[['info','الشاشات محاكاة تدريبية بأسلوب البوابة لا نسخة منها؛ الإجراء الحقيقي قد يختلف في التفاصيل.']]}); },1800);
   }
 
   /* ===== DONE (generic) ===== */
